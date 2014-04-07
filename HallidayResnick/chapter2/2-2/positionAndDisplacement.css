@@ -1,0 +1,16 @@
+input[type='text'] {
+    width: 88px;
+}
+label {
+    margin-right: 10px;
+    margin-left: 10px;
+}
+.wrong {
+    background-color: #FF8080;
+}
+.right {
+    background-color: #00FF00;
+}
+#checkAnswers {
+    margin-left: 10px;
+}
