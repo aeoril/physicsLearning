@@ -14,6 +14,13 @@ window.addEventListener('load', function() {
         MARKER_LENGTH = 40,
         X1_MARKER_TEXT_OFFSET = 25,
         X2_MARKER_TEXT_OFFSET = 40,
+        DISPLACEMENT_OFFSET = -25,
+        ARROWHEAD_LENGTH = 7,
+        ARROWHEAD_WIDTH = 5,
+        X1_COLOR = 'rgb(128, 0, 0)',
+        X2_COLOR = 'rgb(0, 0, 128)',
+        DISPLACEMENT_COLOR = 'rgb(128, 0, 128)',
+        MAGNITUDE_COLOR = 'rgb(0, 128, 0)',
         x1,
         x2,
         canvasElem = document.getElementById('canvas'),
@@ -39,12 +46,17 @@ window.addEventListener('load', function() {
 
     function draw() {
         var lg = ctx.createLinearGradient(0, 0, width, 0),
-            i;
+            i,
+            x1CanvasPosition = (x1 - min) * SCALAR + MARGIN,
+            x2CanvasPosition = (x2 - min) * SCALAR + MARGIN,
+            x1x2CanvasMiddle = x1CanvasPosition <= x2CanvasPosition ?
+                (x2CanvasPosition - x1CanvasPosition) / 2 + x1CanvasPosition :
+                (x1CanvasPosition - x2CanvasPosition) / 2 + x2CanvasPosition;
 
-        function drawMarker(x, name, color, offset) {
+        function drawMarker(x, xCanvasPosition, name, color, offset) {
             ctx.beginPath();
-            ctx.moveTo((x - min) * SCALAR + MARGIN, linePos);
-            ctx.lineTo((x - min) * SCALAR + MARGIN, linePos - MARKER_LENGTH);
+            ctx.moveTo(xCanvasPosition, linePos);
+            ctx.lineTo(xCanvasPosition, linePos - MARKER_LENGTH);
             ctx.strokeStyle = color;
             ctx.stroke();
             ctx.fillStyle = color;
@@ -70,10 +82,47 @@ window.addEventListener('load', function() {
             ctx.fillText(i,  (i - min) * SCALAR + MARGIN - ctx.measureText(i).width / 2, linePos + 15);
         }
         if (!isNaN(x1)) {
-            drawMarker(x1, 'x1', 'rgb(255, 0, 0', X1_MARKER_TEXT_OFFSET);
+            drawMarker(x1, x1CanvasPosition, 'x1', X1_COLOR, X1_MARKER_TEXT_OFFSET);
         }
         if (!isNaN(x2)) {
-            drawMarker(x2, 'x2', 'rgb(0, 0, 255', X2_MARKER_TEXT_OFFSET);
+            drawMarker(x2, x2CanvasPosition, 'x2', X2_COLOR, X2_MARKER_TEXT_OFFSET);
+        }
+        if (inputDisplacement === actualDisplacement) {
+            ctx.beginPath();
+            ctx.moveTo(x1CanvasPosition, linePos + DISPLACEMENT_OFFSET);
+            ctx.lineTo(x2CanvasPosition, linePos + DISPLACEMENT_OFFSET);
+            if (inputDisplacement >= 0) {
+                ctx.lineTo(x2CanvasPosition - ARROWHEAD_LENGTH, linePos + DISPLACEMENT_OFFSET + ARROWHEAD_WIDTH / 2);
+                ctx.lineTo(x2CanvasPosition - ARROWHEAD_LENGTH, linePos + DISPLACEMENT_OFFSET - ARROWHEAD_WIDTH / 2);
+                ctx.lineTo(x2CanvasPosition, linePos + DISPLACEMENT_OFFSET);
+            } else {
+                ctx.lineTo(x2CanvasPosition + ARROWHEAD_LENGTH, linePos + DISPLACEMENT_OFFSET + ARROWHEAD_WIDTH / 2);
+                ctx.lineTo(x2CanvasPosition + ARROWHEAD_LENGTH, linePos + DISPLACEMENT_OFFSET - ARROWHEAD_WIDTH / 2);
+                ctx.lineTo(x2CanvasPosition, linePos + DISPLACEMENT_OFFSET);
+            }
+            ctx.fillStyle = DISPLACEMENT_COLOR;
+            ctx.strokeStyle = DISPLACEMENT_COLOR;
+            ctx.stroke();
+            ctx.fill();
+//            ctx.beginPath();
+//            ctx.moveTo(x1x2CanvasMiddle, linePos + DISPLACEMENT_OFFSET);
+//            ctx.lineTo(x1x2CanvasMiddle, linePos + DISPLACEMENT_OFFSET + TICK_LENGTH);
+//            ctx.stroke();
+            ctx.fillText('Displacement = ' + actualDisplacement,  x1x2CanvasMiddle - ctx.measureText('Displacement = ' + actualDisplacement).width / 2, linePos + DISPLACEMENT_OFFSET + 15);
+        }
+        if (inputMagnitude === actualMagnitude) {
+            ctx.beginPath();
+            ctx.moveTo(x1CanvasPosition, linePos - MARKER_LENGTH);
+            ctx.lineTo(x2CanvasPosition, linePos - MARKER_LENGTH);
+            ctx.strokeStyle = MAGNITUDE_COLOR;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x1x2CanvasMiddle, linePos - MARKER_LENGTH);
+            ctx.lineTo(x1x2CanvasMiddle, linePos - MARKER_LENGTH - TICK_LENGTH);
+            ctx.strokeStyle = MAGNITUDE_COLOR;
+            ctx.stroke();
+            ctx.fillStyle = MAGNITUDE_COLOR;
+            ctx.fillText('Magnitude = ' + actualMagnitude,  x1x2CanvasMiddle - ctx.measureText('Magnitude = ' + actualMagnitude).width / 2, linePos - MARKER_LENGTH - 15);
         }
     }
 
