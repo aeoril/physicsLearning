@@ -8,21 +8,22 @@ window.addEventListener('load', function() {
 
     var SIG_DIGITS = 8,
         MARGIN = 80,
-        SCALAR = 10,
-        STEP = 10,
+        SCALAR = 20,
+        MINOR_STEP = 1,
+        MAJOR_STEP = 5,
         TICK_LENGTH = 5,
         MARKER_LENGTH = 40,
         X1_MARKER_TEXT_OFFSET = 25,
         X2_MARKER_TEXT_OFFSET = 40,
-        DISPLACEMENT_OFFSET = -25,
+        DISPLACEMENT_OFFSET = -30,
         ARROWHEAD_LENGTH = 7,
         ARROWHEAD_WIDTH = 5,
         X1_COLOR = 'rgb(128, 0, 0)',
         X2_COLOR = 'rgb(0, 0, 128)',
         DISPLACEMENT_COLOR = 'rgb(128, 0, 128)',
         MAGNITUDE_COLOR = 'rgb(0, 128, 0)',
-        x1,
-        x2,
+        x1 = NaN,
+        x2 = NaN,
         canvasElem = document.getElementById('canvas'),
         ctx = canvasElem.getContext('2d'),
         width = canvasElem.width,
@@ -39,10 +40,10 @@ window.addEventListener('load', function() {
         displacementLabelElem = document.getElementById('displacementLabel'),
         magnitudeElem = document.getElementById('magnitude'),
         magnitudeLabelElem = document.getElementById('magnitudeLabel'),
-        inputDisplacement,
-        inputMagnitude,
-        actualDisplacement,
-        actualMagnitude;
+        inputDisplacement = NaN,
+        inputMagnitude = NaN,
+        actualDisplacement = NaN,
+        actualMagnitude = NaN;
 
     function draw() {
         var lg = ctx.createLinearGradient(0, 0, width, 0),
@@ -74,12 +75,16 @@ window.addEventListener('load', function() {
         ctx.strokeStyle = 'rgb(0, 0, 0';
         ctx.stroke();
         ctx.fillStyle = 'rgb(0, 0, 0)';
-        for (i = min; i <=  max; i += STEP) {
+        for (i = min; i <=  max; i += MINOR_STEP) {
             ctx.beginPath();
             ctx.moveTo((i - min) * SCALAR + MARGIN, linePos);
             ctx.lineTo((i - min) * SCALAR + MARGIN, linePos - TICK_LENGTH);
             ctx.stroke();
-            ctx.fillText(i,  (i - min) * SCALAR + MARGIN - ctx.measureText(i).width / 2, linePos + 15);
+            if (!(i % MAJOR_STEP)) {
+                ctx.lineTo((i - min) * SCALAR + MARGIN, linePos - TICK_LENGTH * 2);
+                ctx.stroke();
+                ctx.fillText(i,  (i - min) * SCALAR + MARGIN - ctx.measureText(i).width / 2, linePos + 15);
+            }
         }
         if (!isNaN(x1)) {
             drawMarker(x1, x1CanvasPosition, 'x1', X1_COLOR, X1_MARKER_TEXT_OFFSET);
@@ -180,5 +185,5 @@ window.addEventListener('load', function() {
         draw();
     }
     checkAnswersElem.addEventListener('click', checkAnswers, false);
-    checkAnswers();
+    draw();
 });
