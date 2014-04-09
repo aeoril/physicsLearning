@@ -3,7 +3,7 @@
 //
 // hallidayResnick-2-2.js - 1 dimensional position and displacement interactive lesson
 
-window.addEventListener('load', function() {
+(function () {
     'use strict';
 
     var SIG_DIGITS = 8,
@@ -24,36 +24,39 @@ window.addEventListener('load', function() {
         MAGNITUDE_COLOR = 'rgb(0, 128, 0)',
         x1 = NaN,
         x2 = NaN,
-        canvasElem = document.getElementById('canvas'),
-        ctx = canvasElem.getContext('2d'),
-        width = canvasElem.width,
-        height = canvasElem.height,
-        linePos = height / 2,
-        max = (width / 2 - MARGIN) / SCALAR,
-        min = -max,
-        checkAnswersElem = document.getElementById('checkAnswers'),
-        x1Elem = document.getElementById('x1'),
-        x1LabelElem = document.getElementById('x1Label'),
-        x2Elem = document.getElementById('x2'),
-        x2LabelElem = document.getElementById('x2Label'),
-        displacementElem = document.getElementById('displacement'),
-        displacementLabelElem = document.getElementById('displacementLabel'),
-        magnitudeElem = document.getElementById('magnitude'),
-        magnitudeLabelElem = document.getElementById('magnitudeLabel'),
         inputDisplacement = NaN,
         inputMagnitude = NaN,
         actualDisplacement = NaN,
-        actualMagnitude = NaN;
+        actualMagnitude = NaN,
+        canvasElem,
+        ctx,
+        width,
+        height,
+        linePos,
+        max,
+        min,
+        checkAnswersElem,
+        x1Elem,
+        x1LabelElem,
+        x2Elem,
+        x2LabelElem,
+        displacementElem,
+        displacementLabelElem,
+        magnitudeElem,
+        magnitudeLabelElem;
 
     function draw() {
         var lg = ctx.createLinearGradient(0, 0, width, 0),
             i,
             x1CanvasPosition = (x1 - min) * SCALAR + MARGIN,
             x2CanvasPosition = (x2 - min) * SCALAR + MARGIN,
-            x1x2CanvasMiddle = x1CanvasPosition <= x2CanvasPosition ?
-                (x2CanvasPosition - x1CanvasPosition) / 2 + x1CanvasPosition :
-                (x1CanvasPosition - x2CanvasPosition) / 2 + x2CanvasPosition;
+            x1x2CanvasMiddle;
 
+        if (x1CanvasPosition <= x2CanvasPosition) {
+            x1x2CanvasMiddle = (x2CanvasPosition - x1CanvasPosition) / 2 + x1CanvasPosition
+        } else {
+            x1x2CanvasMiddle = (x1CanvasPosition - x2CanvasPosition) / 2 + x2CanvasPosition;
+        }
         function drawMarker(x, xCanvasPosition, name, color, offset) {
             ctx.beginPath();
             ctx.moveTo(xCanvasPosition, linePos);
@@ -63,7 +66,6 @@ window.addEventListener('load', function() {
             ctx.fillStyle = color;
             ctx.fillText(name + ' = ' + x,  (x - min) * SCALAR + MARGIN - ctx.measureText(name + ' = ' + x).width / 2, linePos + offset);
         }
-
         lg.addColorStop('0', 'rgba(255, 0, 255, .2)');
         lg.addColorStop('1.0', 'rgba(0, 0, 255, .2)');
         ctx.clearRect(0, 0, width, height);
@@ -130,9 +132,7 @@ window.addEventListener('load', function() {
             ctx.fillText('Magnitude = ' + actualMagnitude,  x1x2CanvasMiddle - ctx.measureText('Magnitude = ' + actualMagnitude).width / 2, linePos - MARKER_LENGTH - 15);
         }
     }
-
     function checkAnswers() {
-
         function processInput(inputElem, name, min, max) {
             var result;
 
@@ -156,7 +156,6 @@ window.addEventListener('load', function() {
             inputElem.value = result.toString();
             return result;
         }
-
         x1 = processInput(x1Elem, x1LabelElem.innerText, min, max);
         x2 = processInput(x2Elem, x2LabelElem.innerText, min, max);
         inputDisplacement = processInput(displacementElem, displacementLabelElem.innerText, -Infinity, Infinity);
@@ -177,9 +176,28 @@ window.addEventListener('load', function() {
         } else {
             magnitudeElem.className = 'wrong';
         }
-
         draw();
     }
-    checkAnswersElem.addEventListener('click', checkAnswers, false);
-    draw();
-});
+    window.addEventListener('load', function() {
+        canvasElem = document.getElementById('canvas');
+        ctx = canvasElem.getContext('2d');
+        checkAnswersElem = document.getElementById('checkAnswers');
+        x1Elem = document.getElementById('x1');
+        x1LabelElem = document.getElementById('x1Label');
+        x2Elem = document.getElementById('x2');
+        x2LabelElem = document.getElementById('x2Label');
+        displacementElem = document.getElementById('displacement');
+        displacementLabelElem = document.getElementById('displacementLabel');
+        magnitudeElem = document.getElementById('magnitude');
+        magnitudeLabelElem = document.getElementById('magnitudeLabel');
+        width = canvasElem.width;
+        height = canvasElem.height;
+        linePos = height / 2;
+        max = (width / 2 - MARGIN) / SCALAR;
+        min = -max;
+
+        checkAnswersElem.addEventListener('click', checkAnswers, false);
+
+        draw();
+    }, false);
+})();
