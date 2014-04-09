@@ -1,7 +1,7 @@
 // Copyright © 2014 QuarksCode.  MIT License - see http://opensource.org/licenses/MIT and see COPYRIGHT.md
 // Original Author:  aeoril
 //
-// positionAndDisplacement.js - 1 dimensional position and displacement interactive lesson
+// hallidayResnick-2-2.js - 1 dimensional position and displacement interactive lesson
 
 window.addEventListener('load', function() {
     'use strict';
@@ -72,7 +72,7 @@ window.addEventListener('load', function() {
         ctx.beginPath();
         ctx.moveTo(MARGIN, linePos);
         ctx.lineTo(width - MARGIN, linePos);
-        ctx.strokeStyle = 'rgb(0, 0, 0';
+        ctx.strokeStyle = 'rgb(0, 0, 0)';
         ctx.stroke();
         ctx.fillStyle = 'rgb(0, 0, 0)';
         for (i = min; i <=  max; i += MINOR_STEP) {
@@ -168,18 +168,14 @@ window.addEventListener('load', function() {
         actualMagnitude = Math.abs(actualDisplacement);
 
         if (inputDisplacement === actualDisplacement) {
-            displacementElem.classList.add('right');
-            displacementElem.classList.remove('wrong');
+            displacementElem.className = 'right';
         } else {
-            displacementElem.classList.add('wrong');
-            displacementElem.classList.remove('right');
+            displacementElem.className = 'wrong';
         }
         if (inputMagnitude === actualMagnitude) {
-            magnitudeElem.classList.add('right');
-            magnitudeElem.classList.remove('wrong');
+            magnitudeElem.className = 'right';
         } else {
-            magnitudeElem.classList.add('wrong');
-            magnitudeElem.classList.remove('right');
+            magnitudeElem.className = 'wrong';
         }
 
         draw();
