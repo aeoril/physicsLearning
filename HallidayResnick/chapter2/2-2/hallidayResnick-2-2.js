@@ -18,23 +18,14 @@
         DISPLACEMENT_OFFSET = -30,
         ARROWHEAD_LENGTH = 7,
         ARROWHEAD_WIDTH = 5,
+        BLACK_COLOR = 'rgb(0, 0, 0)',
         X1_COLOR = 'rgb(128, 0, 0)',
         X2_COLOR = 'rgb(0, 0, 128)',
         DISPLACEMENT_COLOR = 'rgb(128, 0, 128)',
         MAGNITUDE_COLOR = 'rgb(0, 128, 0)',
-        x1 = NaN,
-        x2 = NaN,
-        inputDisplacement = NaN,
-        inputMagnitude = NaN,
-        actualDisplacement = NaN,
-        actualMagnitude = NaN,
+        BACKGROUND_STOP_1_COLOR = 'rgba(255, 0, 255, .2)',
+        BACKGROUND_STOP_2_COLOR = 'rgba(0, 0, 255, .2)',
         canvasElem,
-        ctx,
-        width,
-        height,
-        linePos,
-        max,
-        min,
         checkAnswersElem,
         x1Elem,
         x1LabelElem,
@@ -43,7 +34,19 @@
         displacementElem,
         displacementLabelElem,
         magnitudeElem,
-        magnitudeLabelElem;
+        magnitudeLabelElem,
+        ctx,
+        width,
+        height,
+        linePos,
+        max,
+        min,
+        x1 = NaN,
+        x2 = NaN,
+        inputDisplacement = NaN,
+        inputMagnitude = NaN,
+        actualDisplacement = NaN,
+        actualMagnitude = NaN;
 
     function draw() {
         var lg = ctx.createLinearGradient(0, 0, width, 0),
@@ -66,17 +69,17 @@
             ctx.fillStyle = color;
             ctx.fillText(name + ' = ' + x,  (x - min) * SCALAR + MARGIN - ctx.measureText(name + ' = ' + x).width / 2, linePos + offset);
         }
-        lg.addColorStop('0', 'rgba(255, 0, 255, .2)');
-        lg.addColorStop('1.0', 'rgba(0, 0, 255, .2)');
+        lg.addColorStop(0, BACKGROUND_STOP_1_COLOR);
+        lg.addColorStop(1.0, BACKGROUND_STOP_2_COLOR);
         ctx.clearRect(0, 0, width, height);
         ctx.fillStyle = lg;
         ctx.fillRect(0, 0, width, height);
         ctx.beginPath();
         ctx.moveTo(MARGIN, linePos);
         ctx.lineTo(width - MARGIN, linePos);
-        ctx.strokeStyle = 'rgb(0, 0, 0)';
+        ctx.strokeStyle = BLACK_COLOR;
         ctx.stroke();
-        ctx.fillStyle = 'rgb(0, 0, 0)';
+        ctx.fillStyle = BLACK_COLOR;
         for (i = min; i <=  max; i += MINOR_STEP) {
             ctx.beginPath();
             ctx.moveTo((i - min) * SCALAR + MARGIN, linePos);
