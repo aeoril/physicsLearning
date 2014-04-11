@@ -19,12 +19,12 @@
         ARROWHEAD_LENGTH = 7,
         ARROWHEAD_WIDTH = 5,
         BLACK_COLOR = 'rgb(0, 0, 0)',
-        X1_COLOR = 'rgb(128, 0, 0)',
-        X2_COLOR = 'rgb(0, 0, 128)',
-        DISPLACEMENT_COLOR = 'rgb(128, 0, 128)',
-        MAGNITUDE_COLOR = 'rgb(0, 128, 0)',
-        BACKGROUND_STOP_1_COLOR = 'rgba(255, 0, 255, .2)',
-        BACKGROUND_STOP_2_COLOR = 'rgba(0, 0, 255, .2)',
+        X1_COLOR = 'rgb(240, 2, 101)',
+        X2_COLOR = 'rgb(0, 0, 200)',
+        DISPLACEMENT_COLOR = 'rgb(190, 0, 190)',
+        MAGNITUDE_COLOR = 'rgb(0, 190, 0)',
+        BACKGROUND_STOP_1_COLOR = 'rgba(0, 255, 0, .01)',
+        BACKGROUND_STOP_2_COLOR = 'rgba(0, 0, 255, .06)',
         canvasElem,
         checkAnswersElem,
         x1Elem,
@@ -36,6 +36,7 @@
         magnitudeElem,
         magnitudeLabelElem,
         ctx,
+        lg,
         width,
         height,
         linePos,
@@ -49,8 +50,7 @@
         actualMagnitude = NaN;
 
     function draw() {
-        var lg = ctx.createLinearGradient(0, 0, width, 0),
-            i,
+        var i,
             x1CanvasPosition = (x1 - min) * SCALAR + MARGIN,
             x2CanvasPosition = (x2 - min) * SCALAR + MARGIN,
             x1x2CanvasMiddle;
@@ -69,8 +69,6 @@
             ctx.fillStyle = color;
             ctx.fillText(name + ' = ' + x,  (x - min) * SCALAR + MARGIN - ctx.measureText(name + ' = ' + x).width / 2, linePos + offset);
         }
-        lg.addColorStop(0, BACKGROUND_STOP_1_COLOR);
-        lg.addColorStop(1.0, BACKGROUND_STOP_2_COLOR);
         ctx.clearRect(0, 0, width, height);
         ctx.fillStyle = lg;
         ctx.fillRect(0, 0, width, height);
@@ -198,6 +196,9 @@
         linePos = height / 2;
         max = (width / 2 - MARGIN) / SCALAR;
         min = -max;
+        lg = ctx.createLinearGradient(0, 0, width, 0);
+        lg.addColorStop(0, BACKGROUND_STOP_1_COLOR);
+        lg.addColorStop(1.0, BACKGROUND_STOP_2_COLOR);
 
         checkAnswersElem.addEventListener('click', checkAnswers, false);
 
