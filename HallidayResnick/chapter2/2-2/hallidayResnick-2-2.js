@@ -179,6 +179,11 @@
         }
         draw();
     }
+    function checkForEnter (e) {
+        if (e.keyCode === 13) {
+            checkAnswers();
+        }
+    }
     window.addEventListener('load', function() {
         canvasElem = document.getElementById('canvas');
         ctx = canvasElem.getContext('2d');
@@ -200,6 +205,10 @@
         lg.addColorStop(0, BACKGROUND_STOP_1_COLOR);
         lg.addColorStop(1.0, BACKGROUND_STOP_2_COLOR);
 
+        x1Elem.addEventListener('keydown', checkForEnter, false);
+        x2Elem.addEventListener('keydown', checkForEnter, false);
+        displacementElem.addEventListener('keydown', checkForEnter, false);
+        magnitudeElem.addEventListener('keydown', checkForEnter, false);
         checkAnswersElem.addEventListener('click', checkAnswers, false);
 
         draw();
