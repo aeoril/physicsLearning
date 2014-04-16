@@ -26,6 +26,7 @@
         BACKGROUND_STOP_1_COLOR = 'rgba(0, 255, 0, .01)',
         BACKGROUND_STOP_2_COLOR = 'rgba(0, 0, 255, .06)',
         canvasElem,
+        formElem,
         checkAnswersElem,
         x1Elem,
         x1LabelElem,
@@ -133,7 +134,7 @@
             ctx.fillText('Magnitude = ' + actualMagnitude,  x1x2CanvasMiddle - ctx.measureText('Magnitude = ' + actualMagnitude).width / 2, linePos - MARKER_LENGTH - 15);
         }
     }
-    function checkAnswers() {
+    function checkAnswers(e) {
         function processInput(inputElem, name, min, max) {
             var result;
 
@@ -178,14 +179,16 @@
             magnitudeElem.className = 'wrong';
         }
         draw();
+        e.preventDefault();
     }
-    function checkForEnter (e) {
-        if (e.keyCode === 13) {
-            checkAnswers();
-        }
-    }
+//    function checkForEnter (e) {
+//        if (e.keyCode === 13) {
+//            checkAnswers();
+//        }
+//    }
     window.addEventListener('load', function() {
         canvasElem = document.getElementById('canvas');
+        formElem = document.getElementById('form');
         ctx = canvasElem.getContext('2d');
         checkAnswersElem = document.getElementById('checkAnswers');
         x1Elem = document.getElementById('x1');
@@ -205,12 +208,13 @@
         lg.addColorStop(0, BACKGROUND_STOP_1_COLOR);
         lg.addColorStop(1.0, BACKGROUND_STOP_2_COLOR);
 
-        x1Elem.addEventListener('keydown', checkForEnter, false);
-        x2Elem.addEventListener('keydown', checkForEnter, false);
-        displacementElem.addEventListener('keydown', checkForEnter, false);
-        magnitudeElem.addEventListener('keydown', checkForEnter, false);
+//        x1Elem.addEventListener('keydown', checkForEnter, false);
+//        x2Elem.addEventListener('keydown', checkForEnter, false);
+//        displacementElem.addEventListener('keydown', checkForEnter, false);
+//        magnitudeElem.addEventListener('keydown', checkForEnter, false);
         checkAnswersElem.addEventListener('click', checkAnswers, false);
 
         draw();
+        x1Elem.focus();
     }, false);
 })();
