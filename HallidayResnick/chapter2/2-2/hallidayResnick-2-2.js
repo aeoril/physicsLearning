@@ -9,13 +9,16 @@
     var SIG_DIGITS = 8,
         MARGIN = 80,
         SCALAR = 20,
+        FONT = 'normal 12pt TimesNewRoman',
         MINOR_STEP = 1,
         MAJOR_STEP = 5,
         TICK_LENGTH = 5,
-        MARKER_LENGTH = 40,
-        X1_MARKER_TEXT_OFFSET = 25,
-        X2_MARKER_TEXT_OFFSET = 40,
-        DISPLACEMENT_OFFSET = -30,
+        MARKER_LENGTH = 50,
+        MARKER_TEXT_OFFSET = 20,
+        X1_MARKER_TEXT_OFFSET = 40,
+        X2_MARKER_TEXT_OFFSET = 55,
+        DISPLACEMENT_OFFSET = -35,
+        DISPLACEMENT_TEXT_OFFSET = DISPLACEMENT_OFFSET + 20,
         ARROWHEAD_LENGTH = 7,
         ARROWHEAD_WIDTH = 5,
         BLACK_COLOR = 'rgb(0, 0, 0)',
@@ -56,11 +59,6 @@
             x2CanvasPosition = (x2 - min) * SCALAR + MARGIN,
             x1x2CanvasMiddle;
 
-        if (x1CanvasPosition <= x2CanvasPosition) {
-            x1x2CanvasMiddle = (x2CanvasPosition - x1CanvasPosition) / 2 + x1CanvasPosition
-        } else {
-            x1x2CanvasMiddle = (x1CanvasPosition - x2CanvasPosition) / 2 + x2CanvasPosition;
-        }
         function drawMarker(x, xCanvasPosition, name, color, offset) {
             ctx.beginPath();
             ctx.moveTo(xCanvasPosition, linePos);
@@ -68,11 +66,17 @@
             ctx.strokeStyle = color;
             ctx.stroke();
             ctx.fillStyle = color;
+            ctx.font = FONT;
             ctx.fillText(name + ' = ' + x,  (x - min) * SCALAR + MARGIN - ctx.measureText(name + ' = ' + x).width / 2, linePos + offset);
+        }
+        if (x1CanvasPosition <= x2CanvasPosition) {
+            x1x2CanvasMiddle = (x2CanvasPosition - x1CanvasPosition) / 2 + x1CanvasPosition
+        } else {
+            x1x2CanvasMiddle = (x1CanvasPosition - x2CanvasPosition) / 2 + x2CanvasPosition;
         }
         ctx.clearRect(0, 0, width, height);
         ctx.fillStyle = lg;
-        ctx.fillRect(0, 0, width, height);
+        //ctx.fillRect(0, 0, width, height);
         ctx.beginPath();
         ctx.moveTo(MARGIN, linePos);
         ctx.lineTo(width - MARGIN, linePos);
@@ -84,10 +88,11 @@
             ctx.moveTo((i - min) * SCALAR + MARGIN, linePos);
             ctx.lineTo((i - min) * SCALAR + MARGIN, linePos - TICK_LENGTH);
             ctx.stroke();
+            ctx.font = FONT;
             if (!(i % MAJOR_STEP)) {
                 ctx.lineTo((i - min) * SCALAR + MARGIN, linePos - TICK_LENGTH * 2);
                 ctx.stroke();
-                ctx.fillText(i,  (i - min) * SCALAR + MARGIN - ctx.measureText(i).width / 2, linePos + 15);
+                ctx.fillText(i,  (i - min) * SCALAR + MARGIN - ctx.measureText(i).width / 2, linePos + MARKER_TEXT_OFFSET);
             }
         }
         if (!isNaN(x1)) {
@@ -117,7 +122,8 @@
 //            ctx.moveTo(x1x2CanvasMiddle, linePos + DISPLACEMENT_OFFSET);
 //            ctx.lineTo(x1x2CanvasMiddle, linePos + DISPLACEMENT_OFFSET + TICK_LENGTH);
 //            ctx.stroke();
-            ctx.fillText('Displacement = ' + actualDisplacement,  x1x2CanvasMiddle - ctx.measureText('Displacement = ' + actualDisplacement).width / 2, linePos + DISPLACEMENT_OFFSET + 15);
+            ctx.font = FONT;
+            ctx.fillText('Displacement = ' + actualDisplacement,  x1x2CanvasMiddle - ctx.measureText('Displacement = ' + actualDisplacement).width / 2, linePos + DISPLACEMENT_TEXT_OFFSET);
         }
         if (inputMagnitude === actualMagnitude) {
             ctx.beginPath();
