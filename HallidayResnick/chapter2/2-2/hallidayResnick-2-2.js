@@ -30,7 +30,6 @@
         BACKGROUND_STOP_2_COLOR = 'rgba(0, 0, 255, .06)',
         canvasElem,
         formElem,
-        checkAnswersElem,
         x1Elem,
         x1LabelElem,
         x2Elem,
@@ -40,7 +39,6 @@
         magnitudeElem,
         magnitudeLabelElem,
         ctx,
-        lg,
         width,
         height,
         linePos,
@@ -75,8 +73,6 @@
             x1x2CanvasMiddle = (x1CanvasPosition - x2CanvasPosition) / 2 + x2CanvasPosition;
         }
         ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = lg;
-        //ctx.fillRect(0, 0, width, height);
         ctx.beginPath();
         ctx.moveTo(MARGIN, linePos);
         ctx.lineTo(width - MARGIN, linePos);
@@ -118,10 +114,6 @@
             ctx.strokeStyle = DISPLACEMENT_COLOR;
             ctx.stroke();
             ctx.fill();
-//            ctx.beginPath();
-//            ctx.moveTo(x1x2CanvasMiddle, linePos + DISPLACEMENT_OFFSET);
-//            ctx.lineTo(x1x2CanvasMiddle, linePos + DISPLACEMENT_OFFSET + TICK_LENGTH);
-//            ctx.stroke();
             ctx.font = FONT;
             ctx.fillText('Displacement = ' + actualDisplacement,  x1x2CanvasMiddle - ctx.measureText('Displacement = ' + actualDisplacement).width / 2, linePos + DISPLACEMENT_TEXT_OFFSET);
         }
@@ -147,7 +139,7 @@
             // Create a numbers from text, fix at 8 significant digits then
             // create numbers from text again to shave off trailing zeroes
             // and have numbers to work with not text
-            result = parseFloat(parseFloat(inputElem.value).toFixed(SIG_DIGITS));
+            result = Number(parseFloat(inputElem.value).toFixed(SIG_DIGITS));
 
             if (isNaN(result)) {
                 alert('Invalid Input: ' + name);
@@ -171,7 +163,7 @@
 
         // Fix at 8 significant digits then create number again to
         // shave off trailing zeroes and have number to work with
-        actualDisplacement = parseFloat((x2 - x1).toFixed(SIG_DIGITS));
+        actualDisplacement = Number((x2 - x1).toFixed(SIG_DIGITS));
         actualMagnitude = Math.abs(actualDisplacement);
 
         if (inputDisplacement === actualDisplacement) {
@@ -187,16 +179,10 @@
         draw();
         e.preventDefault();
     }
-//    function checkForEnter (e) {
-//        if (e.keyCode === 13) {
-//            checkAnswers();
-//        }
-//    }
     window.addEventListener('load', function() {
         canvasElem = document.getElementById('canvas');
         formElem = document.getElementById('form');
         ctx = canvasElem.getContext('2d');
-        checkAnswersElem = document.getElementById('checkAnswers');
         x1Elem = document.getElementById('x1');
         x1LabelElem = document.getElementById('x1Label');
         x2Elem = document.getElementById('x2');
@@ -210,17 +196,8 @@
         linePos = height / 2;
         max = (width / 2 - MARGIN) / SCALAR;
         min = -max;
-        lg = ctx.createLinearGradient(0, 0, width, 0);
-        lg.addColorStop(0, BACKGROUND_STOP_1_COLOR);
-        lg.addColorStop(1.0, BACKGROUND_STOP_2_COLOR);
-
-//        x1Elem.addEventListener('keydown', checkForEnter, false);
-//        x2Elem.addEventListener('keydown', checkForEnter, false);
-//        displacementElem.addEventListener('keydown', checkForEnter, false);
-//        magnitudeElem.addEventListener('keydown', checkForEnter, false);
-        checkAnswersElem.addEventListener('click', checkAnswers, false);
-
+        formElem.addEventListener('submit', checkAnswers, false);
         draw();
         x1Elem.focus();
     }, false);
-})();
+}());
