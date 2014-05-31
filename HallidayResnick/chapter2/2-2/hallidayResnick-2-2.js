@@ -26,8 +26,6 @@
         X2_COLOR = 'rgb(0, 0, 200)',
         DISPLACEMENT_COLOR = 'rgb(190, 0, 190)',
         MAGNITUDE_COLOR = 'rgb(0, 190, 0)',
-        BACKGROUND_STOP_1_COLOR = 'rgba(0, 255, 0, .01)',
-        BACKGROUND_STOP_2_COLOR = 'rgba(0, 0, 255, .06)',
         canvasElem,
         formElem,
         x1Elem,
