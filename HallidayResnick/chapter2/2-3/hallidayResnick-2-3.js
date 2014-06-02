@@ -10,13 +10,18 @@
         MARGIN = 80,
         SCALAR = 20,
         FONT = 'normal 8pt TimesNewRoman',
+        NAME_FONT = 'normal 12pt TimesNewRoman',
         MINOR_STEP = 1,
         MAJOR_STEP = 5,
         TICK_LENGTH = 5,
         MARKER_LENGTH = 50,
-        AXIS_OFFSET = 30,
+        AXIS_OFFSET = 40,
+        AXIS_OFFSET_LEFT,
+        AXIS_OFFSET_RIGHT,
+        AXIS_OFFSET_TOP,
+        AXIS_OFFSET_BOTTOM,
         AXIS_MARGIN = 10,
-        STEP = 20,
+        STEP = 40,
         MARKER_TEXT_OFFSET_X = 5,
         MARKER_TEXT_OFFSET_Y = 15,
         MARKER_TEXT_OFFSET_Y_H = 4,
@@ -34,6 +39,9 @@
         showDetails = true,
         pts,
         closed = false,
+        mouseIsDown = false,
+        mousePoint = 0,
+        mousePos = {},
         canvasElem,
         formElem,
         x1Elem,
@@ -237,7 +245,7 @@
         }
     }
     function draw() {
-        function drawAxis(start, end, offset, isHorizontal, step) {
+        function drawAxis(start, end, offset, name, step, scalar) {
             var i,
                 numTicks = Math.abs((end - start) / step),
                 posStart = {},
@@ -246,7 +254,8 @@
                 textStart = {},
                 textEnd = {},
                 textWidth,
-                temp;
+                temp,
+                isHorizontal = name === 't';
             step = end - start >= 0 ? step : -step;
             ctx.save();
             ctx.strokeStyle = BLACK_COLOR;
@@ -271,30 +280,28 @@
                 ctx.moveTo(posStart.x, posStart.y);
                 ctx.lineTo(posEnd.x, posEnd.y);
                 ctx.stroke();
-                text = String(Math.abs(temp - start));
+                text = String(Math.abs(temp - start) / scalar);
                 textWidth = ctx.measureText(text).width;
                 textStart.x = posStart.x - (isHorizontal ? textWidth / 2 : textWidth + MARKER_TEXT_OFFSET_X);
                 textStart.y = posStart.y + (isHorizontal ? MARKER_TEXT_OFFSET_Y : MARKER_TEXT_OFFSET_Y_H);
                 ctx.fillText(text, textStart.x, textStart.y);
             }
+            textWidth = ctx.measureText(name).width;
+            textStart.x = isHorizontal ? (end - start + textWidth) / 2 : offset - (textWidth + MARKER_TEXT_OFFSET_X * 5);
+            textStart.y = isHorizontal ? offset + MARKER_TEXT_OFFSET_Y * 2 : Math.abs(end - start) / 2 + MARKER_TEXT_OFFSET_Y_H;
+            ctx.font = NAME_FONT;
+            ctx.fillText(name, textStart.x, textStart.y)
             ctx.restore();
         }
         ctx.clearRect(0, 0, canvasElem.width, canvasElem.height);
-        drawAxis(AXIS_OFFSET, width - AXIS_MARGIN, height - AXIS_OFFSET, true, STEP);
-        drawAxis(height - AXIS_OFFSET, AXIS_MARGIN, AXIS_OFFSET, false, STEP);
+        drawAxis(AXIS_OFFSET_LEFT, AXIS_OFFSET_RIGHT, AXIS_OFFSET_BOTTOM, 't', STEP, SCALAR);
+        drawAxis(AXIS_OFFSET_BOTTOM, AXIS_OFFSET_TOP, AXIS_OFFSET_LEFT, 'x', STEP, SCALAR);
         drawSpline();
     }
-    function drawMousePos(e) {
-
+    function calcMousePos(e) {
         var top = 0,
             left = 0,
-            mousePos = {},
-            obj = canvasElem,
-            posText,
-            posTextWidth,
-            posTextHeight = 7,
-            posTextX,
-            posTextY;
+            obj = canvasElem;
 
         // get canvas position
         while (obj.tagName != 'BODY') {
@@ -308,11 +315,46 @@
         // return relative mouse position
         mousePos.x = e.clientX - left + window.pageXOffset;
         mousePos.y = e.clientY - top + window.pageYOffset;
+    }
+    function calcClosestPoint() {
+        var i;
+
+        function calcDistanceSquared(x1, y1, x2, y2) {
+            return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+        }
+
+        mousePoint = 0;
+
+        for (i = 0; i < pts.length - 2; i += 2) {
+           if (calcDistanceSquared(pts[i], pts[i + 1], mousePos.x, mousePos.y) >
+               calcDistanceSquared(pts[i + 2], pts[i + 3], mousePos.x, mousePos.y)) {
+               mousePoint = i + 2;
+           }
+        }
+    }
+    function mouseMove(e) {
+
+        var posText,
+            posTextWidth,
+            posTextHeight = 7,
+            posTextX,
+            posTextY;
+
+        calcMousePos(e);
+
         if (mousePos.x > width) {
             mousePos.x = width;
         }
         if (mousePos.y > height) {
             mousePos.y = height;
+        }
+        if (mouseIsDown) {
+            if (mousePos.x >= AXIS_OFFSET_LEFT && mousePos.x <= AXIS_OFFSET_RIGHT) {
+                pts[mousePoint] = mousePos.x;
+            }
+            if (mousePos.y <= AXIS_OFFSET_BOTTOM && mousePos.y >= AXIS_OFFSET_TOP) {
+                pts[mousePoint + 1] = mousePos.y;
+            }
         }
         draw();
         posText = '{' + mousePos.x + ',' + mousePos.y + ')';
@@ -328,6 +370,15 @@
         }
         ctx.fillText(posText,  posTextX, posTextY);
     };
+    function mouseDown(e) {
+        calcMousePos(e);
+        calcClosestPoint();
+        mouseIsDown = true;
+        mouseMove(e);
+    }
+    function mouseUp() {
+        mouseIsDown = false;
+    }
     function submit(e) {
         pts = [];
         pts.push(Number(x1Elem.value) + AXIS_OFFSET);
@@ -359,9 +410,10 @@
         tElem = document.getElementById('t');
         width = canvasElem.width;
         height = canvasElem.height;
-        linePos = height / 2;
-        max = (width / 2 - MARGIN) / SCALAR;
-        min = -max;
+        AXIS_OFFSET_LEFT = AXIS_OFFSET;
+        AXIS_OFFSET_RIGHT = width - AXIS_MARGIN;
+        AXIS_OFFSET_TOP = AXIS_MARGIN;
+        AXIS_OFFSET_BOTTOM = height - AXIS_OFFSET;
         x1Elem.addEventListener('change', submit, false);
         y1Elem.addEventListener('change', submit, false);
         x2Elem.addEventListener('change', submit, false);
@@ -373,7 +425,9 @@
         tElem.addEventListener('change', submit, false);
         formElem.addEventListener('submit', submit, false);
         //canvasElem.addEventListener('click', canvasMousePos, false);
-        canvasElem.addEventListener('mousemove', drawMousePos, false);
+        canvasElem.addEventListener('mousemove', mouseMove, false);
+        canvasElem.addEventListener('mousedown', mouseDown, false);
+        canvasElem.addEventListener('mouseup', mouseUp, false);
         submit();
         x1Elem.focus();
     }, false);
