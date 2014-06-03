@@ -67,6 +67,11 @@
         actualDisplacement = NaN,
         actualMagnitude = NaN;
 
+// *******************************************************************************************
+// Start Rob Spencer Code from http://scaledinnovation.com/analytics/splines/aboutSplines.html
+// This code is copyrighted with all rights reserved - see his site for details.  Thanks, Rob!
+// *******************************************************************************************
+
     function HSVtoRGB(h,s,v,opacity){
         // inputs h=hue=0-360, s=saturation=0-1, v=value=0-1
         // algorithm from Wikipedia on HSV conversion
@@ -244,6 +249,11 @@
             }
         }
     }
+
+// *******************************************************************************************
+// End Rob Spencer Code from http://scaledinnovation.com/analytics/splines/aboutSplines.html
+// *******************************************************************************************
+
     function draw() {
         function drawAxis(start, end, offset, name, step, scalar) {
             var i,
