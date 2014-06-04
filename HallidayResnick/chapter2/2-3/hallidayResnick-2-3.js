@@ -7,7 +7,7 @@
     'use strict';
 
     var SCALAR = 20,
-        BUNNY_SCALAR = 40,
+        BUNNY_SCALAR = 20,
         FONT = 'normal 8pt TimesNewRoman',
         NAME_FONT = 'normal 12pt TimesNewRoman',
         TICK_LENGTH = 5,
@@ -27,8 +27,10 @@
         BUNNY_X_SCALAR = 720 / 350,
         BUNNY_IMG_WIDTH = 48,
         BUNNY_IMG_HEIGHT = 48,
-        BUNNY_IMG_OFFSET_TOP = 10,
-        STEP = 40,
+        BUNNY_IMG_OFFSET_TOP = 5,
+        stepX,
+        stepY,
+        bunnyStep,
         MARKER_TEXT_OFFSET_X = 5,
         MARKER_TEXT_OFFSET_Y = 15,
         MARKER_TEXT_OFFSET_Y_H = 4,
@@ -59,6 +61,9 @@
         bunnyCtx,
         width,
         height,
+        splineAxisCoordsScalarX,
+        splineAxisCoordsScalarY,
+        bunnyAxisCoordsScalar,
         bunnyWidth,
         bunnyHeight,
         x1 = NaN,
@@ -261,7 +266,7 @@
                 text,
                 textStart = {},
                 textWidth,
-                temp    ;
+                temp;
             step = end - start >= 0 ? step : -step;
             ctx.save();
             ctx.strokeStyle = BLACK_COLOR;
@@ -286,7 +291,7 @@
                 ctx.moveTo(posStart.x, posStart.y);
                 ctx.lineTo(posEnd.x, posEnd.y);
                 ctx.stroke();
-                text = String(Math.abs(temp - start) / scalar);
+                text = String(i * scalar / 10);
                 textWidth = ctx.measureText(text).width;
                 textStart.x = posStart.x - (isHorizontal ? textWidth / 2 : textWidth + MARKER_TEXT_OFFSET_X);
                 textStart.y = posStart.y + (isHorizontal ? MARKER_TEXT_OFFSET_Y : MARKER_TEXT_OFFSET_Y_H);
@@ -300,11 +305,11 @@
             ctx.restore();
         }
         splineCtx.clearRect(0, 0, splineCanvasElem.width, splineCanvasElem.height);
-        drawAxis(splineCtx, AXIS_OFFSET_LEFT, AXIS_OFFSET_RIGHT, AXIS_OFFSET_BOTTOM, 't', STEP, true, SCALAR);
-        drawAxis(splineCtx, AXIS_OFFSET_BOTTOM, AXIS_OFFSET_TOP, AXIS_OFFSET_LEFT, 'x', STEP, false, SCALAR);
+        drawAxis(splineCtx, AXIS_OFFSET_LEFT, AXIS_OFFSET_RIGHT, AXIS_OFFSET_BOTTOM, 't', stepX, true, SCALAR);
+        drawAxis(splineCtx, AXIS_OFFSET_BOTTOM, AXIS_OFFSET_TOP, AXIS_OFFSET_LEFT, 'x', stepY, false, SCALAR);
         drawSpline();
         bunnyCtx.clearRect(0, 0, splineCanvasElem.width, splineCanvasElem.height);
-        drawAxis(bunnyCtx, BUNNY_AXIS_OFFSET_LEFT, BUNNY_AXIS_OFFSET_RIGHT, BUNNY_AXIS_OFFSET_BOTTOM, 'x', STEP, true, BUNNY_SCALAR);
+        drawAxis(bunnyCtx, BUNNY_AXIS_OFFSET_LEFT, BUNNY_AXIS_OFFSET_RIGHT, BUNNY_AXIS_OFFSET_BOTTOM, 'x', bunnyStep, true, BUNNY_SCALAR);
         bunnyCtx.drawImage(bunnyImg, (AXIS_OFFSET_BOTTOM - pts[1]) * BUNNY_X_SCALAR + BUNNY_AXIS_OFFSET_LEFT - BUNNY_IMG_WIDTH / 2, BUNNY_IMG_OFFSET_TOP, BUNNY_IMG_WIDTH, BUNNY_IMG_HEIGHT);
     }
     function calcMousePos(e) {
@@ -342,14 +347,14 @@
         }
     }
     function updateTextBoxes() {
-        x1Elem.value = pts[0];
-        y1Elem.value = pts[1];
-        x2Elem.value = pts[2];
-        y2Elem.value = pts[3];
-        x3Elem.value = pts[4];
-        y3Elem.value = pts[5];
-        x4Elem.value = pts[6];
-        y4Elem.value = pts[7];
+        x1Elem.value = ((pts[0] - AXIS_OFFSET) * splineAxisCoordsScalarX).toFixed(0);
+        y1Elem.value = ((height - (pts[1] + AXIS_OFFSET))  * splineAxisCoordsScalarY).toFixed(0);
+        x2Elem.value = ((pts[2] - AXIS_OFFSET) * splineAxisCoordsScalarX).toFixed(0);
+        y2Elem.value = ((height - (pts[3] + AXIS_OFFSET))  * splineAxisCoordsScalarY).toFixed(0);
+        x3Elem.value = ((pts[4] - AXIS_OFFSET) * splineAxisCoordsScalarX).toFixed(0);
+        y3Elem.value = ((height - (pts[5] + AXIS_OFFSET))  * splineAxisCoordsScalarY).toFixed(0);
+        x4Elem.value = ((pts[6] - AXIS_OFFSET) * splineAxisCoordsScalarX).toFixed(0);
+        y4Elem.value = ((height - (pts[7] + AXIS_OFFSET))  * splineAxisCoordsScalarY).toFixed(0);
     }
     function mouseMove(e) {
 
@@ -407,14 +412,14 @@
     }
     function submit(e) {
         pts = [];
-        pts.push(Number(x1Elem.value) + AXIS_OFFSET);
-        pts.push(height - (Number(y1Elem.value) + AXIS_OFFSET));
-        pts.push(Number(x2Elem.value) + AXIS_OFFSET);
-        pts.push(height - (Number(y2Elem.value) + AXIS_OFFSET));
-        pts.push(Number(x3Elem.value) + AXIS_OFFSET);
-        pts.push(height - (Number(y3Elem.value) + AXIS_OFFSET));
-        pts.push(Number(x4Elem.value) + AXIS_OFFSET);
-        pts.push(height - (Number(y4Elem.value) + AXIS_OFFSET));
+        pts.push(Math.round(Number(x1Elem.value) / splineAxisCoordsScalarX) + AXIS_OFFSET);
+        pts.push(height - (Math.round(Number(y1Elem.value) / splineAxisCoordsScalarY) + AXIS_OFFSET));
+        pts.push(Math.round(Number(x2Elem.value) / splineAxisCoordsScalarX) + AXIS_OFFSET);
+        pts.push(height - (Math.round(Number(y2Elem.value) / splineAxisCoordsScalarY) + AXIS_OFFSET));
+        pts.push(Math.round(Number(x3Elem.value) / splineAxisCoordsScalarX) + AXIS_OFFSET);
+        pts.push(height - (Math.round(Number(y3Elem.value) / splineAxisCoordsScalarY) + AXIS_OFFSET));
+        pts.push(Math.round(Number(x4Elem.value) / splineAxisCoordsScalarX) + AXIS_OFFSET);
+        pts.push(height - (Math.round(Number(y4Elem.value) / splineAxisCoordsScalarY) + AXIS_OFFSET));
         t = Number(tElem.value) / 100;
         draw();
         if (e) {
@@ -452,6 +457,12 @@
         BUNNY_AXIS_OFFSET_LEFT = BUNNY_AXIS_MARGIN;
         BUNNY_AXIS_OFFSET_RIGHT = bunnyWidth - BUNNY_AXIS_MARGIN;
         BUNNY_AXIS_OFFSET_BOTTOM = bunnyHeight - AXIS_OFFSET;
+        splineAxisCoordsScalarX = (width / (AXIS_OFFSET_RIGHT - AXIS_OFFSET_LEFT)) / SCALAR;
+        splineAxisCoordsScalarY = (height / (AXIS_OFFSET_BOTTOM - AXIS_OFFSET_TOP)) / SCALAR;
+        bunnyAxisCoordsScalar = (bunnyWidth / (BUNNY_AXIS_OFFSET_RIGHT - BUNNY_AXIS_OFFSET_LEFT)) / BUNNY_SCALAR;
+        stepX = 2 / splineAxisCoordsScalarX;
+        stepY = 2 / splineAxisCoordsScalarY;
+        bunnyStep = (BUNNY_AXIS_OFFSET_RIGHT - BUNNY_AXIS_OFFSET_LEFT) / 10;
         x1Elem.addEventListener('change', submit, false);
         y1Elem.addEventListener('change', submit, false);
         x2Elem.addEventListener('change', submit, false);
