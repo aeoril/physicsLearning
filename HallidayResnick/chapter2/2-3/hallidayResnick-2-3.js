@@ -6,21 +6,19 @@
 (function () {
     'use strict';
 
-    var SIG_DIGITS = 8,
-        MARGIN = 80,
-        SCALAR = 20,
+    var SCALAR = 20,
         BUNNY_SCALAR = 40,
         FONT = 'normal 8pt TimesNewRoman',
         NAME_FONT = 'normal 12pt TimesNewRoman',
-        MINOR_STEP = 1,
-        MAJOR_STEP = 5,
         TICK_LENGTH = 5,
-        MARKER_LENGTH = 50,
+        CLOSEST_X = 220,
         AXIS_OFFSET = 40,
         AXIS_OFFSET_LEFT,
         AXIS_OFFSET_RIGHT,
         AXIS_OFFSET_TOP,
         AXIS_OFFSET_BOTTOM,
+        AXIS_CLOSEST_X = 20,
+        AXIS_CLOSEST_Y = 80,
         BUNNY_AXIS_OFFSET_LEFT,
         BUNNY_AXIS_OFFSET_RIGHT,
         BUNNY_AXIS_OFFSET_BOTTOM,
@@ -31,21 +29,12 @@
         BUNNY_IMG_HEIGHT = 48,
         BUNNY_IMG_OFFSET_TOP = 10,
         STEP = 40,
-        BUNNY_STEP = 10,
         MARKER_TEXT_OFFSET_X = 5,
         MARKER_TEXT_OFFSET_Y = 15,
         MARKER_TEXT_OFFSET_Y_H = 4,
-        X1_MARKER_TEXT_OFFSET = 40,
-        X2_MARKER_TEXT_OFFSET = 55,
-        DISPLACEMENT_OFFSET = -35,
-        DISPLACEMENT_TEXT_OFFSET = DISPLACEMENT_OFFSET + 20,
         ARROWHEAD_LENGTH = 7,
         ARROWHEAD_WIDTH = 5,
         BLACK_COLOR = 'rgb(0, 0, 0)',
-        X1_COLOR = 'rgb(240, 2, 101)',
-        X2_COLOR = 'rgb(0, 0, 200)',
-        DISPLACEMENT_COLOR = 'rgb(190, 0, 190)',
-        MAGNITUDE_COLOR = 'rgb(0, 190, 0)',
         showDetails = true,
         pts,
         closed = false,
@@ -72,40 +61,33 @@
         height,
         bunnyWidth,
         bunnyHeight,
-        linePos,
-        max,
-        min,
         x1 = NaN,
-        x2 = NaN,
-        inputDisplacement = NaN,
-        inputMagnitude = NaN,
-        actualDisplacement = NaN,
-        actualMagnitude = NaN;
+        x2 = NaN;
 
 // *******************************************************************************************
 // Start Rob Spencer Code from http://scaledinnovation.com/analytics/splines/aboutSplines.html
 // This code is copyrighted with all rights reserved - see his site for details.  Thanks, Rob!
 // *******************************************************************************************
 
-    function HSVtoRGB(h,s,v,opacity){
+    function convertHSVtoRGB(h,s,v,opacity){
         // inputs h=hue=0-360, s=saturation=0-1, v=value=0-1
         // algorithm from Wikipedia on HSV conversion
         var toHex=function(decimalValue,places){
             if(places == undefined || isNaN(places))  places = 2;
-            var hex = new Array("0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F");
+            var hex = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"];
             var next = 0;
-            var hexidecimal = "";
+            var hexadecimal = "";
             decimalValue=Math.floor(decimalValue);
             while(decimalValue > 0){
                 next = decimalValue % 16;
                 decimalValue = Math.floor((decimalValue - next)/16);
-                hexidecimal = hex[next] + hexidecimal;
+                hexadecimal = hex[next] + hexadecimal;
             }
-            while (hexidecimal.length<places){
-                hexidecimal = "0"+hexidecimal;
+            while (hexadecimal.length<places){
+                hexadecimal = "0"+hexadecimal;
             }
-            return hexidecimal;
-        }
+            return hexadecimal;
+        };
         var hi=Math.floor(h/60)%6;
         var f=h/60-Math.floor(h/60);
         var p=v*(1-s);
@@ -190,18 +172,19 @@
         splineCtx.lineWidth=4;
         var cp=[];   // array of control points, as x0,y0,x1,y1,...
         var n=pts.length;
+        var color, i;
 
         if(closed){
             //   Append and prepend knots and control points to close the curve
             pts.push(pts[0],pts[1],pts[2],pts[3]);
             pts.unshift(pts[n-1]);
             pts.unshift(pts[n-1]);
-            for(var i=0;i<n;i+=2){
+            for(i=0;i<n;i+=2){
                 cp=cp.concat(getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
             }
             cp=cp.concat(cp[0],cp[1]);
-            for(var i=2;i<n+2;i+=2){
-                var color=HSVtoRGB(Math.floor(240*(i-2)/(n-2)),0.8,0.8);
+            for(i=2;i<n+2;i+=2){
+                color=convertHSVtoRGB(Math.floor(240*(i-2)/(n-2)),0.8,0.8);
                 if(!showDetails){color="#555555"}
                 splineCtx.strokeStyle=hexToCanvasColor(color,0.75);
                 splineCtx.beginPath();
@@ -216,11 +199,11 @@
             }
         }else{
             // Draw an open curve, not connected at the ends
-            for(var i=0;i<n-4;i+=2){
+            for(i=0;i<n-4;i+=2){
                 cp=cp.concat(getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
             }
-            for(var i=2;i<pts.length-5;i+=2){
-                var color=HSVtoRGB(Math.floor(240*(i-2)/(n-2)),0.8,0.8);
+            for(i=2;i<pts.length-5;i+=2){
+                color=convertHSVtoRGB(Math.floor(240*(i-2)/(n-2)),0.8,0.8);
                 if(!showDetails){color="#555555"}
                 splineCtx.strokeStyle=hexToCanvasColor(color,0.75);
                 splineCtx.beginPath();
@@ -234,7 +217,7 @@
                 }
             }
             //  For open curves the first and last arcs are simple quadratics.
-            var color=HSVtoRGB(40,0.4,0.4);  // brown
+            color=convertHSVtoRGB(40,0.4,0.4);  // brown
             if(!showDetails){color="#555555"}
             splineCtx.strokeStyle=hexToCanvasColor(color,0.75);
             splineCtx.beginPath();
@@ -243,7 +226,7 @@
             splineCtx.stroke();
             splineCtx.closePath();
 
-            var color=HSVtoRGB(240,0.8,0.8); // indigo
+            color=convertHSVtoRGB(240,0.8,0.8); // indigo
             if(!showDetails){color="#555555"}
             splineCtx.strokeStyle=hexToCanvasColor(color,0.75);
             splineCtx.beginPath();
@@ -259,7 +242,7 @@
         splineCtx.restore();
 
         if(showDetails){   //   Draw the knot points.
-            for(var i=0;i<n;i+=2){
+            for(i=0;i<n;i+=2){
                 drawPoint(splineCtx,pts[i],pts[i+1],2.5,"#ffff00");
             }
         }
@@ -277,7 +260,6 @@
                 posEnd = {},
                 text,
                 textStart = {},
-                textEnd = {},
                 textWidth,
                 temp    ;
             step = end - start >= 0 ? step : -step;
@@ -314,7 +296,7 @@
             textStart.x = isHorizontal ? start + (end - start - textWidth) / 2 : offset - (textWidth + MARKER_TEXT_OFFSET_X * 5);
             textStart.y = isHorizontal ? offset + MARKER_TEXT_OFFSET_Y * 2 : end + Math.abs(end - start) / 2;
             ctx.font = NAME_FONT;
-            ctx.fillText(name, textStart.x, textStart.y)
+            ctx.fillText(name, textStart.x, textStart.y);
             ctx.restore();
         }
         splineCtx.clearRect(0, 0, splineCanvasElem.width, splineCanvasElem.height);
@@ -359,6 +341,16 @@
            }
         }
     }
+    function updateTextBoxes() {
+        x1Elem.value = pts[0];
+        y1Elem.value = pts[1];
+        x2Elem.value = pts[2];
+        y2Elem.value = pts[3];
+        x3Elem.value = pts[4];
+        y3Elem.value = pts[5];
+        x4Elem.value = pts[6];
+        y4Elem.value = pts[7];
+    }
     function mouseMove(e) {
 
         var posText,
@@ -376,13 +368,20 @@
             mousePos.y = height;
         }
         if (mouseIsDown) {
-            if (mousePos.x >= AXIS_OFFSET_LEFT && mousePos.x <= AXIS_OFFSET_RIGHT) {
+            if (mousePoint !== 0 &&
+                ((mousePoint === pts.length - 2 &&
+                  (mousePos.x >= pts[mousePoint - 2] + CLOSEST_X && mousePos.x <= AXIS_OFFSET_RIGHT)) ||
+                 ((mousePos.x >= pts[mousePoint - 2] + CLOSEST_X && mousePos.x < pts[mousePoint + 2] - CLOSEST_X) &&
+                  (mousePos.x >= AXIS_OFFSET_LEFT + AXIS_CLOSEST_X && mousePos.x <= AXIS_OFFSET_RIGHT - AXIS_CLOSEST_X)))) {
                 pts[mousePoint] = mousePos.x;
             }
-            if (mousePos.y <= AXIS_OFFSET_BOTTOM && mousePos.y >= AXIS_OFFSET_TOP) {
+            if (((mousePoint === 0 || mousePoint === pts.length - 2) &&
+                 mousePos.y <= AXIS_OFFSET_BOTTOM && mousePos.y >= AXIS_OFFSET_TOP) ||
+                (mousePos.y <= AXIS_OFFSET_BOTTOM - AXIS_CLOSEST_Y && mousePos.y >= AXIS_OFFSET_TOP + AXIS_CLOSEST_Y)) {
                 pts[mousePoint + 1] = mousePos.y;
             }
         }
+        updateTextBoxes();
         draw();
         posText = '{' + mousePos.x + ',' + mousePos.y + ')';
         posTextWidth = splineCtx.measureText(posText).width;
@@ -396,7 +395,7 @@
             posTextY = mousePos.y + (posTextHeight - mousePos.y);
         }
         splineCtx.fillText(posText,  posTextX, posTextY);
-    };
+    }
     function mouseDown(e) {
         calcMousePos(e);
         calcClosestPoint();
@@ -467,6 +466,7 @@
         splineCanvasElem.addEventListener('mousemove', mouseMove, false);
         splineCanvasElem.addEventListener('mousedown', mouseDown, false);
         splineCanvasElem.addEventListener('mouseup', mouseUp, false);
+        splineCanvasElem.addEventListener('mouseleave', mouseUp, false);
         bunnyImg.src = 'bunny.jpg';
         //submit();
         x1Elem.focus();
