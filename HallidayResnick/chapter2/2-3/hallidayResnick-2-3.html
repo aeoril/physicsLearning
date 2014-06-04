@@ -7,7 +7,7 @@
 <body>
     <h3>Position, Motion and Time Lesson - First Year Physics for Physical Science and Engineering Majors</h3>
 
-    <canvas id="canvas" height="400" width="960"></canvas><br>
+    <canvas id="splineCanvas" height="400" width="960"></canvas><br>
     <form id="form" action="#" method="get">
         <label id="x1Label" for="x1">x1</label>
         <input id="x1" name="x1" type="number" min="0" max="910" step="1" value="0"/>
@@ -29,6 +29,8 @@
         <input id="t" name="t" type="number" min="0" max="100" step="1" value="50"/>
         <button type="submit">Draw!</button>
     </form>
+    <br>
+    <canvas id="bunnyCanvas" height="100" width="960"></canvas><br>
 
     <p>Underlying math code for splines by Rob Spencer:<br>
         <a href="http://scaledinnovation.com/analytics/splines/aboutSplines.html">http://scaledinnovation.com/analytics/splines/aboutSplines.html</a><br>

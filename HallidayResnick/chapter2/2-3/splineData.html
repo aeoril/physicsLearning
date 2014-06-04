@@ -1,0 +1,307 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Spline Interpolation for Data</title>
+    <meta content="Scaled Innovation, the personal site of Robin W. Spencer">
+	<meta content="javascript, design, analytics, canvas, algorithms, data mining">
+	<meta name="author" content="Robin W. Spencer" />
+	<meta name="date" content="2014-03-09" />
+<style type="text/css">
+body{
+    margin:24px;
+    font:12pt Helvetica;
+    color:#999;
+    background:#eee;
+    position:relative;
+}
+#canvas1{
+    float: left;
+    margin:10px;
+    background:#fff;
+    border:1px solid #999;
+}
+h1{
+    text-shadow:1px 1px 1px #000;
+}
+#links{
+    position: absolute;
+    top:0px;
+    right:0px;
+}
+a:link,a:visited,a:active{
+    text-decoration:none;
+    color:#aa3;
+}
+a:hover{
+    text-decoration:none;
+    color:#ff5;
+}
+input.text{
+    width:36px;
+    margin:0 2em 0 0;
+    text-align:center;
+    background:#fff;
+    border:1px solid #ccc;
+}
+.button{
+    margin:0 0 0 1em;
+}
+#controls{
+    margin-left:20px;
+}
+#controls div{
+    display: inline-block;
+    margin:0px 0 0 0;
+}
+#input{
+    float:left;
+    margin:10px;
+    padding:10px;
+    width:120px;
+    height: 380px;
+    overflow: auto;
+    font:10pt Helvetica, sans-serif;
+    color:#555555;
+}
+#slider{
+    width:200px;
+    margin:10px 0 10px 10px;
+
+}
+</style>
+<script type="text/javascript">
+/*
+	Copyright 2014 by Robin W. Spencer
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You can find a copy of the GNU General Public License
+    at http://www.gnu.org/licenses/.
+
+*/
+
+function px(x){
+    return 20 + 3.6*x;      //  assume 400px wide canvas and data on 0..100
+}
+function py(y){
+    return 20 + 3.6*(100 - y);  //  assume 400px high canvas and data on 0..100
+}
+function interpolate(x, segments){
+    //  Find the segment that contains x (inefficient linear search).
+    var found = false;
+    for(var i=1; i<segments.length; i++){
+        var s = segments[i];
+        if( (x >= s.x0) && (x <= s.x1)){
+            found = true;
+            break;
+        }
+    }
+    if(found){
+        //  Assemble the terms of the cubic equations.
+        var cX = 3 * (s.cpx1 - s.x0);
+        var bX = 3 * (s.cpx2 - s.cpx1) - cX;
+        var aX = s.x1 - s.x0 - cX - bX;
+        var dX = s.x0;
+
+        var cY = 3 * (s.cpy1 - s.y0);
+        var bY = 3 * (s.cpy2 - s.cpy1) - cY;
+        var aY = s.y1 - s.y0 - cY - bY;
+        var dY = s.y0;
+        //  Binary search to find t such that input x = at^3 + bt^2 + ct + d
+        //  Tried solving cubic and Newton's method but neither is as robust as this.
+        var t = 0.5;
+        var dt = t/2;
+        var fX = function(t){ return dX + t*(cX + t*(bX + t*aX)) };
+        var epsilon = 1e-6;
+        while( Math.abs(fX(t) - x) > epsilon && dt > epsilon ){
+            if( (fX(t) - x ) < 0 ){
+                t += dt;
+            }else{
+                t -= dt;
+            }
+            dt = dt/2;
+        }
+   //     var x = dX + t*(cX + t*(bX + t*aX));  // = at^3 + bt^2 + ct + d
+        var y = dY + t*(cY + t*(bY + t*aY));
+        return {x:x, y:y}
+    }else{
+        return null;
+    }
+}
+function update(ctx, data, tension){
+    //  Create a new data object to hold the fixed data and the interpolation data.
+    //  First pass: add fixed data to the segment objects.  Given data[1...N],
+    //  note segment[0] === segment[1] and segment[N+1] === segment[N] so that
+    //  cubic splines at the ends will collapse to quadratics.
+    var N = data.length;
+    var segments = [{
+        x0: data[1].x,
+        y0: data[1].y,
+        x1: data[1].x,
+        y1: data[1].y
+    }];
+    for(var i=1; i<N-1; i++){
+        var s = {
+            x0: data[i].x,
+            y0: data[i].y,
+            x1: data[i+1].x,
+            y1: data[i+1].y
+        }
+        segments.push(s);
+    }
+    segments.push(segments[segments.length-1]);
+
+    //  Second pass: calculate the spline control points
+    for(var i=0; i<segments.length-1; i++){
+        var s = segments[i];
+
+        s.x2 = segments[i+1].x1;  //  Look-ahead needed
+        s.y2 = segments[i+1].y1;
+
+        var d01 = Math.sqrt(Math.pow(s.x1 - s.x0,2) + Math.pow(s.y1 - s.y0,2));
+        var d12 = Math.sqrt(Math.pow(s.x2 - s.x1,2) + Math.pow(s.y2 - s.y1,2));
+
+        var fa = tension*d01/(d01 + d12);
+        var fb = tension - fa;
+
+        s.tcpx1 = s.x1 + fa*(s.x0 - s.x2);
+        s.tcpy1 = s.y1 + fa*(s.y0 - s.y2);
+
+        s.tcpx2 = s.x1 - fb*(s.x0 - s.x2);
+        s.tcpy2 = s.y1 - fb*(s.y0 - s.y2);
+    }
+
+    //  Third pass:  reassign control points to the segments where they'll be used.
+    for(var i=1; i<segments.length-1; i++){
+        var s = segments[i];
+        s.cpx2 = segments[i].tcpx1;
+        s.cpy2 = segments[i].tcpy1;
+        s.cpx1 = segments[i-1].tcpx2
+        s.cpy1 = segments[i-1].tcpy2
+    }
+
+    //  Update the display.
+    document.getElementById("tValue").innerHTML = tension.toFixed(2);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+    //  Draw fixed data points.
+    ctx.strokeStyle = "#555555";
+    for(var i=0; i<data.length; i++){
+        var x = data[i].x;
+        var y = data[i].y;
+        ctx.beginPath();
+        ctx.lineWidth = 1;
+        ctx.arc( px(x), py(y), 6, 0, 6.283, false);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fillStyle = "rgba(0,0,0,0.2)";
+        ctx.fill();
+        ctx.fillStyle = "#777777";
+        ctx.fillText("p"+i, px(x)+8, py(y)+8);
+    }
+    //  Draw native bezier interpolation.
+    for(var i=1; i<segments.length-1; i++){
+        var s = segments[i];
+        ctx.beginPath();
+        ctx.strokeStyle = "#999999";
+        ctx.moveTo(px(s.x0), py(s.y0));
+   //     ctx.lineTo(px(s.x1), py(s.y1));
+        ctx.bezierCurveTo(px(s.cpx1), py(s.cpy1), px(s.cpx2), py(s.cpy2), px(s.x1), py(s.y1));
+        ctx.stroke();
+        ctx.closePath();
+        //  Draw control points.
+        /*
+        ctx.fillStyle = "red";
+        ctx.beginPath();
+        ctx.arc(px(s.cpx1), py(s.cpy1), 2, 0, 6.28, false);
+        ctx.fill();
+        ctx.fillText("s"+i+"cp1", px(s.cpx1)+3, py(s.cpy1)+5);
+        ctx.closePath();
+        ctx.fillStyle = "green";
+        ctx.beginPath();
+        ctx.arc(px(s.cpx2), py(s.cpy2), 2, 0, 6.28, false);
+        ctx.fill();
+        ctx.closePath();
+        ctx.fillText("s"+i+"cp2", px(s.cpx2)+3, py(s.cpy2)+5);
+        */
+    }
+
+    //  Draw specific interpolated points.
+    var xmin = data[1].x;
+    var xmax = data[data.length-1].x;
+    var numPts = 200;
+    ctx.fillStyle = "blue";
+    for(var x=xmin; x<=xmax; x+=(xmax-xmin)/numPts){
+        var pt = interpolate(x, segments);
+        ctx.beginPath();
+        ctx.arc(px(pt.x), py(pt.y), 2, 0, 6.28, false);
+        ctx.fill();
+        ctx.closePath();
+    }
+}
+function initialize(t){
+    //  Set up the canvas.
+    var e = document.getElementById("canvas1");
+    e.width = 600;
+    e.height = 400;
+    var ctx = e.getContext('2d');
+    if(!ctx){
+        alert("This page requires Safari, Chrome, or Firefox.");
+        return;
+    }
+    ctx.clearRect(0, 0, e.width, e.height);
+    //  Generate some data.  Note the leading empty element.
+    var n = 10;
+    var data = [{}];
+    for(var i=1; i<=n; i++){
+        data.push({
+            x: (i-0.5)*150/n,
+            y: Math.round(100*Math.random())
+        })
+    }
+
+ //   data = [{}, {x: 10, y:10}, {x: 40, y:60}, {x: 60, y:40},  {x: 90, y:90},   ]
+
+    data.sort(function(a,b){
+        return a.x - b.x;
+    })
+    document.getElementById("input").value = JSON.stringify(data, null, 4);
+
+    //  Event handling for the slider
+    document.getElementById("slider").onchange = function(event){
+        var tension = Number(event && event.target && event.target.value || 50)/100;
+        update(ctx, data, tension);
+    }
+    //  Draw with default tension = 0.5
+    update(ctx, data, 0.5);
+}
+</script>
+</head>
+<body onload="initialize();">
+<div id="links">
+    back to <a href='http://scaledinnovation.com'>Scaled Innovation</a><br/>
+    <a href="splines.html">splines for graphics</a><br>
+    <a href="aboutSplines.html">about the geometry</a>
+</div>
+<h1>Spline Interpolation for Data</h1>
+<div id='controls'>
+    <div>adjust tension t</div>
+    <input id='slider' type='range' min='-100' max='100' value='50'>
+    <div id='tValue'></div>
+</div>
+<textarea id='input'></textarea>
+<canvas id='canvas1'>
+    <div style="padding:72px;text-align:center;font:18pt bold serif">
+        This page requires a modern HTML5-compliant browser, such as Safari, Firefox, Chrome, or Opera.<br/>
+       <img src="splineDefault.png" width="300" height="225" border="0">
+    </div>
+</canvas>
+</body>
+</html>
