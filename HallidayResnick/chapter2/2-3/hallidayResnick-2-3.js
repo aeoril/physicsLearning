@@ -1,7 +1,7 @@
 // Copyright © 2014 QuarksCode.  MIT License - see http://opensource.org/licenses/MIT and see COPYRIGHT.md
 // Original Author:  aeoril
 //
-// hallidayResnick-2-2.js - 1 dimensional position and displacement interactive lesson
+// hallidayResnick-2-3.js - 1 motion: displacement and time interactive lesson
 
 (function () {
     'use strict';
@@ -64,6 +64,7 @@
         height,
         splineAxisCoordsScalarX,
         splineAxisCoordsScalarY,
+        splineAxisCoordsScalarRatio,
         bunnyAxisCoordsScalar,
         bunnyWidth,
         bunnyHeight,
@@ -494,24 +495,23 @@
         }
     }
     function bunnyRun() {
-        var bunnyX,
-            fudge = 928/1000;
+        var bunnyX;
 
+        bunnyX = avgVels[currentVelIndex] * delT * splineAxisCoordsScalarRatio + bunnyXTotal;
+        bunnyCtx.clearRect(0, 0, bunnyWidth, bunnyHeight);
+        drawAxis(bunnyCtx, BUNNY_AXIS_OFFSET_LEFT, BUNNY_AXIS_OFFSET_RIGHT, BUNNY_AXIS_OFFSET_BOTTOM, 'x', bunnyStep, true, BUNNY_SCALAR);
+        drawBunny(bunnyX * bunnyXScalar);
+        delT++;
         if (delT + delTTotal > pts[(currentVelIndex + 1) * 2] - AXIS_OFFSET_LEFT) {
-            bunnyXTotal += avgVels[currentVelIndex] * delT * fudge;
+            bunnyXTotal += avgVels[currentVelIndex] * (delT - 1) * splineAxisCoordsScalarRatio;
             currentVelIndex++;
-            delTTotal += delT;
-            delT = 0;
+            delTTotal += delT - 1;
+            delT = 1;
             if (currentVelIndex + 1 === pts.length / 2) {
                 //window.cancelAnimationFrame(requestID);
                 return;
             }
         }
-        bunnyX = avgVels[currentVelIndex] * delT * fudge + bunnyXTotal;
-        bunnyCtx.clearRect(0, 0, bunnyWidth, bunnyHeight);
-        drawAxis(bunnyCtx, BUNNY_AXIS_OFFSET_LEFT, BUNNY_AXIS_OFFSET_RIGHT, BUNNY_AXIS_OFFSET_BOTTOM, 'x', bunnyStep, true, BUNNY_SCALAR);
-        drawBunny(bunnyX * bunnyXScalar);
-        delT++;
         window.requestAnimationFrame(bunnyRun);
     }
     function animate() {
@@ -550,6 +550,7 @@
         BUNNY_AXIS_OFFSET_BOTTOM = bunnyHeight - AXIS_OFFSET;
         splineAxisCoordsScalarX = (width / (AXIS_OFFSET_RIGHT - AXIS_OFFSET_LEFT)) / SCALAR;
         splineAxisCoordsScalarY = (height / (AXIS_OFFSET_BOTTOM - AXIS_OFFSET_TOP)) / SCALAR;
+        splineAxisCoordsScalarRatio = splineAxisCoordsScalarX / splineAxisCoordsScalarY;
         bunnyAxisCoordsScalar = (bunnyWidth / (BUNNY_AXIS_OFFSET_RIGHT - BUNNY_AXIS_OFFSET_LEFT)) / BUNNY_SCALAR;
         bunnyXScalar = (BUNNY_AXIS_OFFSET_RIGHT - BUNNY_AXIS_OFFSET_LEFT) / (AXIS_OFFSET_BOTTOM - AXIS_OFFSET_TOP);
         stepX = 2 / splineAxisCoordsScalarX;
