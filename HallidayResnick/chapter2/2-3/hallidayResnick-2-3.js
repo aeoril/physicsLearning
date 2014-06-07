@@ -24,7 +24,7 @@
         BUNNY_AXIS_OFFSET_BOTTOM,
         AXIS_MARGIN = 10,
         BUNNY_AXIS_MARGIN = (960 - 720) / 2,
-        BUNNY_X_SCALAR = 720 / 350,
+        bunnyXScalar,
         BUNNY_IMG_WIDTH = 48,
         BUNNY_IMG_HEIGHT = 48,
         BUNNY_IMG_OFFSET_TOP = 5,
@@ -341,12 +341,14 @@
         drawAxis(splineCtx, AXIS_OFFSET_LEFT, AXIS_OFFSET_RIGHT, AXIS_OFFSET_BOTTOM, 't', stepX, true, SCALAR);
         drawAxis(splineCtx, AXIS_OFFSET_BOTTOM, AXIS_OFFSET_TOP, AXIS_OFFSET_LEFT, 'x', stepY, false, SCALAR);
         drawSpline();
-        bunnyCtx.clearRect(0, 0, splineCanvasElem.width, splineCanvasElem.height);
-        drawBunny((AXIS_OFFSET_BOTTOM - pts[1]) * BUNNY_X_SCALAR);
-        drawAxis(bunnyCtx, BUNNY_AXIS_OFFSET_LEFT, BUNNY_AXIS_OFFSET_RIGHT, BUNNY_AXIS_OFFSET_BOTTOM, 'x', bunnyStep, true, BUNNY_SCALAR);
         drawArrow({x: pts[0], y: pts[1]}, {x: pts[2], y: pts[3]}, 'Avg Vel  ' + avgVels[0].toFixed(3));
         drawArrow({x: pts[2], y: pts[3]}, {x: pts[4], y: pts[5]}, 'Avg Vel  ' + avgVels[1].toFixed(3));
         drawArrow({x: pts[4], y: pts[5]}, {x: pts[6], y: pts[7]}, 'Avg Vel  ' + avgVels[2].toFixed(3));
+    }
+    function drawBunnyAll() {
+        bunnyCtx.clearRect(0, 0, splineCanvasElem.width, splineCanvasElem.height);
+        drawBunny((AXIS_OFFSET_BOTTOM - pts[1]) * bunnyXScalar);
+        drawAxis(bunnyCtx, BUNNY_AXIS_OFFSET_LEFT, BUNNY_AXIS_OFFSET_RIGHT, BUNNY_AXIS_OFFSET_BOTTOM, 'x', bunnyStep, true, BUNNY_SCALAR);
     }
     function calcMousePos(e) {
         var top = 0,
@@ -382,15 +384,21 @@
         }
     }
     function updateTextBoxes() {
-        x1Elem.value = ((pts[0] - AXIS_OFFSET) * splineAxisCoordsScalarX).toFixed(20);
-        y1Elem.value = ((height - (pts[1] + AXIS_OFFSET))  * splineAxisCoordsScalarY).toFixed(20);
-        x2Elem.value = ((pts[2] - AXIS_OFFSET) * splineAxisCoordsScalarX).toFixed(20);
-        y2Elem.value = ((height - (pts[3] + AXIS_OFFSET))  * splineAxisCoordsScalarY).toFixed(20);
-        x3Elem.value = ((pts[4] - AXIS_OFFSET) * splineAxisCoordsScalarX).toFixed(20);
-        y3Elem.value = ((height - (pts[5] + AXIS_OFFSET))  * splineAxisCoordsScalarY).toFixed(20);
-        x4Elem.value = ((pts[6] - AXIS_OFFSET) * splineAxisCoordsScalarX).toFixed(20);
-        y4Elem.value = ((height - (pts[7] + AXIS_OFFSET))  * splineAxisCoordsScalarY).toFixed(20);
-    }
+        function calcTDisplayVal(t) {
+            return ((t - AXIS_OFFSET) * splineAxisCoordsScalarX).toFixed(4);
+        }
+        function calcXDisplayVal(x) {
+            return ((height - (x + AXIS_OFFSET))  * splineAxisCoordsScalarY).toFixed(4);
+        }
+        x1Elem.value = calcTDisplayVal(pts[0]);
+        y1Elem.value = calcXDisplayVal(pts[1]);
+        x2Elem.value = calcTDisplayVal(pts[2]);
+        y2Elem.value = calcXDisplayVal(pts[3]);
+        x3Elem.value = calcTDisplayVal(pts[4]);
+        y3Elem.value = calcXDisplayVal(pts[5]);
+        x4Elem.value = calcTDisplayVal(pts[6]);
+        y4Elem.value = calcXDisplayVal(pts[7]);
+            }
     function updateAvgVels() {
         function calcVel(p1, p2) {
             return (p2.x - p1.x) / (p2.t - p1.t);
@@ -435,6 +443,9 @@
         updateTextBoxes();
         updateAvgVels();
         draw();
+        if (mousePoint === 0 && mouseIsDown) {
+            drawBunnyAll();
+        }
         posText = '{' + mousePos.x + ',' + mousePos.y + ')';
         posTextWidth = splineCtx.measureText(posText).width;
         posTextX = mousePos.x;
@@ -458,39 +469,48 @@
         mouseIsDown = false;
     }
     function submit(e) {
+        function calcTPoint(tElem) {
+            return Number(tElem.value) / splineAxisCoordsScalarX + AXIS_OFFSET;
+        }
+        function calcXPoint(xElem) {
+            return height - (Number(xElem.value) / splineAxisCoordsScalarY + AXIS_OFFSET);
+        }
         pts = [];
-        pts.push(Math.round(Number(x1Elem.value) / splineAxisCoordsScalarX) + AXIS_OFFSET);
-        pts.push(height - (Math.round(Number(y1Elem.value) / splineAxisCoordsScalarY) + AXIS_OFFSET));
-        pts.push(Math.round(Number(x2Elem.value) / splineAxisCoordsScalarX) + AXIS_OFFSET);
-        pts.push(height - (Math.round(Number(y2Elem.value) / splineAxisCoordsScalarY) + AXIS_OFFSET));
-        pts.push(Math.round(Number(x3Elem.value) / splineAxisCoordsScalarX) + AXIS_OFFSET);
-        pts.push(height - (Math.round(Number(y3Elem.value) / splineAxisCoordsScalarY) + AXIS_OFFSET));
-        pts.push(Math.round(Number(x4Elem.value) / splineAxisCoordsScalarX) + AXIS_OFFSET);
-        pts.push(height - (Math.round(Number(y4Elem.value) / splineAxisCoordsScalarY) + AXIS_OFFSET));
+        pts.push(calcTPoint(x1Elem));
+        pts.push(calcXPoint(y1Elem));
+        pts.push(calcTPoint(x2Elem));
+        pts.push(calcXPoint(y2Elem));
+        pts.push(calcTPoint(x3Elem));
+        pts.push(calcXPoint(y3Elem));
+        pts.push(calcTPoint(x4Elem));
+        pts.push(calcXPoint(y4Elem));
         t = Number(tElem.value) / 100;
         updateAvgVels();
+        updateTextBoxes();
         draw();
+        drawBunnyAll();
         if (e) {
             e.preventDefault();
         }
     }
     function bunnyRun() {
-        var bunnyX;
+        var bunnyX,
+            fudge = 928/1000;
 
-        if (delT + delTTotal > pts[(currentVelIndex + 1) * 2] - AXIS_OFFSET_LEFT - AXIS_MARGIN) {
-            bunnyXTotal += avgVels[currentVelIndex] * delT;
+        if (delT + delTTotal > pts[(currentVelIndex + 1) * 2] - AXIS_OFFSET_LEFT) {
+            bunnyXTotal += avgVels[currentVelIndex] * delT * fudge;
             currentVelIndex++;
             delTTotal += delT;
             delT = 0;
             if (currentVelIndex + 1 === pts.length / 2) {
-                window.cancelAnimationFrame(requestID);
+                //window.cancelAnimationFrame(requestID);
                 return;
             }
         }
-        bunnyX = avgVels[currentVelIndex] * delT + bunnyXTotal;
+        bunnyX = avgVels[currentVelIndex] * delT * fudge + bunnyXTotal;
         bunnyCtx.clearRect(0, 0, bunnyWidth, bunnyHeight);
         drawAxis(bunnyCtx, BUNNY_AXIS_OFFSET_LEFT, BUNNY_AXIS_OFFSET_RIGHT, BUNNY_AXIS_OFFSET_BOTTOM, 'x', bunnyStep, true, BUNNY_SCALAR);
-        drawBunny(bunnyX * BUNNY_X_SCALAR);
+        drawBunny(bunnyX * bunnyXScalar);
         delT++;
         window.requestAnimationFrame(bunnyRun);
     }
@@ -501,11 +521,6 @@
         currentVelIndex = 0;
         requestID = window.requestAnimationFrame(bunnyRun);
     }
-    bunnyImg.width = 24;
-    bunnyImg.height = 24;
-    bunnyImg.addEventListener('load', function () {
-        submit();
-    });
     window.addEventListener('load', function() {
         splineCanvasElem = document.getElementById('splineCanvas');
         bunnyCanvasElem = document.getElementById('bunnyCanvas');
@@ -536,18 +551,19 @@
         splineAxisCoordsScalarX = (width / (AXIS_OFFSET_RIGHT - AXIS_OFFSET_LEFT)) / SCALAR;
         splineAxisCoordsScalarY = (height / (AXIS_OFFSET_BOTTOM - AXIS_OFFSET_TOP)) / SCALAR;
         bunnyAxisCoordsScalar = (bunnyWidth / (BUNNY_AXIS_OFFSET_RIGHT - BUNNY_AXIS_OFFSET_LEFT)) / BUNNY_SCALAR;
+        bunnyXScalar = (BUNNY_AXIS_OFFSET_RIGHT - BUNNY_AXIS_OFFSET_LEFT) / (AXIS_OFFSET_BOTTOM - AXIS_OFFSET_TOP);
         stepX = 2 / splineAxisCoordsScalarX;
         stepY = 2 / splineAxisCoordsScalarY;
         bunnyStep = (BUNNY_AXIS_OFFSET_RIGHT - BUNNY_AXIS_OFFSET_LEFT) / 10;
-        x1Elem.addEventListener('change', submit, false);
-        y1Elem.addEventListener('change', submit, false);
-        x2Elem.addEventListener('change', submit, false);
-        y2Elem.addEventListener('change', submit, false);
-        x3Elem.addEventListener('change', submit, false);
-        y3Elem.addEventListener('change', submit, false);
-        x4Elem.addEventListener('change', submit, false);
-        y4Elem.addEventListener('change', submit, false);
-        tElem.addEventListener('change', submit, false);
+//        x1Elem.addEventListener('change', submit, false);
+//        y1Elem.addEventListener('change', submit, false);
+//        x2Elem.addEventListener('change', submit, false);
+//        y2Elem.addEventListener('change', submit, false);
+//        x3Elem.addEventListener('change', submit, false);
+//        y3Elem.addEventListener('change', submit, false);
+//        x4Elem.addEventListener('change', submit, false);
+//        y4Elem.addEventListener('change', submit, false);
+//        tElem.addEventListener('change', submit, false);
         //formElem.addEventListener('submit', submit, false);
         animateElem.addEventListener('click', animate, false);
         //canvasElem.addEventListener('click', canvasMousePos, false);
@@ -555,8 +571,10 @@
         splineCanvasElem.addEventListener('mousedown', mouseDown, false);
         splineCanvasElem.addEventListener('mouseup', mouseUp, false);
         splineCanvasElem.addEventListener('mouseleave', mouseUp, false);
+        bunnyImg.addEventListener('load', function () {
+            submit();
+        });
         bunnyImg.src = 'bunny.jpg';
-        //submit();
         x1Elem.focus();
     }, false);
 }());
