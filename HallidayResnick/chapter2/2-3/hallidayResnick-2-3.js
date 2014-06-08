@@ -77,193 +77,116 @@
         currentVelIndex,
         requestID;
 
+    function calcDistance(p1, p2) {
+        var delta = {x: p2.x - p1.x, y: p2.y - p1.y};
+        return Math.sqrt(delta.x * delta.x + delta.y * delta.y);
+    }
 // *******************************************************************************************
 // Start Rob Spencer Code from http://scaledinnovation.com/analytics/splines/aboutSplines.html
 // This code is copyrighted with all rights reserved - see his site for details.  Thanks, Rob!
+// Heavily refactored by QuarksCode
 // *******************************************************************************************
-
-    function convertHSVtoRGB(h,s,v,opacity){
-        // inputs h=hue=0-360, s=saturation=0-1, v=value=0-1
-        // algorithm from Wikipedia on HSV conversion
-        var toHex=function(decimalValue,places){
-            if(places == undefined || isNaN(places))  places = 2;
-            var hex = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"];
-            var next = 0;
-            var hexadecimal = "";
-            decimalValue=Math.floor(decimalValue);
-            while(decimalValue > 0){
-                next = decimalValue % 16;
-                decimalValue = Math.floor((decimalValue - next)/16);
-                hexadecimal = hex[next] + hexadecimal;
-            }
-            while (hexadecimal.length<places){
-                hexadecimal = "0"+hexadecimal;
-            }
-            return hexadecimal;
-        };
-        var hi=Math.floor(h/60)%6;
-        var f=h/60-Math.floor(h/60);
-        var p=v*(1-s);
-        var q=v*(1-f*s);
-        var t=v*(1-(1-f)*s);
-        var r=v;  // case hi==0 below
-        var g=t;
-        var b=p;
-        switch(hi){
-            case 1:r=q;g=v;b=p;break;
-            case 2:r=p;g=v;b=t;break;
-            case 3:r=p;g=q;b=v;break;
-            case 4:r=t;g=p;b=v;break;
-            case 5:r=v;g=p;b=q;break;
-        }
-        //  At this point r,g,b are in 0...1 range.  Now convert into rgba or #FFFFFF notation
-        if(opacity){
-            return "rgba("+Math.round(255*r)+","+Math.round(255*g)+","+Math.round(255*b)+","+opacity+")";
-        }else{
-            return "#"+toHex(r*255)+toHex(g*255)+toHex(b*255);
-        }
-    }
-    function hexToCanvasColor(hexColor,opacity){
-        // Convert #AA77CC to rbga() format for Firefox
-        opacity=opacity || "1.0";
-        hexColor=hexColor.replace("#","");
-        var r=parseInt(hexColor.substring(0,2),16);
-        var g=parseInt(hexColor.substring(2,4),16);
-        var b=parseInt(hexColor.substring(4,6),16);
-        return "rgba("+r+","+g+","+b+","+opacity+")";
-    }
-    function drawPoint(ctx,x,y,r,color){
+    function drawPoint(ctx, knot, r, strokeColor, fillColor){
         ctx.save();
         ctx.beginPath();
         ctx.lineWidth=1;
-        ctx.fillStyle=hexToCanvasColor(color,1);
-        ctx.arc(x,y,r,0.0,2*Math.PI,false);
+        ctx.strokeStyle = strokeColor;
+        ctx.fillStyle=fillColor;
+        ctx.arc(knot.x, knot.y, r, 0.0, 2*Math.PI, false);
         ctx.closePath();
         ctx.stroke();
         ctx.fill();
         ctx.restore();
     }
-    function getControlPoints(x0,y0,x1,y1,x2,y2,t){
-        //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment
-        //  x2,y2 is the next knot -- not connected here but needed to calculate p2
-        //  p1 is the control point calculated here, from x1 back toward x0.
-        //  p2 is the next control point, calculated here and returned to become the
-        //  next segment's p1.
+    function getControlPoints(prevKnot, currentKnot, nextKnot, t){
+        //  knot1 and knot2 are the end (knot) pts of this segment
+        //  knot3 is the next knot -- not connected here but needed to calculate controlPoint2
+        //  controlPoint1 is the control point calculated here, from knot1 back toward knot0.
+        //  controlPoint2 is the next control point, calculated here and returned to become the
+        //  next segment's controlPoint1.
         //  t is the 'tension' which controls how far the control points spread.
 
         //  Scaling factors: distances from this knot to the previous and following knots.
-        var d01=Math.sqrt(Math.pow(x1-x0,2)+Math.pow(y1-y0,2));
-        var d12=Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
+        var distancePC= calcDistance(prevKnot, currentKnot),
+            distanceCN = calcDistance(currentKnot, nextKnot),
+            fractionPC = t * distancePC / (distancePC + distanceCN),
+            fractionCN = t - fractionPC,
+            controlPointPrev2 = {x: currentKnot.x + fractionPC * (prevKnot.x - nextKnot.x),
+                y: currentKnot.y + fractionPC * (prevKnot.y - nextKnot.y)},
+            controlPointCurr1 = {x: prevKnot.x - fractionCN * (prevKnot.x - nextKnot.x),
+                y: currentKnot.y - fractionCN * (prevKnot.y - nextKnot.y)};
 
-        var fa=t*d01/(d01+d12);
-        var fb=t-fa;
-
-        var p1x=x1+fa*(x0-x2);
-        var p1y=y1+fa*(y0-y2);
-
-        var p2x=x1-fb*(x0-x2);
-        var p2y=y1-fb*(y0-y2);
-
-        return [p1x,p1y,p2x,p2y]
+        return {prev2: controlPrev2, curr1: controlPointCurr1};
     }
-    function drawControlLine(ctx,x,y,px,py){
+    function drawControlLine(ctx, knot, controlPoint){
         return;
         //  Only for demo purposes: show the control line and control points.
         ctx.save();
         ctx.beginPath();
         ctx.lineWidth=1;
         ctx.strokeStyle="rgba(0,0,0,0.3)";
-        ctx.moveTo(x,y);
-        ctx.lineTo(px,py);
+        ctx.moveTo(knot.x, knot.y);
+        ctx.lineTo(controlPoint.x, controlPoint.y);
         ctx.closePath();
         ctx.stroke();
-        drawPoint(ctx,px,py,1.5,"#000000");
+        drawPoint(ctx, controlPoint, 1.5, ctx.strokeStyle, ctx.strokeStyle);
         ctx.restore();
     }
-    function drawSpline(){
-        //showDetails=document.getElementById('details').checked;
-        splineCtx.save();
-        splineCtx.lineWidth=4;
-        var cp=[];   // array of control points, as x0,y0,x1,y1,...
-        var n=pts.length;
-        var color, i;
-
-        if(closed){
-            //   Append and prepend knots and control points to close the curve
-            pts.push(pts[0],pts[1],pts[2],pts[3]);
-            pts.unshift(pts[n-1]);
-            pts.unshift(pts[n-1]);
-            for(i=0;i<n;i+=2){
-                cp=cp.concat(getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
-            }
-            cp=cp.concat(cp[0],cp[1]);
-            for(i=2;i<n+2;i+=2){
-                color=convertHSVtoRGB(Math.floor(240*(i-2)/(n-2)),0.8,0.8);
-                if(!SHOW_DETAILS){color="#555555"}
-                splineCtx.strokeStyle=hexToCanvasColor(color,0.75);
-                splineCtx.beginPath();
-                splineCtx.moveTo(pts[i],pts[i+1]);
-                splineCtx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
-                splineCtx.stroke();
-                splineCtx.closePath();
-                if(SHOW_DETAILS){
-                    drawControlLine(splineCtx,pts[i],pts[i+1],cp[2*i-2],cp[2*i-1]);
-                    drawControlLine(splineCtx,pts[i+2],pts[i+3],cp[2*i],cp[2*i+1]);
-                }
-            }
-        }else{
-            // Draw an open curve, not connected at the ends
-            for(i=0;i<n-4;i+=2){
-                cp=cp.concat(getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
-            }
-            for(i=2;i<pts.length-5;i+=2){
-                color=convertHSVtoRGB(Math.floor(240*(i-2)/(n-2)),0.8,0.8);
-                if(!SHOW_DETAILS){color="#555555"}
-                splineCtx.strokeStyle=hexToCanvasColor(color,0.75);
-                splineCtx.beginPath();
-                splineCtx.moveTo(pts[i],pts[i+1]);
-                splineCtx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
-                splineCtx.stroke();
-                splineCtx.closePath();
-                if(SHOW_DETAILS){
-                    drawControlLine(splineCtx,pts[i],pts[i+1],cp[2*i-2],cp[2*i-1]);
-                    drawControlLine(splineCtx,pts[i+2],pts[i+3],cp[2*i],cp[2*i+1]);
-                }
-            }
-            //  For open curves the first and last arcs are simple quadratics.
-            color=convertHSVtoRGB(40,0.4,0.4);  // brown
-            if(!SHOW_DETAILS){color="#555555"}
-            splineCtx.strokeStyle=hexToCanvasColor(color,0.75);
-            splineCtx.beginPath();
-            splineCtx.moveTo(pts[0],pts[1]);
-            splineCtx.quadraticCurveTo(cp[0],cp[1],pts[2],pts[3]);
-            splineCtx.stroke();
-            splineCtx.closePath();
-
-            color=convertHSVtoRGB(240,0.8,0.8); // indigo
-            if(!SHOW_DETAILS){color="#555555"}
-            splineCtx.strokeStyle=hexToCanvasColor(color,0.75);
-            splineCtx.beginPath();
-            splineCtx.moveTo(pts[n-2],pts[n-1]);
-            splineCtx.quadraticCurveTo(cp[2*n-10],cp[2*n-9],pts[n-4],pts[n-3]);
-            splineCtx.stroke();
-            splineCtx.closePath();
-            if(SHOW_DETAILS){
-                drawControlLine(splineCtx,pts[2],pts[3],cp[0],cp[1]);
-                drawControlLine(splineCtx,pts[n-4],pts[n-3],cp[2*n-10],cp[2*n-9]);
-            }
+    function drawInnerSegment(ctx, knot1, knot2) {
+        ctx.strokeStyle = knot.color;
+        ctx.beginPath();
+        ctx.moveTo(knot1.x, knot2.y);
+        ctx.bezierCurveTo(knot1.cp1.x, knot1.cp1.y, knot1.cp2.x, knot1.cp2.y,
+            knot2.x, knot2.y);
+        ctx.stroke();
+        ctx.closePath();
+        if(showControlPoints){
+            drawControlLine(ctx, knot1, knot1.cp1);
+            drawControlLine(ctx, knot1, knot1.cp2);
         }
-        splineCtx.restore();
+    }
+    function drawOpenSegment(ctx, endKnot, innerKnot, color) {
+        ctx.strokeStyle=color;
+        ctx.beginPath();
+        ctx.moveTo(endKnot.x, endKnot.y);
+        ctx.quadraticCurveTo(innerKnot.cp2.x, innerKnot.cp2.y, innerKnot.x, innerKnot.y);
+        ctx.stroke();
+        ctx.closePath();
+    }
+    function drawSpline(ctx, knots, closed, showControlPoints){
+        var controlPoints = [],
+            lastIndex = knots.length - 1;
 
-        if(SHOW_DETAILS){   //   Draw the knot points.
-            for(i=0;i<n;i+=2){
-                drawPoint(splineCtx,pts[i],pts[i+1],2.5,"#ffff00");
+        ctx.save();
+        ctx.lineWidth=4;
+        knots.forEach(function (knot, index, array) {
+            var prevKnot = index === 0 ? array[array.length - 1] : array[index - 1],
+                nextKnot = array[(index + 1) % array.length],
+                controlPoints = getControlPoints(prevKnot, knot, nextKnot);
+            prevPoint.cp2 = controlPoints.prev2;
+            point.cp1 = controlPoints.curr1;
+        });
+        knots.forEach(function (knot, index, array) {
+            var nextKnot = array[(index + 1) % array.length];
+            if (!closed && index === 1 || index === array.length) {
+                return;
             }
+            drawInnerSegment(ctx, knot1, knot2);
+        });
+        if (!closed) {
+            drawOpenSegment(knots[0], knots[1], knots[0].color);
+            drawOpenSegment(knots[lastIndex], knots[lastIndex - 1],
+                knots[lastIndex - 1].color);
         }
+        knots.forEach(function(knot) {
+            drawPoint(ctx, knot, 2.5, "rgb(0, 0, 0)", "rgb(255, 255, 0)");
+        });
+        ctx.restore();
     }
 
 // *******************************************************************************************
 // End Rob Spencer Code from http://scaledinnovation.com/analytics/splines/aboutSplines.html
+// Heavily refactored by QuarksCode
 // *******************************************************************************************
 
     function drawArrow(p1, p2, text) {
@@ -368,9 +291,6 @@
         // return relative mouse position
         mousePos.x = e.clientX - left + window.pageXOffset;
         mousePos.y = e.clientY - top + window.pageYOffset;
-    }
-    function calcDistance(x1, y1, x2, y2) {
-        return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
     function calcClosestPoint() {
         var i;
