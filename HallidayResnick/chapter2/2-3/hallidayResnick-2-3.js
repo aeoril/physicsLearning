@@ -38,8 +38,8 @@
         ARROWHEAD_WIDTH = 5,
         BLACK_COLOR = 'rgb(0, 0, 0)',
         SHOW_DETAILS = true,
+        CLOSED = false,
         pts,
-        closed = false,
         mouseIsDown = false,
         mousePoint = 0,
         mousePos = {},
@@ -77,8 +77,8 @@
         currentVelIndex,
         requestID;
 
-    function calcDistance(p1, p2) {
-        var delta = {x: p2.x - p1.x, y: p2.y - p1.y};
+    function calcDistance(point1, point2) {
+        var delta = {x: point2.x - point1.x, y: point2.y - point1.y};
         return Math.sqrt(delta.x * delta.x + delta.y * delta.y);
     }
 // *******************************************************************************************
@@ -116,15 +116,13 @@
             controlPointCurr1 = {x: prevKnot.x - fractionCN * (prevKnot.x - nextKnot.x),
                 y: currentKnot.y - fractionCN * (prevKnot.y - nextKnot.y)};
 
-        return {prev2: controlPrev2, curr1: controlPointCurr1};
+        return {prev2: controlPointPrev2, curr1: controlPointCurr1};
     }
-    function drawControlLine(ctx, knot, controlPoint){
-        return;
-        //  Only for demo purposes: show the control line and control points.
+    function drawControlLine(ctx, knot, controlPoint, color){
         ctx.save();
         ctx.beginPath();
-        ctx.lineWidth=1;
-        ctx.strokeStyle="rgba(0,0,0,0.3)";
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = color;
         ctx.moveTo(knot.x, knot.y);
         ctx.lineTo(controlPoint.x, controlPoint.y);
         ctx.closePath();
@@ -132,8 +130,8 @@
         drawPoint(ctx, controlPoint, 1.5, ctx.strokeStyle, ctx.strokeStyle);
         ctx.restore();
     }
-    function drawInnerSegment(ctx, knot1, knot2) {
-        ctx.strokeStyle = knot.color;
+    function drawInnerSegment(ctx, knot1, knot2, showControlPoints) {
+        ctx.strokeStyle = knot1.color;
         ctx.beginPath();
         ctx.moveTo(knot1.x, knot2.y);
         ctx.bezierCurveTo(knot1.cp1.x, knot1.cp1.y, knot1.cp2.x, knot1.cp2.y,
@@ -141,21 +139,24 @@
         ctx.stroke();
         ctx.closePath();
         if(showControlPoints){
-            drawControlLine(ctx, knot1, knot1.cp1);
-            drawControlLine(ctx, knot1, knot1.cp2);
+            drawControlLine(ctx, knot1, knot1.cp1, BLACK_COLOR);
+            drawControlLine(ctx, knot1, knot1.cp2, BLACK_COLOR);
         }
     }
-    function drawOpenSegment(ctx, endKnot, innerKnot, color) {
+    function drawEndSegment(ctx, endKnot, innerKnot, color, showControlPoints) {
         ctx.strokeStyle=color;
         ctx.beginPath();
         ctx.moveTo(endKnot.x, endKnot.y);
         ctx.quadraticCurveTo(innerKnot.cp2.x, innerKnot.cp2.y, innerKnot.x, innerKnot.y);
         ctx.stroke();
         ctx.closePath();
+        if(showControlPoints){
+            drawControlLine(ctx, innerKnot, innerKnot.cp1, BLACK_COLOR);
+            drawControlLine(ctx, innerKnot, innerKnot.cp2, BLACK_COLOR);
+        }
     }
-    function drawSpline(ctx, knots, closed, showControlPoints){
-        var controlPoints = [],
-            lastIndex = knots.length - 1;
+    function drawSpline(ctx, knots, closed, drawControlPoints){
+        var lastIndex = knots.length - 1;
 
         ctx.save();
         ctx.lineWidth=4;
@@ -163,20 +164,20 @@
             var prevKnot = index === 0 ? array[array.length - 1] : array[index - 1],
                 nextKnot = array[(index + 1) % array.length],
                 controlPoints = getControlPoints(prevKnot, knot, nextKnot);
-            prevPoint.cp2 = controlPoints.prev2;
-            point.cp1 = controlPoints.curr1;
+            prevKnot.cp2 = controlPoints.prev2;
+            knot.cp1 = controlPoints.curr1;
         });
         knots.forEach(function (knot, index, array) {
             var nextKnot = array[(index + 1) % array.length];
             if (!closed && index === 1 || index === array.length) {
                 return;
             }
-            drawInnerSegment(ctx, knot1, knot2);
+            drawInnerSegment(ctx, knot, nextKnot, drawControlPoints);
         });
         if (!closed) {
-            drawOpenSegment(knots[0], knots[1], knots[0].color);
-            drawOpenSegment(knots[lastIndex], knots[lastIndex - 1],
-                knots[lastIndex - 1].color);
+            drawEndSegment(knots[0], knots[1], knots[0].color, drawControlPoints);
+            drawEndSegment(knots[lastIndex], knots[lastIndex - 1],
+                knots[lastIndex - 1].color, drawControlPoints);
         }
         knots.forEach(function(knot) {
             drawPoint(ctx, knot, 2.5, "rgb(0, 0, 0)", "rgb(255, 255, 0)");
