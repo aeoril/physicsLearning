@@ -350,7 +350,8 @@
             if (mousePoint !== 0 &&
                 ((mousePoint === knots.length - 1 &&
                   (mousePos.t >= knots[mousePoint - 1].t + CLOSEST_T && mousePos.t <= AXIS_OFFSET_RIGHT)) ||
-                 ((mousePos.t >= knots[mousePoint - 1].t + CLOSEST_T && mousePos.t < knots[mousePoint + 1].t - CLOSEST_T) &&
+                 (mousePoint < knots.length - 1 &&
+                  (mousePos.t >= knots[mousePoint - 1].t + CLOSEST_T && mousePos.t < knots[mousePoint + 1].t - CLOSEST_T) &&
                   (mousePos.t >= AXIS_OFFSET_LEFT + AXIS_CLOSEST_T && mousePos.t <= AXIS_OFFSET_RIGHT - AXIS_CLOSEST_T)))) {
                 knots[mousePoint].t = mousePos.t;
             }
@@ -416,6 +417,8 @@
         bunnyCtx.clearRect(0, 0, bunnyWidth, bunnyHeight);
         drawAxis(bunnyCtx, BUNNY_AXIS_OFFSET_LEFT, BUNNY_AXIS_OFFSET_RIGHT, BUNNY_AXIS_OFFSET_BOTTOM, 'x', bunnyStep, true, BUNNY_SCALAR);
         drawBunny(bunnyCtx, bunnyX * bunnyXScalar);
+        draw(splineCtx);
+        drawPoint(splineCtx, {t: (delT + delTTotal) + AXIS_OFFSET_LEFT, x: AXIS_OFFSET_BOTTOM - bunnyX}, 5.0, "rgb(0, 0, 0)", "rgb(255, 0, 255)");
         delT++;
         if (delT + delTTotal > knots[(currentVelIndex + 1)].t - AXIS_OFFSET_LEFT) {
             bunnyXTotal += avgVels[currentVelIndex] * (delT - 1) * splineAxisCoordsScalarRatio;
