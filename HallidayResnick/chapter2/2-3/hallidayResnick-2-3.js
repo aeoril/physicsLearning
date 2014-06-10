@@ -37,7 +37,7 @@
         ARROWHEAD_LENGTH = 7,
         ARROWHEAD_WIDTH = 5,
         BLACK_COLOR = 'rgb(0, 0, 0)',
-        DRAW_CONTROL_POINTS = true,
+        DRAW_CONTROL_POINTS = false,
         CLOSED = false,
         SEGMENT_COLORS = ['rgb(255, 0, 0', 'rgb(0, 255, 0)', 'rgb(0, 0, 255)', 'rbb(255, 255, 0)'],
         knots = [],
