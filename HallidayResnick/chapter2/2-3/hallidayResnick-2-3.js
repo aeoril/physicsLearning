@@ -40,6 +40,7 @@
         DRAW_CONTROL_POINTS = false,
         CLOSED = false,
         SEGMENT_COLORS = ['rgb(255, 0, 0', 'rgb(0, 255, 0)', 'rgb(0, 0, 255)', 'rbb(255, 255, 0)'],
+        KNOT_POINT_FILL_COLOR = 'rgb(255, 255, 0)',
         knots = [],
         mouseIsDown = false,
         mousePoint = 0,
@@ -178,7 +179,7 @@
             drawControlLine(ctx, knots[lastIndex], knots[lastIndex - 1].cp2, BLACK_COLOR);
         }
         knots.forEach(function(knot) {
-            drawPoint(ctx, knot, 2.5, "rgb(0, 0, 0)", "rgb(255, 255, 0)");
+            drawPoint(ctx, knot, 2.5, BLACK_COLOR, KNOT_POINT_FILL_COLOR);
         });
         ctx.restore();
     }
