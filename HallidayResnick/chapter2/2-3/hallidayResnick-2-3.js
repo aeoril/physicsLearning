@@ -6,37 +6,36 @@
 (function () {
     'use strict';
 
-    var SCALAR = 20,
-        BUNNY_SCALAR = 20,
-        FONT = 'normal 8pt TimesNewRoman',
-        NAME_FONT = 'normal 12pt TimesNewRoman',
-        TICK_LENGTH = 5,
+    var TICK_LENGTH = 5,
+        BLACK_COLOR = 'rgb(0, 0, 0)',
+        AXIS_LABEL_T = 't',
+        AXIS_LABEL_X = 'x',
+        AXIS_MIN_COORDINATE_T = -20,
+        AXIS_MAX_COORDINATE_T = 20,
+        AXIS_MIN_COORDINATE_X = -10,
+        AXIS_MAX_COORDINATE_X = 10,
+        AXIS_COORDINATE_STEP = 2,
+        COORDINATE_OFFSET_X = 5,
+        NUM_TICKS_T = (AXIS_MAX_COORDINATE_T - AXIS_MIN_COORDINATE_T) / AXIS_COORDINATE_STEP,
+        NUM_TICKS_X = (AXIS_MAX_COORDINATE_X - AXIS_MIN_COORDINATE_X) / AXIS_COORDINATE_STEP,
+        AXIS_COORDINATES_FONT = 'normal 8pt TimesNewRoman',
+        AXIS_LABEL_FONT = 'normal 12pt TimesNewRoman',
+        axisLengthT = splineCanvasElem.width - AXIS_MARGINS * 2,
+        axisLengthX = splineCanvasElem.height - AXIS_MARGINS * 2,
+        tickDistanceT = axisLengthT / NUM_TICKS_T,
+        COORDINATE_TEXT_OFFSET_Y = 15,
+        COORDINATE_TEXT_OFFSET_Y_H = 4,
         CLOSEST_T = 220,
-        AXIS_OFFSET = 40,
-        AXIS_OFFSET_LEFT,
-        AXIS_OFFSET_RIGHT,
-        AXIS_OFFSET_TOP,
-        AXIS_OFFSET_BOTTOM,
         AXIS_CLOSEST_T = 20,
         AXIS_CLOSEST_X = 80,
-        BUNNY_AXIS_OFFSET_LEFT,
-        BUNNY_AXIS_OFFSET_RIGHT,
-        BUNNY_AXIS_OFFSET_BOTTOM,
-        AXIS_MARGIN = 10,
-        BUNNY_AXIS_MARGIN = (960 - 720) / 2,
-        bunnyXScalar,
         BUNNY_IMG_WIDTH = 48,
         BUNNY_IMG_HEIGHT = 48,
         BUNNY_IMG_OFFSET_TOP = 5,
         stepT,
         stepX,
         bunnyStep,
-        MARKER_TEXT_OFFSET_X = 5,
-        MARKER_TEXT_OFFSET_Y = 15,
-        MARKER_TEXT_OFFSET_Y_H = 4,
         ARROWHEAD_LENGTH = 7,
         ARROWHEAD_WIDTH = 5,
-        BLACK_COLOR = 'rgb(0, 0, 0)',
         DRAW_CONTROL_POINTS = false,
         CLOSED = false,
         SEGMENT_COLORS = ['rgb(255, 0, 0', 'rgb(0, 255, 0)', 'rgb(0, 0, 255)', 'rbb(255, 255, 0)'],
@@ -214,56 +213,56 @@
     function drawBunny(ctx, x) {
         ctx.drawImage(bunnyImg, x + BUNNY_AXIS_OFFSET_LEFT - BUNNY_IMG_WIDTH / 2, BUNNY_IMG_OFFSET_TOP, BUNNY_IMG_WIDTH, BUNNY_IMG_HEIGHT);
     }
-    function drawAxis(ctx, start, end, offset, name, step, isHorizontal, scalar) {
-        var i,
-            numTicks = Math.abs((end - start) / step),
-            posStart = {},
-            posEnd = {},
-            text,
-            textStart = {},
-            textWidth,
-            temp;
-        step = end - start >= 0 ? step : -step;
-        ctx.save();
-        ctx.strokeStyle = BLACK_COLOR;
-        ctx.fillStyle = BLACK_COLOR;
-        ctx.font = FONT;
-        ctx.beginPath();
-        if (isHorizontal) {
-            ctx.moveTo(start, offset);
-            ctx.lineTo(end, offset);
-        } else {
-            ctx.moveTo(offset, start);
-            ctx.lineTo(offset, end);
-        }
-        ctx.stroke();
-        for (i = 1; i < numTicks; i++) {
-            temp = start + i * step;
-            posStart.t = (isHorizontal ? temp : offset);
-            posStart.x = (!isHorizontal ? temp : offset);
-            posEnd.t = (isHorizontal ? posStart.t : posStart.t + TICK_LENGTH);
-            posEnd.x = (!isHorizontal ? posStart.x : posStart.x - TICK_LENGTH);
+    function drawHorizontalAxis(ctx, start, numTicks, tickDistance, axisColor,
+                                axisOffset, minCoordinate, coordinateOffset, step,
+                                coordinateFont, coordinateColor, label, labelOffset, labelFont, labelColor) {
+        var startPos = {},
+            endPos = {},
+            coordinate,
+            i;
+
+        function drawTick(ctx, startPos, endPos, coordinate, offset, font, color) {
+            ctx.save();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
             ctx.beginPath();
             ctx.moveTo(posStart.t, posStart.x);
             ctx.lineTo(posEnd.t, posEnd.x);
             ctx.stroke();
-            text = String(i * scalar / 10);
-            textWidth = ctx.measureText(text).width;
-            textStart.t = posStart.t - (isHorizontal ? textWidth / 2 : textWidth + MARKER_TEXT_OFFSET_X);
-            textStart.x = posStart.x + (isHorizontal ? MARKER_TEXT_OFFSET_Y : MARKER_TEXT_OFFSET_Y_H);
-            ctx.fillText(text, textStart.t, textStart.x);
+            ctx.font = font;
+            ctx.fillText(text, startPos.t - ctx.measureText(text).width / 2, startPos.x + offset);
+            ctx.restore();
         }
-        textWidth = ctx.measureText(name).width;
-        textStart.t = isHorizontal ? start + (end - start - textWidth) / 2 : offset - (textWidth + MARKER_TEXT_OFFSET_X * 5);
-        textStart.x = isHorizontal ? offset + MARKER_TEXT_OFFSET_Y * 2 : end + Math.abs(end - start) / 2;
-        ctx.font = NAME_FONT;
-        ctx.fillText(name, textStart.t, textStart.x);
+        ctx.save();
+        ctx.strokeStyle = axisColor;
+        ctx.beginPath();
+        ctx.moveTo(start, offset);
+        ctx.lineTo(end, offset);
+        ctx.stroke();
+        ctx.restore();
+        for (i = 0; i <= numTicks; i++) {
+            startPos.t = start + i * tickDistance;
+            startPos.x = axisOffset;
+            endPos.t = tickStartPos.t + TICK_LENGTH;
+            endPos.x = axisOffset;
+            coordinate = minCoordinate + step * i;
+            drawTick(ctx, tickStartPos, tickEndPos, coordinate, coordinateOffset, coordinateFont, coordinateColor);
+        }
+        startPos.t = start + (numTicks * tickDistance - ctx.measureText(label).width) / 2;
+        startPos.x = offset + labelOffset;
+        ctx.save();
+        ctx.fillStyle = labelColor;
+        ctx.font = labelFont;
+        ctx.fillText(label, startPos.t, startPos.x);
         ctx.restore();
     }
     function draw(ctx) {
         ctx.clearRect(0, 0, splineCanvasElem.width, splineCanvasElem.height);
-        drawAxis(ctx, AXIS_OFFSET_LEFT, AXIS_OFFSET_RIGHT, AXIS_OFFSET_BOTTOM, 't', stepT, true, SCALAR);
-        drawAxis(ctx, AXIS_OFFSET_BOTTOM, AXIS_OFFSET_TOP, AXIS_OFFSET_LEFT, 'x', stepX, false, SCALAR);
+        drawHorizontalAxis(ctx, start, NUM_TICKS_T, tickDistanceT, BLACK_COLOR,
+            AXIS_MIN_COORDINATE_T, COORDINATE_OFFSET_X, AXIS_COORDINATE_STEP,
+            AXIS_COORDINATES_FONT, BLACK_COLOR, AXIS_LABEL_T, , AXIS_LABEL_FONT, BLACK_COLOR);
+        //drawAxis(ctx, AXIS_OFFSET_BOTTOM, AXIS_OFFSET_TOP, AXIS_OFFSET_LEFT, 'x', stepX, false, SCALAR);
         drawSpline(ctx, knots, CLOSED, DRAW_CONTROL_POINTS);
         drawArrow(ctx, knots[0], knots[1], 'Avg Vel  ' + avgVels[0].toFixed(3));
         drawArrow(ctx, knots[1], knots[2], 'Avg Vel  ' + avgVels[1].toFixed(3));
