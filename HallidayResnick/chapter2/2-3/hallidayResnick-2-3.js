@@ -7,33 +7,108 @@
     'use strict';
 
     var TICK_LENGTH = 5,
+        LINE_WIDTH = 1,
         BLACK_COLOR = 'rgb(0, 0, 0)',
-        AXIS_LABEL_T = 't',
-        AXIS_LABEL_X = 'x',
-        AXIS_MIN_COORDINATE_T = -20,
-        AXIS_MAX_COORDINATE_T = 20,
-        AXIS_MIN_COORDINATE_X = -10,
-        AXIS_MAX_COORDINATE_X = 10,
         AXIS_COORDINATE_STEP = 2,
-        COORDINATE_OFFSET_X = 5,
-        NUM_TICKS_T = (AXIS_MAX_COORDINATE_T - AXIS_MIN_COORDINATE_T) / AXIS_COORDINATE_STEP,
-        NUM_TICKS_X = (AXIS_MAX_COORDINATE_X - AXIS_MIN_COORDINATE_X) / AXIS_COORDINATE_STEP,
         AXIS_COORDINATES_FONT = 'normal 8pt TimesNewRoman',
         AXIS_LABEL_FONT = 'normal 12pt TimesNewRoman',
-        axisLengthT = splineCanvasElem.width - AXIS_MARGINS * 2,
-        axisLengthX = splineCanvasElem.height - AXIS_MARGINS * 2,
-        tickDistanceT = axisLengthT / NUM_TICKS_T,
-        COORDINATE_TEXT_OFFSET_Y = 15,
-        COORDINATE_TEXT_OFFSET_Y_H = 4,
+        AXIS_LABEL_OFFSET_T_T = 20,
+        AXIS_LABEL_OFFSET_X_T = 20,
+        AXIS_LABEL_OFFSET_T_X = 20,
+        AXIS_LABEL_OFFSET_X_X = 20,
+        COORDINATE_LABEL_OFFSET_T_T = 20,
+        COORDINATE_LABEL_OFFSET_X_T = 20,
+        COORDINATE_LABEL_OFFSET_T_X = 20,
+        COORDINATE_LABEL_OFFSET_X_X = 20,
+        SPLINE_AXIS_MARGINS = 30,
+        SPLINE_AXIS_MIN_COORDINATE_T = -20,
+        SPLINE_AXIS_MAX_COORDINATE_T = 20,
+        SPLINE_AXIS_NUM_COORDINATES_T = (SPLINE_AXIS_MAX_COORDINATE_T - SPLINE_AXIS_MIN_COORDINATE_T) / AXIS_COORDINATE_STEP,
+        SPLINE_AXIS_MIN_COORDINATE_X = -10,
+        SPLINE_AXIS_MAX_COORDINATE_X = 10,
+        SPLINE_AXIS_NUM_COORDINATES_X = (SPLINE_AXIS_MAX_COORDINATE_X - SPLINE_AXIS_MIN_COORDINATE_X) / AXIS_COORDINATE_STEP,
+        SPLINE_AXIS_LABELS_T =
+            [
+                {
+                    text: '-t',
+                    font: AXIS_LABEL_FONT,
+                    color: BLACK_COLOR,
+                    relativeTo: "start",
+                    offset: {t: AXIS_LABEL_OFFSET_T_T, x: AXIS_LABEL_OFFSET_X_T},
+                    angle: 0,
+                    adjustForWidth: true
+                },
+                {
+                    text: 't',
+                    font: AXIS_LABEL_FONT,
+                    color: BLACK_COLOR,
+                    relativeTo: "end",
+                    offset: {t: -AXIS_LABEL_OFFSET_T_T, x: AXIS_LABEL_OFFSET_X_T},
+                    angle: 0,
+                    adjustForWidth: true
+                }
+            ],
+        SPLINE_AXIS_LABELS_X =
+            [
+                {
+                    text: '-x',
+                    font: AXIS_COORDINATES_FONT,
+                    color: BLACK_COLOR,
+                    relativeTo: "start",
+                    offset: {t: AXIS_LABEL_OFFSET_T_X, x: AXIS_LABEL_OFFSET_X_X},
+                    angle: -90,
+                    adjustForWidth: false
+                },
+                {
+                    text: 'x',
+                    font: AXIS_COORDINATES_FONT,
+                    color: BLACK_COLOR,
+                    relativeTo: "end",
+                    offset: {t: -AXIS_LABEL_OFFSET_T_X, x: AXIS_LABEL_OFFSET_X_X},
+                    angle: -90,
+                    adjustForWidth: false
+                }
+            ],
+        COORDINATE_LABELS_T =
+            [
+                {
+                    text: '',
+                    font: AXIS_LABEL_FONT,
+                    color: BLACK_COLOR,
+                    relativeTo: "start",
+                    offset: {t: COORDINATE_LABEL_OFFSET_T_T, x: COORDINATE_LABEL_OFFSET_X_T},
+                    angle: -90,
+                    adjustForWidth: true
+                }
+            ],
+        COORDINATE_LABELS_X =
+            [
+                {
+                    text: '',
+                    font: AXIS_LABEL_FONT,
+                    color: BLACK_COLOR,
+                    relativeTo: "start",
+                    offset: {t: COORDINATE_LABEL_OFFSET_T_X, x: COORDINATE_LABEL_OFFSET_X_X},
+                    angle: -90,
+                    adjustForWidth: true
+                }
+            ],
+        splineCanvasWidth = splineCanvasElem.width,
+        splineCanvasHeight = splineCanvasElem.height,
+        splineAxisStartT = {t: SPLINE_AXIS_MARGINS, x: splineCanvasHeight / 2},
+        splineAxisEndT = {t: splineCanvasWidth - SPLINE_AXIS_MARGINS, x: splineCanvasHeight / 2},
+        splineAxisStartX = {t: splineCanvasWidth / 2, x: splineCanvasHeight - SPLINE_AXIS_MARGINS},
+        splineAxisEndX = {t: splineCanvasWidth / 2, x: SPLINE_AXIS_MARGINS},
+        splineAxisLengthT = splineCanvasWidth - SPLINE_AXIS_MARGINS * 2,
+        splineAxisLengthX = splineCanvasHeight - SPLINE_AXIS_MARGINS * 2,
         CLOSEST_T = 220,
         AXIS_CLOSEST_T = 20,
         AXIS_CLOSEST_X = 80,
         BUNNY_IMG_WIDTH = 48,
         BUNNY_IMG_HEIGHT = 48,
-        BUNNY_IMG_OFFSET_TOP = 5,
-        stepT,
-        stepX,
-        bunnyStep,
+        BUNNY_IMG_MARGIN_TOP = 5,
+        ARROW_LABEL_FONT = 'normal 12pt TimesNewRoman',
+        ARROW_LABEL_OFFSET_X = 20,
         ARROWHEAD_LENGTH = 7,
         ARROWHEAD_WIDTH = 5,
         DRAW_CONTROL_POINTS = false,
@@ -61,8 +136,6 @@
         tension,
         splineCtx,
         bunnyCtx,
-        width,
-        height,
         splineAxisCoordsScalarT,
         splineAxisCoordsScalarX,
         splineAxisCoordsScalarRatio,
@@ -77,6 +150,16 @@
         bunnyXTotal,
         currentVelIndex,
         requestID;
+
+    function clone(from) {
+        var to = {},
+            key;
+
+        for (key in from) {
+            if (from.hasOwnProperty(key)) to[key] = obj[key];
+        }
+        return to;
+    }
 
     function calcDistance(point1, point2) {
         var delta = {t: point2.t - point1.t, x: point2.x - point1.x};
@@ -193,7 +276,7 @@
             angle = Math.atan2(p2.x - p1.x, p2.t - p1.t),
             end = {t: length, x: 0};
         ctx.save();
-        ctx.font = NAME_FONT;
+        ctx.font = ARROW_LABEL_FONT;
         ctx.strokeStyle = BLACK_COLOR;
         ctx.fillStyle = BLACK_COLOR;
         ctx.lineWidth = 1;
@@ -207,72 +290,86 @@
         ctx.lineTo(end.t, end.x);
         ctx.stroke();
         ctx.fill();
-        ctx.fillText(text, end.t / 2 - ctx.measureText(text).width / 2, end.x - MARKER_TEXT_OFFSET_X);
+        ctx.fillText(text, end.t / 2 - ctx.measureText(text).width / 2, end.x - ARROW_LABEL_OFFSET_X);
         ctx.restore();
     }
-    function drawBunny(ctx, x) {
-        ctx.drawImage(bunnyImg, x + BUNNY_AXIS_OFFSET_LEFT - BUNNY_IMG_WIDTH / 2, BUNNY_IMG_OFFSET_TOP, BUNNY_IMG_WIDTH, BUNNY_IMG_HEIGHT);
-    }
-    function drawHorizontalAxis(ctx, start, numTicks, tickDistance, axisColor,
-                                axisOffset, minCoordinate, coordinateOffset, step,
-                                coordinateFont, coordinateColor, label, labelOffset, labelFont, labelColor) {
-        var startPos = {},
-            endPos = {},
-            coordinate,
+    function drawAxis(ctx, start, end, width, color, axisLabels,
+                      minCoordinate, maxCoordinate, step, tickWidth, tickLength, coordinateLabels) {
+        var length = calcDistance(start, end),
+            angle = Math.atan2(end.x - start.x, end.t - start.t),
+            numCoordinates = maxCoordinate - minCoordinate,
+            tickStart = {x: 0},
+            tickEnd = {x: tickLength},
+            tickText,
             i;
 
-        function drawTick(ctx, startPos, endPos, coordinate, offset, font, color) {
+        function drawLabeledLine(ctx, start, end, width, color, labels) {
+            var length = calcDistance(start, end),
+                angle = Math.atan2(end.x - start.x, end.t - start.t),
+                labelT;
             ctx.save();
-            ctx.lineWidth = 1;
+            ctx.lineWidth = width;
             ctx.strokeStyle = color;
-            ctx.fillStyle = color;
+            ctx.translate(start.t, start.x);
+            ctx.rotate(angle);
             ctx.beginPath();
-            ctx.moveTo(posStart.t, posStart.x);
-            ctx.lineTo(posEnd.t, posEnd.x);
+            ctx.moveTo(0, 0);
+            ctx.lineTo(length, 0);
             ctx.stroke();
-            ctx.font = font;
-            ctx.fillText(text, startPos.t - ctx.measureText(text).width / 2, startPos.x + offset);
-            ctx.restore();
+            labels.forEach(function (label) {
+                var textT;
+                ctx.font = label.font;
+                ctx.fillStyle = label.color;
+                switch (label.relativeTo) {
+                    case 'start' :
+                        labelT = label.offset.t;
+                        break;
+                    case 'middle' :
+                        labelT = length / 2 + label.offset.t;
+                        break;
+                    case 'end' :
+                        labelT = length + label.offset.t;
+                        break;
+                }
+                textT = label.adjustForWidth ? labelT - ctx.measureText(label.text) / 2 : labelT;
+                ctx.fillText(label.text, labelT, label.offset.x);
+                ctx.restore();
+            });
         }
         ctx.save();
-        ctx.strokeStyle = axisColor;
-        ctx.beginPath();
-        ctx.moveTo(start, offset);
-        ctx.lineTo(end, offset);
-        ctx.stroke();
-        ctx.restore();
-        for (i = 0; i <= numTicks; i++) {
-            startPos.t = start + i * tickDistance;
-            startPos.x = axisOffset;
-            endPos.t = tickStartPos.t + TICK_LENGTH;
-            endPos.x = axisOffset;
-            coordinate = minCoordinate + step * i;
-            drawTick(ctx, tickStartPos, tickEndPos, coordinate, coordinateOffset, coordinateFont, coordinateColor);
+        ctx.translate(start.t, start.x);
+        ctx.rotate(angle);
+        drawLabeledLine(ctx, {t: 0, x: 0}, {t: length, x: 0}, width, color, axisLabels);
+        tickLabel = tickLabel.clone();
+        for (i = 0; i < numCoordinates; i++) {
+            tickStart.t = i * length / numCoordinates;
+            tickEnd.t = tickStart.t;
+            tickLabel.offset.t = tickLabel.offset.t + tickStart.t;
+            tickLabel.text = minCoordinate + step * i;
+            drawLabeledLine(ctx, tickStart, tickEnd, tickWidth, coordinateLabels);
         }
-        startPos.t = start + (numTicks * tickDistance - ctx.measureText(label).width) / 2;
-        startPos.x = offset + labelOffset;
-        ctx.save();
-        ctx.fillStyle = labelColor;
-        ctx.font = labelFont;
-        ctx.fillText(label, startPos.t, startPos.x);
         ctx.restore();
     }
-    function draw(ctx) {
-        ctx.clearRect(0, 0, splineCanvasElem.width, splineCanvasElem.height);
-        drawHorizontalAxis(ctx, start, NUM_TICKS_T, tickDistanceT, BLACK_COLOR,
-            AXIS_MIN_COORDINATE_T, COORDINATE_OFFSET_X, AXIS_COORDINATE_STEP,
-            AXIS_COORDINATES_FONT, BLACK_COLOR, AXIS_LABEL_T, , AXIS_LABEL_FONT, BLACK_COLOR);
-        //drawAxis(ctx, AXIS_OFFSET_BOTTOM, AXIS_OFFSET_TOP, AXIS_OFFSET_LEFT, 'x', stepX, false, SCALAR);
+    function drawSplineAll(ctx) {
+        ctx.clearRect(0, 0, splineCanvasWidth, splineCanvasHeight);
+        drawAxis(ctx, splineAxisStartT, splineAxisEndT, LINE_WIDTH, BLACK_COLOR, SPLINE_AXIS_LABELS_T,
+            SPLINE_AXIS_MIN_COORDINATE_T, SPLINE_AXIS_MAX_COORDINATE_T, AXIS_COORDINATE_STEP, LINE_WIDTH, TICK_LENGTH, COORDINATE_LABELS_T);
+        drawAxis(ctx, splineAxisStartX, splineAxisEndX, LINE_WIDTH, BLACK_COLOR, SPLINE_AXIS_LABELS_X,
+            SPLINE_AXIS_MIN_COORDINATE_X, SPLINE_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH, TICK_LENGTH, COORDINATE_LABELS_X);
         drawSpline(ctx, knots, CLOSED, DRAW_CONTROL_POINTS);
         drawArrow(ctx, knots[0], knots[1], 'Avg Vel  ' + avgVels[0].toFixed(3));
         drawArrow(ctx, knots[1], knots[2], 'Avg Vel  ' + avgVels[1].toFixed(3));
         drawArrow(ctx, knots[2], knots[3], 'Avg Vel  ' + avgVels[2].toFixed(3));
     }
-    function drawBunnyAll(ctx) {
-        ctx.clearRect(0, 0, splineCanvasElem.width, splineCanvasElem.height);
-        drawBunny(ctx, (AXIS_OFFSET_BOTTOM - knots[0].x) * bunnyXScalar);
-        drawAxis(ctx, BUNNY_AXIS_OFFSET_LEFT, BUNNY_AXIS_OFFSET_RIGHT, BUNNY_AXIS_OFFSET_BOTTOM, 'x', bunnyStep, true, BUNNY_SCALAR);
-    }
+//    function drawBunny(ctx, x) {
+//        ctx.drawImage(bunnyImg, x + BUNNY_AXIS_OFFSET_LEFT - BUNNY_IMG_WIDTH / 2, BUNNY_IMG_OFFSET_TOP, BUNNY_IMG_WIDTH, BUNNY_IMG_HEIGHT);
+//    }
+//    function drawBunnyAll(ctx) {
+//        ctx.clearRect(0, 0, bunnyCanvasWidth, bunnyCanvasHeight);
+//        drawBunny(ctx, (AXIS_OFFSET_BOTTOM - knots[0].x) * bunnyXScalar);
+//        drawAxis(ctx, splineAxisStartX, splineAxisEndX, LINE_WIDTH, BLACK_COLOR, SPLINE_AXIS_LABELS_X,
+//            SPLINE_AXIS_MIN_COORDINATE_X, SPLINE_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH, TICK_LENGTH, COORDINATE_LABELS_X);
+//    }
     function calcMousePos(e) {
         var top = 0,
             left = 0,
@@ -455,25 +552,12 @@
         x4Elem = document.getElementById('x4');
         tensionElem = document.getElementById('tension');
         animateElem = document.getElementById('animate');
-        width = splineCanvasElem.width;
-        height = splineCanvasElem.height;
         bunnyWidth = bunnyCanvasElem.width;
         bunnyHeight = bunnyCanvasElem.height;
-        AXIS_OFFSET_LEFT = AXIS_OFFSET;
-        AXIS_OFFSET_RIGHT = width - AXIS_MARGIN;
-        AXIS_OFFSET_TOP = AXIS_MARGIN;
-        AXIS_OFFSET_BOTTOM = height - AXIS_OFFSET;
-        BUNNY_AXIS_OFFSET_LEFT = BUNNY_AXIS_MARGIN;
-        BUNNY_AXIS_OFFSET_RIGHT = bunnyWidth - BUNNY_AXIS_MARGIN;
-        BUNNY_AXIS_OFFSET_BOTTOM = bunnyHeight - AXIS_OFFSET;
         splineAxisCoordsScalarT = (width / (AXIS_OFFSET_RIGHT - AXIS_OFFSET_LEFT)) / SCALAR;
         splineAxisCoordsScalarX = (height / (AXIS_OFFSET_BOTTOM - AXIS_OFFSET_TOP)) / SCALAR;
         splineAxisCoordsScalarRatio = splineAxisCoordsScalarT / splineAxisCoordsScalarX;
         bunnyAxisCoordsScalar = (bunnyWidth / (BUNNY_AXIS_OFFSET_RIGHT - BUNNY_AXIS_OFFSET_LEFT)) / BUNNY_SCALAR;
-        bunnyXScalar = (BUNNY_AXIS_OFFSET_RIGHT - BUNNY_AXIS_OFFSET_LEFT) / (AXIS_OFFSET_BOTTOM - AXIS_OFFSET_TOP);
-        stepT = 2 / splineAxisCoordsScalarT;
-        stepX = 2 / splineAxisCoordsScalarX;
-        bunnyStep = (BUNNY_AXIS_OFFSET_RIGHT - BUNNY_AXIS_OFFSET_LEFT) / 10;
 //        x1Elem.addEventListener('change', submit, false);
 //        y1Elem.addEventListener('change', submit, false);
 //        x2Elem.addEventListener('change', submit, false);
