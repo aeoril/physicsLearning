@@ -3,19 +3,24 @@
     box-shadow: 0 0 10px #888;
     margin-bottom: 5px;
 }*/
+
+.canvasDiv {
+    /*margin-left: -50px;*/
+    width: 1060px;
+    text-align: center;
+}
+
 input[type='text'] {
-    width: 88px;
+    width: 80px;
 }
 label {
-    margin-right: 10px;
-    margin-left: 10px;
+    margin-right: 3px;
+    margin-left: 3px;
+    font-size: 14px;
 }
 .wrong {
     background-color: #FF8080;
 }
 .right {
     background-color: #80FF80;
-}
-#checkAnswers {
-    margin-left: 10px;
 }

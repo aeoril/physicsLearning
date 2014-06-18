@@ -196,6 +196,6 @@
         min = -max;
         formElem.addEventListener('submit', checkAnswers, false);
         draw();
-        x1Elem.focus();
+        //x1Elem.focus();
     }, false);
 }());
