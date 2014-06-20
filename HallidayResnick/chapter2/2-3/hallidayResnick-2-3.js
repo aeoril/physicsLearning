@@ -7,19 +7,19 @@
     'use strict';
 
     var COORDINATE_DISPLAY_DIGITS = 2,
-        TICK_LENGTH = 5,
+        TICK_DISPLACEMENT = 5,
         LINE_WIDTH = 1,
         BLACK_COLOR = 'rgb(0, 0, 0)',
         AXIS_COORDINATE_STEP = 2,
         AXIS_COORDINATES_FONT = 'normal 8pt TimesNewRoman',
         AXIS_LABEL_FONT = 'normal 12pt TimesNewRoman',
         AXIS_LABEL_OFFSET_T_T = 20,
-        AXIS_LABEL_OFFSET_X_T = 20,
+        AXIS_LABEL_OFFSET_X_T = 40,
         AXIS_LABEL_OFFSET_T_X = 20,
-        AXIS_LABEL_OFFSET_X_X = 20,
-        COORDINATE_LABEL_OFFSET_T_T = 20,
+        AXIS_LABEL_OFFSET_X_X = 40,
+        COORDINATE_LABEL_OFFSET_T_T = 0,
         COORDINATE_LABEL_OFFSET_X_T = 20,
-        COORDINATE_LABEL_OFFSET_T_X = 20,
+        COORDINATE_LABEL_OFFSET_T_X = 0,
         COORDINATE_LABEL_OFFSET_X_X = 20,
         SPLINE_AXIS_MARGINS = 30,
         SPLINE_AXIS_MIN_COORDINATE_T = -20,
@@ -42,7 +42,7 @@
                     adjustForWidth: true
                 },
                 {
-                    text: 't',
+                    text: '+t',
                     font: AXIS_LABEL_FONT,
                     color: BLACK_COLOR,
                     relativeTo: "end",
@@ -55,21 +55,21 @@
             [
                 {
                     text: '-x',
-                    font: AXIS_COORDINATES_FONT,
+                    font: AXIS_LABEL_FONT,
                     color: BLACK_COLOR,
                     relativeTo: "start",
-                    offset: {t: AXIS_LABEL_OFFSET_T_X, x: AXIS_LABEL_OFFSET_X_X},
+                    offset: {t: AXIS_LABEL_OFFSET_T_X, x: -AXIS_LABEL_OFFSET_X_X},
                     angle: -90,
-                    adjustForWidth: false
+                    adjustForWidth: true
                 },
                 {
-                    text: 'x',
-                    font: AXIS_COORDINATES_FONT,
+                    text: '+x',
+                    font: AXIS_LABEL_FONT,
                     color: BLACK_COLOR,
                     relativeTo: "end",
-                    offset: {t: -AXIS_LABEL_OFFSET_T_X, x: AXIS_LABEL_OFFSET_X_X},
+                    offset: {t: -AXIS_LABEL_OFFSET_T_X, x: -AXIS_LABEL_OFFSET_X_X},
                     angle: -90,
-                    adjustForWidth: false
+                    adjustForWidth: true
                 }
             ],
         COORDINATE_LABELS_T =
@@ -91,7 +91,7 @@
                     font: AXIS_LABEL_FONT,
                     color: BLACK_COLOR,
                     relativeTo: "start",
-                    offset: {t: COORDINATE_LABEL_OFFSET_T_X, x: COORDINATE_LABEL_OFFSET_X_X},
+                    offset: {t: COORDINATE_LABEL_OFFSET_T_X, x: -COORDINATE_LABEL_OFFSET_X_X},
                     angle: -90,
                     adjustForWidth: true
                 }
@@ -108,8 +108,8 @@
         splineAxisCoordinatesScalarX,
         //splineAxisCoordinatesRatio,
         CLOSEST_T = 220,
-        AXIS_CLOSEST_T = 20,
-        AXIS_CLOSEST_X = 80,
+        AXIS_CLOSEST_T = 0,
+        AXIS_CLOSEST_X = 0,
         //BUNNY_IMG_WIDTH = 48,
         //BUNNY_IMG_HEIGHT = 48,
         //BUNNY_IMG_MARGIN_TOP = 5,
@@ -152,12 +152,18 @@
         //currentVelIndex,
         //requestID;
 
-    function clone(from) {
+    function cloneObj(from) {
         var to = {},
             key;
 
         for (key in from) {
-            if (from.hasOwnProperty(key)) to[key] = obj[key];
+            if (from.hasOwnProperty(key)) {
+                if (typeof from[key] === 'object') {
+                    to[key] = cloneObj(from[key]);
+                } else {
+                    to[key] = from[key];
+                }
+            }
         }
         return to;
     }
@@ -295,13 +301,12 @@
         ctx.restore();
     }
     function drawAxis(ctx, start, end, width, color, axisLabels,
-                      minCoordinate, maxCoordinate, step, tickWidth, tickLength, coordinateLabels) {
+                      minCoordinate, maxCoordinate, step, tickWidth, tickLength, tickColor, coordinateLabels) {
         var length = calcDistance(start, end),
             angle = Math.atan2(end.x - start.x, end.t - start.t),
-            numCoordinates = maxCoordinate - minCoordinate,
+            numCoordinates = (maxCoordinate - minCoordinate) / step,
             tickStart = {x: 0},
-            tickEnd = {x: tickLength},
-            tickLabel,
+            tickEnd = {x: -tickLength},
             i;
 
         function drawLabeledLine(ctx, start, end, width, color, labels) {
@@ -311,13 +316,16 @@
             ctx.lineWidth = width;
             ctx.strokeStyle = color;
             ctx.translate(start.t, start.x);
+            ctx.save();
             ctx.rotate(angle);
             ctx.beginPath();
             ctx.moveTo(0, 0);
             ctx.lineTo(length, 0);
             ctx.stroke();
+            ctx.restore();
             labels.forEach(function (label) {
                 var labelT;
+                ctx.save();
                 ctx.font = label.font;
                 ctx.fillStyle = label.color;
                 switch (label.relativeTo) {
@@ -331,31 +339,34 @@
                         labelT = length + label.offset.t;
                         break;
                 }
-                labelT = label.adjustForWidth ? labelT - ctx.measureText(label.text) / 2 : labelT;
+                labelT = label.adjustForWidth ? labelT - ctx.measureText(label.text).width / 2 : labelT;
                 ctx.fillText(label.text, labelT, label.offset.x);
                 ctx.restore();
             });
+            ctx.restore();
         }
         ctx.save();
         ctx.translate(start.t, start.x);
         ctx.rotate(angle);
         drawLabeledLine(ctx, {t: 0, x: 0}, {t: length, x: 0}, width, color, axisLabels);
-        tickLabel = clone(coordinateLabels[0]);
-        for (i = 0; i < numCoordinates; i++) {
+        for (i = 0; i <= numCoordinates; i++) {
             tickStart.t = i * length / numCoordinates;
             tickEnd.t = tickStart.t;
-            tickLabel.offset.t = tickLabel.offset.t + tickStart.t;
-            tickLabel.text = minCoordinate + step * i;
-            drawLabeledLine(ctx, tickStart, tickEnd, tickWidth, [tickLabel]);
+            coordinateLabels[0].text = minCoordinate + step * i;
+            if (coordinateLabels[0].text !== 0) {
+                drawLabeledLine(ctx, tickStart, tickEnd, tickWidth, tickColor, coordinateLabels);
+            }
         }
         ctx.restore();
     }
     function drawSplineAll(ctx) {
         ctx.clearRect(0, 0, splineCanvasWidth, splineCanvasHeight);
         drawAxis(ctx, splineAxisStartT, splineAxisEndT, LINE_WIDTH, BLACK_COLOR, SPLINE_AXIS_LABELS_T,
-            SPLINE_AXIS_MIN_COORDINATE_T, SPLINE_AXIS_MAX_COORDINATE_T, AXIS_COORDINATE_STEP, LINE_WIDTH, TICK_LENGTH, COORDINATE_LABELS_T);
+            SPLINE_AXIS_MIN_COORDINATE_T, SPLINE_AXIS_MAX_COORDINATE_T, AXIS_COORDINATE_STEP, LINE_WIDTH,
+            TICK_DISPLACEMENT, BLACK_COLOR, COORDINATE_LABELS_T);
         drawAxis(ctx, splineAxisStartX, splineAxisEndX, LINE_WIDTH, BLACK_COLOR, SPLINE_AXIS_LABELS_X,
-            SPLINE_AXIS_MIN_COORDINATE_X, SPLINE_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH, TICK_LENGTH, COORDINATE_LABELS_X);
+            SPLINE_AXIS_MIN_COORDINATE_X, SPLINE_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH,
+            -TICK_DISPLACEMENT, BLACK_COLOR, COORDINATE_LABELS_X);
         drawSpline(ctx, knots, CLOSED, DRAW_CONTROL_POINTS);
         drawArrow(ctx, knots[0], knots[1], 'Avg Vel  ' + avgVelocities[0].toFixed(3));
         drawArrow(ctx, knots[1], knots[2], 'Avg Vel  ' + avgVelocities[1].toFixed(3));
@@ -402,10 +413,10 @@
     }
     function updateKnotCoordinateValues() {
         function calcTCoordinateValue(t) {
-            return ((t - splineAxisStartT.t) * splineAxisCoordinatesScalarT).toFixed(COORDINATE_DISPLAY_DIGITS);
+            return (((t - splineAxisStartT.t) * splineAxisCoordinatesScalarT) + SPLINE_AXIS_MIN_COORDINATE_T).toFixed(COORDINATE_DISPLAY_DIGITS);
         }
         function calcXCoordinateValue(x) {
-            return ((splineAxisLengthX - (x + splineAxisStartX.x))  * splineAxisCoordinatesScalarX).toFixed(COORDINATE_DISPLAY_DIGITS);
+            return (((splineAxisStartX.x - x)  * splineAxisCoordinatesScalarX) + SPLINE_AXIS_MIN_COORDINATE_X).toFixed(COORDINATE_DISPLAY_DIGITS);
         }
         knots.forEach(function (value) {
             value.coordinates = {t: calcTCoordinateValue(value.t),
@@ -495,13 +506,13 @@
     }
     function submit(e) {
         knots = [];
-        knots.push({coordinates: {t: Number(t1Elem), x: Number(x1Elem)}, color: SEGMENT_COLORS[0]});
-        knots.push({coordinates: {t: Number(t2Elem), x: Number(x2Elem)}, color: SEGMENT_COLORS[1]});
-        knots.push({coordinates: {t: Number(t3Elem), x: Number(x3Elem)}, color: SEGMENT_COLORS[2]});
-        knots.push({coordinates: {t: Number(t4Elem), x: Number(x4Elem)}, color: SEGMENT_COLORS[3]});
+        knots.push({coordinates: {t: Number(t1Elem.value), x: Number(x1Elem.value)}, color: SEGMENT_COLORS[0]});
+        knots.push({coordinates: {t: Number(t2Elem.value), x: Number(x2Elem.value)}, color: SEGMENT_COLORS[1]});
+        knots.push({coordinates: {t: Number(t3Elem.value), x: Number(x3Elem.value)}, color: SEGMENT_COLORS[2]});
+        knots.push({coordinates: {t: Number(t4Elem.value), x: Number(x4Elem.value)}, color: SEGMENT_COLORS[3]});
         knots.forEach(function (knot) {
-            knot.t = knot.coordinates.t / splineAxisCoordinatesScalarT + splineAxisStartT.t;
-            knot.x = splineCanvasHeight - (knot.coordinates.x / splineAxisCoordinatesScalarX + splineAxisStartX.x);
+            knot.t = (knot.coordinates.t - SPLINE_AXIS_MIN_COORDINATE_T) / splineAxisCoordinatesScalarT + splineAxisStartT.t;
+            knot.x = splineAxisStartX.x - (knot.coordinates.x - SPLINE_AXIS_MIN_COORDINATE_X) / splineAxisCoordinatesScalarX;
         });
         tension = Number(tensionElem.value) / 100;
         updateKnotCoordinateValues();
@@ -592,6 +603,6 @@
             submit();
         });
         bunnyImg.src = 'bunny.jpg';
-        t1Elem.focus();
+        //t1Elem.focus();
     }, false);
 }());
