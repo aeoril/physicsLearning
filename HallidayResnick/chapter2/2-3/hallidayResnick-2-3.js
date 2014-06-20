@@ -353,14 +353,14 @@
         ctx.translate(start.t, start.x);
         ctx.rotate(angle);
         drawLabeledLine(ctx, {t: 0, x: 0}, {t: length, x: 0}, width, color, axisLabels);
-        /*for (i = 0; i <= numCoordinates; i++) {
+        for (i = 0; i <= numCoordinates; i++) {
             tickStart.t = i * length / numCoordinates;
             tickEnd.t = tickStart.t;
             coordinateLabels[0].text = minCoordinate + step * i;
             if (coordinateLabels[0].text !== 0) {
                 drawLabeledLine(ctx, tickStart, tickEnd, tickWidth, tickColor, coordinateLabels);
             }
-        }*/
+        }
         ctx.restore();
     }
     function drawSplineAll(ctx) {
