@@ -1,10 +1,34 @@
+div {
+    color: #CCCCCC;
+    padding: 10px;
+    margin: auto;
+    width: 1060px;
+    text-align: center;
+    background-color: #888888;
+}
 canvas {
-    border: 1px solid #ccc;
-    box-shadow: 0 0 10px #888;
-    margin-bottom: 5px;
+    border: 1px solid #CCCCCC;
+    /*box-shadow: 0 0 10px #888;*/
+    margin-bottom: 15px;
 }
 input[type='text'] {
-    width: 55px;
+    width: 45px;
+    color: #CCCCCC;
+    background-color: #888888;
+    border-style: solid;
+    border-color: #CCCCCC;
+    text-align: center;
+}
+input[type='button'] {
+    width: 70px;
+    color: #CCCCCC;
+    background-color: #888888;
+    margin-left: 10px;
+    border-style: solid;
+    border-color: #CCCCCC;
+}
+input:focus {
+    outline: solid thin #CCCCCC;
 }
 label {
     margin-right: 5px;

@@ -9,18 +9,22 @@
     var COORDINATE_DISPLAY_DIGITS = 2,
         TICK_DISPLACEMENT = 5,
         LINE_WIDTH = 1,
-        BLACK_COLOR = 'rgb(0, 0, 0)',
+        COLOR = 'rgb(204, 204, 204)',
+        //CANVAS_BACKGROUND_COLOR = 'rgb(100, 100, 100)',
+        SEGMENT_COLORS = ['rgb(45, 136, 45)', 'rgb(34, 102, 102)',
+            'rgb(170, 57, 57)', 'rgb(170, 108, 57)'],
+        KNOT_POINT_FILL_COLOR = 'rgb(212, 154, 106)',
         AXIS_COORDINATE_STEP = 2,
-        AXIS_COORDINATES_FONT = 'normal 8pt TimesNewRoman',
-        AXIS_LABEL_FONT = 'normal 12pt TimesNewRoman',
+        AXIS_COORDINATES_FONT = 'normal 10pt TimesNewRoman',
+        AXIS_LABEL_FONT = 'normal 13pt TimesNewRoman',
         AXIS_LABEL_OFFSET_T_T = 20,
         AXIS_LABEL_OFFSET_X_T = 40,
         AXIS_LABEL_OFFSET_T_X = 20,
-        AXIS_LABEL_OFFSET_X_X = 40,
+        AXIS_LABEL_OFFSET_X_X = 50,
         COORDINATE_LABEL_OFFSET_T_T = 0,
         COORDINATE_LABEL_OFFSET_X_T = 20,
-        COORDINATE_LABEL_OFFSET_T_X = 0,
-        COORDINATE_LABEL_OFFSET_X_X = 20,
+        COORDINATE_LABEL_OFFSET_T_X = 5,
+        COORDINATE_LABEL_OFFSET_X_X = 10,
         SPLINE_AXIS_MARGINS = 30,
         SPLINE_AXIS_MIN_COORDINATE_T = -20,
         SPLINE_AXIS_MAX_COORDINATE_T = 20,
@@ -35,20 +39,20 @@
                 {
                     text: '-t',
                     font: AXIS_LABEL_FONT,
-                    color: BLACK_COLOR,
+                    color: COLOR,
                     relativeTo: "start",
                     offset: {t: AXIS_LABEL_OFFSET_T_T, x: AXIS_LABEL_OFFSET_X_T},
                     angle: 0,
-                    adjustForWidth: true
+                    widthMultiplier: 0.5
                 },
                 {
                     text: '+t',
                     font: AXIS_LABEL_FONT,
-                    color: BLACK_COLOR,
+                    color: COLOR,
                     relativeTo: "end",
                     offset: {t: -AXIS_LABEL_OFFSET_T_T, x: AXIS_LABEL_OFFSET_X_T},
                     angle: 0,
-                    adjustForWidth: true
+                    widthMultiplier: 0.5
                 }
             ],
         SPLINE_AXIS_LABELS_X =
@@ -56,44 +60,44 @@
                 {
                     text: '-x',
                     font: AXIS_LABEL_FONT,
-                    color: BLACK_COLOR,
+                    color: COLOR,
                     relativeTo: "start",
                     offset: {t: AXIS_LABEL_OFFSET_T_X, x: -AXIS_LABEL_OFFSET_X_X},
-                    angle: -90,
-                    adjustForWidth: true
+                    angle: Math.PI / 2,
+                    widthMultiplier: 0.5
                 },
                 {
                     text: '+x',
                     font: AXIS_LABEL_FONT,
-                    color: BLACK_COLOR,
+                    color: COLOR,
                     relativeTo: "end",
                     offset: {t: -AXIS_LABEL_OFFSET_T_X, x: -AXIS_LABEL_OFFSET_X_X},
-                    angle: -90,
-                    adjustForWidth: true
+                    angle: Math.PI / 2,
+                    widthMultiplier: 0.5
                 }
             ],
         COORDINATE_LABELS_T =
             [
                 {
                     text: '',
-                    font: AXIS_LABEL_FONT,
-                    color: BLACK_COLOR,
+                    font: AXIS_COORDINATES_FONT,
+                    color: COLOR,
                     relativeTo: "start",
                     offset: {t: COORDINATE_LABEL_OFFSET_T_T, x: COORDINATE_LABEL_OFFSET_X_T},
-                    angle: -90,
-                    adjustForWidth: true
+                    angle: 0,
+                    widthMultiplier: 0.5
                 }
             ],
         COORDINATE_LABELS_X =
             [
                 {
                     text: '',
-                    font: AXIS_LABEL_FONT,
-                    color: BLACK_COLOR,
+                    font: AXIS_COORDINATES_FONT,
+                    color: COLOR,
                     relativeTo: "start",
-                    offset: {t: COORDINATE_LABEL_OFFSET_T_X, x: -COORDINATE_LABEL_OFFSET_X_X},
-                    angle: -90,
-                    adjustForWidth: true
+                    offset: {t: -COORDINATE_LABEL_OFFSET_T_X, x: -COORDINATE_LABEL_OFFSET_X_X},
+                    angle: Math.PI / 2,
+                    widthMultiplier: 1
                 }
             ],
         splineCanvasWidth,
@@ -118,9 +122,7 @@
         ARROWHEAD_LENGTH = 7,
         ARROWHEAD_WIDTH = 5,
         DRAW_CONTROL_POINTS = false,
-        CLOSED = false,
-        SEGMENT_COLORS = ['rgb(255, 0, 0', 'rgb(0, 255, 0)', 'rgb(0, 0, 255)', 'rbb(255, 255, 0)'],
-        KNOT_POINT_FILL_COLOR = 'rgb(255, 255, 0)',
+        CLOSED = true,
         knots = [],
         mouseIsDown = false,
         mousePoint = 0,
@@ -222,8 +224,8 @@
         ctx.stroke();
         ctx.closePath();
         if(drawControlPoints){
-            drawControlLine(ctx, knot1, knot1.cp1, BLACK_COLOR);
-            drawControlLine(ctx, knot1, knotPrev.cp2, BLACK_COLOR);
+            drawControlLine(ctx, knot1, knot1.cp1, COLOR);
+            drawControlLine(ctx, knot1, knotPrev.cp2, COLOR);
         }
     }
     function drawEndSegment(ctx, endKnot, innerKnot, cp, cpKnot, prevKnot, color, drawControlPoints) {
@@ -234,8 +236,8 @@
         ctx.stroke();
         ctx.closePath();
         if(drawControlPoints){
-            drawControlLine(ctx, cpKnot, cpKnot.cp1, BLACK_COLOR);
-            drawControlLine(ctx, cpKnot, prevKnot.cp2, BLACK_COLOR);
+            drawControlLine(ctx, cpKnot, cpKnot.cp1, COLOR);
+            drawControlLine(ctx, cpKnot, prevKnot.cp2, COLOR);
         }
     }
     function drawSpline(ctx, knots, closed, drawControlPoints){
@@ -264,11 +266,11 @@
                 knots[lastIndex - 1].cp1, knots[lastIndex - 1],  knots[lastIndex - 2], knots[lastIndex - 1].color, drawControlPoints);
         }
         if(drawControlPoints){
-            drawControlLine(ctx, knots[lastIndex], knots[lastIndex].cp1, BLACK_COLOR);
-            drawControlLine(ctx, knots[lastIndex], knots[lastIndex - 1].cp2, BLACK_COLOR);
+            drawControlLine(ctx, knots[lastIndex], knots[lastIndex].cp1, COLOR);
+            drawControlLine(ctx, knots[lastIndex], knots[lastIndex - 1].cp2, COLOR);
         }
         knots.forEach(function(knot) {
-            drawPoint(ctx, knot, 2.5, BLACK_COLOR, KNOT_POINT_FILL_COLOR);
+            drawPoint(ctx, knot, 2.5, COLOR, KNOT_POINT_FILL_COLOR);
         });
         ctx.restore();
     }
@@ -284,8 +286,8 @@
             end = {t: length, x: 0};
         ctx.save();
         ctx.font = ARROW_LABEL_FONT;
-        ctx.strokeStyle = BLACK_COLOR;
-        ctx.fillStyle = BLACK_COLOR;
+        ctx.strokeStyle = COLOR;
+        ctx.fillStyle = COLOR;
         ctx.lineWidth = 1;
         ctx.translate(p1.t, p1.x);
         ctx.rotate(angle);
@@ -339,8 +341,10 @@
                         labelT = length + label.offset.t;
                         break;
                 }
-                labelT = label.adjustForWidth ? labelT - ctx.measureText(label.text).width / 2 : labelT;
-                ctx.fillText(label.text, labelT, label.offset.x);
+                //labelT = label.adjustForWidth ? labelT - ctx.measureText(label.text).width / 2 : labelT;
+                ctx.translate(labelT, label.offset.x);
+                ctx.rotate(label.angle);
+                ctx.fillText(label.text, -ctx.measureText(label.text).width * label.widthMultiplier, 0);
                 ctx.restore();
             });
             ctx.restore();
@@ -349,24 +353,28 @@
         ctx.translate(start.t, start.x);
         ctx.rotate(angle);
         drawLabeledLine(ctx, {t: 0, x: 0}, {t: length, x: 0}, width, color, axisLabels);
-        for (i = 0; i <= numCoordinates; i++) {
+        /*for (i = 0; i <= numCoordinates; i++) {
             tickStart.t = i * length / numCoordinates;
             tickEnd.t = tickStart.t;
             coordinateLabels[0].text = minCoordinate + step * i;
             if (coordinateLabels[0].text !== 0) {
                 drawLabeledLine(ctx, tickStart, tickEnd, tickWidth, tickColor, coordinateLabels);
             }
-        }
+        }*/
         ctx.restore();
     }
     function drawSplineAll(ctx) {
         ctx.clearRect(0, 0, splineCanvasWidth, splineCanvasHeight);
-        drawAxis(ctx, splineAxisStartT, splineAxisEndT, LINE_WIDTH, BLACK_COLOR, SPLINE_AXIS_LABELS_T,
+        //ctx.save();
+        //ctx.fillStyle = CANVAS_BACKGROUND_COLOR;
+        //ctx.fillRect(0, 0, splineCanvasWidth, splineCanvasHeight);
+        ctx.restore();
+        drawAxis(ctx, splineAxisStartT, splineAxisEndT, LINE_WIDTH, COLOR, SPLINE_AXIS_LABELS_T,
             SPLINE_AXIS_MIN_COORDINATE_T, SPLINE_AXIS_MAX_COORDINATE_T, AXIS_COORDINATE_STEP, LINE_WIDTH,
-            TICK_DISPLACEMENT, BLACK_COLOR, COORDINATE_LABELS_T);
-        drawAxis(ctx, splineAxisStartX, splineAxisEndX, LINE_WIDTH, BLACK_COLOR, SPLINE_AXIS_LABELS_X,
+            TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_T);
+        drawAxis(ctx, splineAxisStartX, splineAxisEndX, LINE_WIDTH, COLOR, SPLINE_AXIS_LABELS_X,
             SPLINE_AXIS_MIN_COORDINATE_X, SPLINE_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH,
-            -TICK_DISPLACEMENT, BLACK_COLOR, COORDINATE_LABELS_X);
+            -TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_X);
         drawSpline(ctx, knots, CLOSED, DRAW_CONTROL_POINTS);
         drawArrow(ctx, knots[0], knots[1], 'Avg Vel  ' + avgVelocities[0].toFixed(3));
         drawArrow(ctx, knots[1], knots[2], 'Avg Vel  ' + avgVelocities[1].toFixed(3));
@@ -377,6 +385,8 @@
 //    }
 //    function drawBunnyAll(ctx) {
 //        ctx.clearRect(0, 0, bunnyCanvasWidth, bunnyCanvasHeight);
+//        ctx.fillStyle = CANVAS_BACKGROUND_COLOR;
+//        ctx.fillRect(0, 0, splineCanvasWidth, splineCanvasHeight);
 //        drawBunny(ctx, (AXIS_OFFSET_BOTTOM - knots[0].x) * bunnyXScalar);
 //        drawAxis(ctx, splineAxisStartX, splineAxisEndX, LINE_WIDTH, BLACK_COLOR, SPLINE_AXIS_LABELS_X,
 //            SPLINE_AXIS_MIN_COORDINATE_X, SPLINE_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH, TICK_LENGTH, COORDINATE_LABELS_X);
@@ -493,7 +503,10 @@
         if (mousePos.x - posTextHeight < 0) {
             posTextX = mousePos.x + (posTextHeight - mousePos.x);
         }
+        splineCtx.save();
+        splineCtx.fillStyle = COLOR;
         splineCtx.fillText(posText,  posTextT, posTextX);
+        splineCtx.restore();
     }
     function mouseDown(e) {
         calcMousePos(e);
@@ -529,8 +542,10 @@
 
         bunnyX = avgVelocities[currentVelIndex] * delT * axisCoordinatesRatio + bunnyXTotal;
         bunnyCtx.clearRect(0, 0, bunnyWidth, bunnyHeight);
-        //drawAxis(bunnyCtx, BUNNY_AXIS_OFFSET_LEFT, BUNNY_AXIS_OFFSET_RIGHT, BUNNY_AXIS_OFFSET_BOTTOM, 'x', bunnyStep, true, BUNNY_SCALAR);
-        //drawBunny(bunnyCtx, bunnyX * bunnyXScalar);
+        ctx.fillStyle = CANVAS_BACKGROUND_COLOR;
+        ctx.fillRect(0, 0, splineCanvasWidth, splineCanvasHeight);
+        drawAxis(bunnyCtx, BUNNY_AXIS_OFFSET_LEFT, BUNNY_AXIS_OFFSET_RIGHT, BUNNY_AXIS_OFFSET_BOTTOM, 'x', bunnyStep, true, BUNNY_SCALAR);
+        drawBunny(bunnyCtx, bunnyX * bunnyXScalar);
         drawSplineAll(splineCtx);
         drawPoint(splineCtx, {t: (delT + delTTotal) + AXIS_OFFSET_LEFT, x: AXIS_OFFSET_BOTTOM - bunnyX}, 5.0, "rgb(0, 0, 0)", "rgb(255, 0, 255)");
         delT++;
