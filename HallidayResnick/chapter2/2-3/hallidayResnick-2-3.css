@@ -15,7 +15,7 @@ body {
 }
 div {
     /*color: #CCCCCC;*/
-    color: #999;
+    color: #777;
     padding: 10px;
     margin: auto;
     width: 1060px;
@@ -24,36 +24,36 @@ div {
 }
 canvas {
     /*border: 1px solid #CCCCCC;*/
-    border: 1px solid #888;
+    border: 1px solid #777;
     /*box-shadow: 0 0 10px #888;*/
     margin-bottom: 15px;
 }
 input[type='text'] {
     width: 50px;
     /*color: #CCCCCC;*/
-    color: #999;
+    color: #777;
     /*background-color: #888888;*/
     border-style: solid;
     /*border-color: #CCCCCC;*/
-    border-color: #999;
+    border-color: #777;
     text-align: center;
     font-family: 'Droid Sans', sans-serif;
 }
 input[type='button'] {
     width: 70px;
     /*color: #CCCCCC;*/
-    color: #999;
+    color: #777;
     /*background-color: #888888;*/
-    background-color: #EEE;
+    background-color: #F8F8F8;
     margin-left: 10px;
-    /*border-style: solid;*/
+    border-style: solid;
     /*border-color: #CCCCCC;*/
-    border-color: #999;
+    border-color: #777;
     font-family: 'Droid Sans', sans-serif;
 }
 input:focus {
     /*outline: solid thin #CCCCCC;*/
-    outline: solid 1px #999;
+    outline: solid 1px #777;
 }
 label {
     margin-right: 5px;
