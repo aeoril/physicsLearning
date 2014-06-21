@@ -1,3 +1,11 @@
+a {text-decoration: none;}
+a:link    { color: #2b81af; }
+a:visited { color: #753CAB; }
+/*a:hover   { color: #96d641; }*/
+a:hover   { color: #2b81af; text-decoration: underline; }
+/*a:active  { color: #96d641; }*/
+a:active  { color: #753CAB; }
+
 body {
     /*background-color: #FFF;*/
     /*font-family: 'Droid Sans', Arial, sans-serif;*/
@@ -6,42 +14,52 @@ body {
     /*text-align: center;*/
 }
 div {
-    color: #CCCCCC;
+    /*color: #CCCCCC;*/
+    color: #999;
     padding: 10px;
     margin: auto;
     width: 1060px;
     text-align: center;
-    background-color: #888888;
+    /*background-color: #888888;*/
 }
 canvas {
-    border: 1px solid #CCCCCC;
+    /*border: 1px solid #CCCCCC;*/
+    border: 1px solid #888;
     /*box-shadow: 0 0 10px #888;*/
     margin-bottom: 15px;
 }
 input[type='text'] {
     width: 50px;
-    color: #CCCCCC;
-    background-color: #888888;
+    /*color: #CCCCCC;*/
+    color: #999;
+    /*background-color: #888888;*/
     border-style: solid;
-    border-color: #CCCCCC;
+    /*border-color: #CCCCCC;*/
+    border-color: #999;
     text-align: center;
     font-family: 'Droid Sans', sans-serif;
 }
 input[type='button'] {
     width: 70px;
-    color: #CCCCCC;
-    background-color: #888888;
+    /*color: #CCCCCC;*/
+    color: #999;
+    /*background-color: #888888;*/
+    background-color: #EEE;
     margin-left: 10px;
-    border-style: solid;
-    border-color: #CCCCCC;
+    /*border-style: solid;*/
+    /*border-color: #CCCCCC;*/
+    border-color: #999;
     font-family: 'Droid Sans', sans-serif;
 }
 input:focus {
-    outline: solid thin #CCCCCC;
+    /*outline: solid thin #CCCCCC;*/
+    outline: solid 1px #999;
 }
 label {
     margin-right: 5px;
     margin-left: 5px;
+    font-size: 12pt;
+    vertical-align: middle;
 }
 .wrong {
     background-color: #FF8080;
