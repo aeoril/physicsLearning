@@ -11,6 +11,7 @@
         TICK_DISPLACEMENT = 5,
         LINE_WIDTH = 1,
         COLOR = 'rgb(100, 100, 100)',
+        ARROW_LABEL_COLOR = 'rgb(117, 60, 171)',
         //CANVAS_BACKGROUND_COLOR = 'rgb(100, 100, 100)',
         SEGMENT_COLORS = ['rgb(128, 209, 99)', 'rgb(231, 109, 128)',
             'rgb(74, 158, 139)', 'rgb(245, 165, 115)'],
@@ -281,14 +282,14 @@
 // Heavily refactored by QuarksCode
 // *******************************************************************************************
 
-    function drawArrow(ctx, p1, p2, text) {
+    function drawArrow(ctx, p1, p2, text, arrowColor, labelColor) {
         var length = calcDistance(p1, p2),
             angle = Math.atan2(p2.x - p1.x, p2.t - p1.t),
             end = {t: length, x: 0};
         ctx.save();
         ctx.font = ARROW_LABEL_FONT;
-        ctx.strokeStyle = COLOR;
-        ctx.fillStyle = COLOR;
+        ctx.strokeStyle = arrowColor;
+        ctx.fillStyle = arrowColor;
         ctx.lineWidth = 1;
         ctx.translate(p1.t, p1.x);
         ctx.rotate(angle);
@@ -300,6 +301,7 @@
         ctx.lineTo(end.t, end.x);
         ctx.stroke();
         ctx.fill();
+        ctx.fillStyle = labelColor;
         ctx.fillText(text, end.t / 2 - ctx.measureText(text).width / 2, end.x - ARROW_LABEL_OFFSET_X);
         ctx.restore();
     }
@@ -377,9 +379,9 @@
             SPLINE_AXIS_MIN_COORDINATE_X, SPLINE_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH,
             -TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_X);
         drawSpline(ctx, knots, CLOSED, DRAW_CONTROL_POINTS);
-        drawArrow(ctx, knots[0], knots[1], 'Avg Vel  ' + averageVelocities[0].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS));
-        drawArrow(ctx, knots[1], knots[2], 'Avg Vel  ' + averageVelocities[1].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS));
-        drawArrow(ctx, knots[2], knots[3], 'Avg Vel  ' + averageVelocities[2].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS));
+        drawArrow(ctx, knots[0], knots[1], 'Average Velocity =  ' + averageVelocities[0].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLOR);
+        drawArrow(ctx, knots[1], knots[2], 'Average Velocity =  ' + averageVelocities[1].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLOR);
+        drawArrow(ctx, knots[2], knots[3], 'Average Velocity =  ' + averageVelocities[2].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLOR);
     }
 //    function drawBunny(ctx, x) {
 //        ctx.drawImage(bunnyImg, x + BUNNY_AXIS_OFFSET_LEFT - BUNNY_IMG_WIDTH / 2, BUNNY_IMG_OFFSET_TOP, BUNNY_IMG_WIDTH, BUNNY_IMG_HEIGHT);
