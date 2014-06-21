@@ -1,3 +1,10 @@
+body {
+    /*background-color: #FFF;*/
+    /*font-family: 'Droid Sans', Arial, sans-serif;*/
+    font-family: 'Droid Sans', sans-serif;
+    /*font-size: 17px;*/
+    /*text-align: center;*/
+}
 div {
     color: #CCCCCC;
     padding: 10px;
@@ -12,12 +19,13 @@ canvas {
     margin-bottom: 15px;
 }
 input[type='text'] {
-    width: 45px;
+    width: 50px;
     color: #CCCCCC;
     background-color: #888888;
     border-style: solid;
     border-color: #CCCCCC;
     text-align: center;
+    font-family: 'Droid Sans', sans-serif;
 }
 input[type='button'] {
     width: 70px;
@@ -26,6 +34,7 @@ input[type='button'] {
     margin-left: 10px;
     border-style: solid;
     border-color: #CCCCCC;
+    font-family: 'Droid Sans', sans-serif;
 }
 input:focus {
     outline: solid thin #CCCCCC;

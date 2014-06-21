@@ -7,6 +7,7 @@
     'use strict';
 
     var COORDINATE_DISPLAY_DIGITS = 2,
+        AVERAGE_VELOCITY_DISPLAY_DIGITS = 2,
         TICK_DISPLACEMENT = 5,
         LINE_WIDTH = 1,
         COLOR = 'rgb(204, 204, 204)',
@@ -15,15 +16,15 @@
             'rgb(170, 57, 57)', 'rgb(170, 108, 57)'],
         KNOT_POINT_FILL_COLOR = 'rgb(212, 154, 106)',
         AXIS_COORDINATE_STEP = 2,
-        AXIS_COORDINATES_FONT = 'normal 10pt TimesNewRoman',
-        AXIS_LABEL_FONT = 'normal 13pt TimesNewRoman',
+        AXIS_COORDINATES_FONT = 'normal 10pt "Droid Sans", sans-serif',
+        AXIS_LABEL_FONT = 'normal 13pt "Droid Sans", sans-serif',
         AXIS_LABEL_OFFSET_T_T = 20,
         AXIS_LABEL_OFFSET_X_T = 40,
         AXIS_LABEL_OFFSET_T_X = 20,
         AXIS_LABEL_OFFSET_X_X = 50,
         COORDINATE_LABEL_OFFSET_T_T = 0,
         COORDINATE_LABEL_OFFSET_X_T = 20,
-        COORDINATE_LABEL_OFFSET_T_X = 5,
+        COORDINATE_LABEL_OFFSET_T_X = 4,
         COORDINATE_LABEL_OFFSET_X_X = 10,
         SPLINE_AXIS_MARGINS = 30,
         SPLINE_AXIS_MIN_COORDINATE_T = -20,
@@ -117,8 +118,8 @@
         //BUNNY_IMG_WIDTH = 48,
         //BUNNY_IMG_HEIGHT = 48,
         //BUNNY_IMG_MARGIN_TOP = 5,
-        ARROW_LABEL_FONT = 'normal 12pt TimesNewRoman',
-        ARROW_LABEL_OFFSET_X = 20,
+        ARROW_LABEL_FONT = 'normal 10pt "Droid Sans", sans-serif',
+        ARROW_LABEL_OFFSET_X = 10,
         ARROWHEAD_LENGTH = 7,
         ARROWHEAD_WIDTH = 5,
         DRAW_CONTROL_POINTS = false,
@@ -147,7 +148,7 @@
         //axisCoordinatesRatio,
         //x1 = NaN,
         //x2 = NaN,
-        avgVelocities = [];//,
+        averageVelocities = [];//,
         //delT,
         //delTTotal,
         //bunnyXTotal,
@@ -376,9 +377,9 @@
             SPLINE_AXIS_MIN_COORDINATE_X, SPLINE_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH,
             -TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_X);
         drawSpline(ctx, knots, CLOSED, DRAW_CONTROL_POINTS);
-        drawArrow(ctx, knots[0], knots[1], 'Avg Vel  ' + avgVelocities[0].toFixed(3));
-        drawArrow(ctx, knots[1], knots[2], 'Avg Vel  ' + avgVelocities[1].toFixed(3));
-        drawArrow(ctx, knots[2], knots[3], 'Avg Vel  ' + avgVelocities[2].toFixed(3));
+        drawArrow(ctx, knots[0], knots[1], 'Avg Vel  ' + averageVelocities[0].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS));
+        drawArrow(ctx, knots[1], knots[2], 'Avg Vel  ' + averageVelocities[1].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS));
+        drawArrow(ctx, knots[2], knots[3], 'Avg Vel  ' + averageVelocities[2].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS));
     }
 //    function drawBunny(ctx, x) {
 //        ctx.drawImage(bunnyImg, x + BUNNY_AXIS_OFFSET_LEFT - BUNNY_IMG_WIDTH / 2, BUNNY_IMG_OFFSET_TOP, BUNNY_IMG_WIDTH, BUNNY_IMG_HEIGHT);
@@ -444,15 +445,15 @@
         x4Elem.value = knots[3].coordinates.x;
     }
     function updateAverageVelocities() {
-        function calcVel(p1, p2) {
+        function calculateVelocity(p1, p2) {
             return (p2.x - p1.x) / (p2.t - p1.t);
         }
-        avgVelocities[0] = calcVel({t: Number(t1Elem.value), x: Number(x1Elem.value)},
-            {t: Number(t2Elem.value), x: Number(x2Elem.value)});
-        avgVelocities[1] = calcVel({t: Number(t2Elem.value), x: Number(x2Elem.value)},
-            {t: Number(t3Elem.value), x: Number(x3Elem.value)});
-        avgVelocities[2] = calcVel({t: Number(t3Elem.value), x: Number(x3Elem.value)},
-            {t: Number(t4Elem.value), x: Number(x4Elem.value)});
+        averageVelocities[0] = calculateVelocity({t: knots[0].coordinates.t, x: knots[0].coordinates.x},
+            {t: knots[1].coordinates.t, x: knots[1].coordinates.x});
+        averageVelocities[1] = calculateVelocity({t: knots[1].coordinates.t, x: knots[1].coordinates.x},
+            {t: knots[2].coordinates.t, x: knots[2].coordinates.x});
+        averageVelocities[2] = calculateVelocity({t: knots[2].coordinates.t, x: knots[2].coordinates.x},
+            {t: knots[3].coordinates.t, x: knots[3].coordinates.x});
     }
     function mouseMove(e) {
 
