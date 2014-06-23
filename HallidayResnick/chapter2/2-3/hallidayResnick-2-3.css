@@ -28,6 +28,9 @@ canvas {
     /*box-shadow: 0 0 10px #888;*/
     margin-bottom: 15px;
 }
+#splineBackgroundCanvas {
+    display: none;
+}
 input[type='text'] {
     width: 50px;
     /*color: #CCCCCC;*/
