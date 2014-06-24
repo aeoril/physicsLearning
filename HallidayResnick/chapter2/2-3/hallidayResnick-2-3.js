@@ -11,7 +11,9 @@
         TICK_DISPLACEMENT = 5,
         LINE_WIDTH = 1,
         COLOR = 'rgb(100, 100, 100)',
-        ARROW_LABEL_COLOR = 'rgb(184, 111, 252)', // Light Purple
+        ARROW_LABEL_COLOR = 'rgb(123, 192, 176)', // Light green-blue pastel
+        //ARROW_LABEL_COLOR = 'rgb(115, 90, 255)', // Blue
+        //ARROW_LABEL_COLOR = 'rgb(184, 111, 252)', // Light Purple
         //ARROW_LABEL_COLOR = 'rgb(117, 60, 171)', // Purple
         //CANVAS_BACKGROUND_COLOR = 'rgb(100, 100, 100)',
         SEGMENT_COLORS = ['rgb(128, 209, 99)', 'rgb(231, 109, 128)',
