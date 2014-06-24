@@ -11,7 +11,8 @@
         TICK_DISPLACEMENT = 5,
         LINE_WIDTH = 1,
         COLOR = 'rgb(100, 100, 100)',
-        ARROW_LABEL_COLOR = 'rgb(123, 192, 176)', // Light green-blue pastel
+        ARROW_LABEL_COLORS = ['rgb(169, 229, 146)',
+            'rgb(245, 157, 171)', 'rgb(123, 192, 176)'], // Light green-blue pastel
         //ARROW_LABEL_COLOR = 'rgb(115, 90, 255)', // Blue
         //ARROW_LABEL_COLOR = 'rgb(184, 111, 252)', // Light Purple
         //ARROW_LABEL_COLOR = 'rgb(117, 60, 171)', // Purple
@@ -383,9 +384,9 @@
 //            SPLINE_AXIS_MIN_COORDINATE_X, SPLINE_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH,
 //            -TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_X);
         drawSpline(ctx, knots, CLOSED, DRAW_CONTROL_POINTS);
-        drawArrow(ctx, knots[0], knots[1], 'Average Velocity =  ' + averageVelocities[0].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLOR);
-        drawArrow(ctx, knots[1], knots[2], 'Average Velocity =  ' + averageVelocities[1].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLOR);
-        drawArrow(ctx, knots[2], knots[3], 'Average Velocity =  ' + averageVelocities[2].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLOR);
+        drawArrow(ctx, knots[0], knots[1], 'Average Velocity =  ' + averageVelocities[0].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[0]);
+        drawArrow(ctx, knots[1], knots[2], 'Average Velocity =  ' + averageVelocities[1].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[1]);
+        drawArrow(ctx, knots[2], knots[3], 'Average Velocity =  ' + averageVelocities[2].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[2]);
     }
 //    function drawBunny(ctx, x) {
 //        ctx.drawImage(bunnyImg, x + BUNNY_AXIS_OFFSET_LEFT - BUNNY_IMG_WIDTH / 2, BUNNY_IMG_OFFSET_TOP, BUNNY_IMG_WIDTH, BUNNY_IMG_HEIGHT);
