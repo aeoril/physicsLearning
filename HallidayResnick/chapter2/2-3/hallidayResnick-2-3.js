@@ -23,31 +23,31 @@
         AXIS_COORDINATE_STEP = 2,
         AXIS_COORDINATES_FONT = 'normal 10pt "Droid Sans", sans-serif',
         AXIS_LABEL_FONT = 'normal 13pt "Droid Sans", sans-serif',
-        AXIS_LABEL_OFFSET_T_T = 20,
-        AXIS_LABEL_OFFSET_X_T = 40,
-        AXIS_LABEL_OFFSET_T_X = 20,
-        AXIS_LABEL_OFFSET_X_X = 50,
-        COORDINATE_LABEL_OFFSET_T_T = 0,
-        COORDINATE_LABEL_OFFSET_X_T = 20,
-        COORDINATE_LABEL_OFFSET_T_X = 4,
-        COORDINATE_LABEL_OFFSET_X_X = 10,
+        AXIS_LABEL_OFFSET_X_X = 20,
+        AXIS_LABEL_OFFSET_Y_X = 40,
+        AXIS_LABEL_OFFSET_X_Y = 20,
+        AXIS_LABEL_OFFSET_Y_Y = 50,
+        COORDINATE_LABEL_OFFSET_X_X = 0,
+        COORDINATE_LABEL_OFFSET_Y_X = 20,
+        COORDINATE_LABEL_OFFSET_X_Y = 4,
+        COORDINATE_LABEL_OFFSET_Y_Y = 10,
         SPLINE_AXIS_MARGINS = 30,
-        SPLINE_AXIS_MIN_COORDINATE_T = -20,
-        SPLINE_AXIS_MAX_COORDINATE_T = 20,
-        SPLINE_AXIS_RANGE_T = SPLINE_AXIS_MAX_COORDINATE_T - SPLINE_AXIS_MIN_COORDINATE_T,
-        //SPLINE_AXIS_NUM_COORDINATES_T = (SPLINE_AXIS_RANGE_T) / AXIS_COORDINATE_STEP,
-        SPLINE_AXIS_MIN_COORDINATE_X = -10,
-        SPLINE_AXIS_MAX_COORDINATE_X = 10,
+        SPLINE_AXIS_MIN_COORDINATE_X = -20,
+        SPLINE_AXIS_MAX_COORDINATE_X = 20,
         SPLINE_AXIS_RANGE_X = SPLINE_AXIS_MAX_COORDINATE_X - SPLINE_AXIS_MIN_COORDINATE_X,
         //SPLINE_AXIS_NUM_COORDINATES_X = (SPLINE_AXIS_RANGE_X) / AXIS_COORDINATE_STEP,
-        SPLINE_AXIS_LABELS_T =
+        SPLINE_AXIS_MIN_COORDINATE_Y = -10,
+        SPLINE_AXIS_MAX_COORDINATE_Y = 10,
+        SPLINE_AXIS_RANGE_Y = SPLINE_AXIS_MAX_COORDINATE_Y - SPLINE_AXIS_MIN_COORDINATE_Y,
+        //SPLINE_AXIS_NUM_COORDINATES_Y = (SPLINE_AXIS_RANGE_Y) / AXIS_COORDINATE_STEP,
+        SPLINE_AXIS_LABELS_X =
             [
                 {
                     text: '-t',
                     font: AXIS_LABEL_FONT,
                     color: COLOR,
                     relativeTo: "start",
-                    offset: {t: AXIS_LABEL_OFFSET_T_T, x: AXIS_LABEL_OFFSET_X_T},
+                    offset: {x: AXIS_LABEL_OFFSET_X_X, y: AXIS_LABEL_OFFSET_Y_X},
                     angle: 0,
                     widthMultiplier: 0.5
                 },
@@ -56,19 +56,19 @@
                     font: AXIS_LABEL_FONT,
                     color: COLOR,
                     relativeTo: "end",
-                    offset: {t: -AXIS_LABEL_OFFSET_T_T, x: AXIS_LABEL_OFFSET_X_T},
+                    offset: {x: -AXIS_LABEL_OFFSET_X_X, y: AXIS_LABEL_OFFSET_Y_X},
                     angle: 0,
                     widthMultiplier: 0.5
                 }
             ],
-        SPLINE_AXIS_LABELS_X =
+        SPLINE_AXIS_LABELS_Y =
             [
                 {
                     text: '-x',
                     font: AXIS_LABEL_FONT,
                     color: COLOR,
                     relativeTo: "start",
-                    offset: {t: AXIS_LABEL_OFFSET_T_X, x: -AXIS_LABEL_OFFSET_X_X},
+                    offset: {x: AXIS_LABEL_OFFSET_X_Y, y: -AXIS_LABEL_OFFSET_Y_Y},
                     angle: Math.PI / 2,
                     widthMultiplier: 0.5
                 },
@@ -77,20 +77,8 @@
                     font: AXIS_LABEL_FONT,
                     color: COLOR,
                     relativeTo: "end",
-                    offset: {t: -AXIS_LABEL_OFFSET_T_X, x: -AXIS_LABEL_OFFSET_X_X},
+                    offset: {x: -AXIS_LABEL_OFFSET_X_Y, y: -AXIS_LABEL_OFFSET_Y_Y},
                     angle: Math.PI / 2,
-                    widthMultiplier: 0.5
-                }
-            ],
-        COORDINATE_LABELS_T =
-            [
-                {
-                    text: '',
-                    font: AXIS_COORDINATES_FONT,
-                    color: COLOR,
-                    relativeTo: "start",
-                    offset: {t: COORDINATE_LABEL_OFFSET_T_T, x: COORDINATE_LABEL_OFFSET_X_T},
-                    angle: 0,
                     widthMultiplier: 0.5
                 }
             ],
@@ -101,30 +89,42 @@
                     font: AXIS_COORDINATES_FONT,
                     color: COLOR,
                     relativeTo: "start",
-                    offset: {t: -COORDINATE_LABEL_OFFSET_T_X, x: -COORDINATE_LABEL_OFFSET_X_X},
+                    offset: {x: COORDINATE_LABEL_OFFSET_X_X, y: COORDINATE_LABEL_OFFSET_Y_X},
+                    angle: 0,
+                    widthMultiplier: 0.5
+                }
+            ],
+        COORDINATE_LABELS_Y =
+            [
+                {
+                    text: '',
+                    font: AXIS_COORDINATES_FONT,
+                    color: COLOR,
+                    relativeTo: "start",
+                    offset: {x: -COORDINATE_LABEL_OFFSET_X_Y, y: -COORDINATE_LABEL_OFFSET_Y_Y},
                     angle: Math.PI / 2,
                     widthMultiplier: 1
                 }
             ],
         splineCanvasWidth,
         splineCanvasHeight,
-        splineAxisStartT,
-        splineAxisEndT,
         splineAxisStartX,
         splineAxisEndX,
-        splineAxisLengthT,
+        splineAxisStartY,
+        splineAxisEndY,
         splineAxisLengthX,
-        splineAxisCoordinatesScalarT,
+        splineAxisLengthY,
         splineAxisCoordinatesScalarX,
+        splineAxisCoordinatesScalarY,
         //splineAxisCoordinatesRatio,
-        CLOSEST_T = 220,
-        AXIS_CLOSEST_T = 0,
+        CLOSEST_X = 220,
         AXIS_CLOSEST_X = 0,
+        AXIS_CLOSEST_Y = 0,
         //BUNNY_IMG_WIDTH = 48,
         //BUNNY_IMG_HEIGHT = 48,
         //BUNNY_IMG_MARGIN_TOP = 5,
         ARROW_LABEL_FONT = 'normal 10pt "Droid Sans", sans-serif',
-        ARROW_LABEL_OFFSET_X = 10,
+        ARROW_LABEL_OFFSET_Y = 10,
         ARROWHEAD_LENGTH = 7,
         ARROWHEAD_WIDTH = 5,
         DRAW_CONTROL_POINTS = false,
@@ -156,9 +156,9 @@
         //x1 = NaN,
         //x2 = NaN,
         averageVelocities = [];//,
-        //delT,
-        //delTTotal,
-        //bunnyXTotal,
+        //delX,
+        //delXTotal,
+        //bunnyYTotal,
         //currentVelIndex,
         //requestID;
 
@@ -179,8 +179,8 @@
     }
 
     function calcDistance(point1, point2) {
-        var delta = {t: point2.t - point1.t, x: point2.x - point1.x};
-        return Math.sqrt(delta.t * delta.t + delta.x * delta.x);
+        var delta = {x: point2.x - point1.x, y: point2.y - point1.y};
+        return Math.sqrt(delta.x * delta.x + delta.y * delta.y);
     }
 // *******************************************************************************************
 // Start Rob Spencer Code from http://scaledinnovation.com/analytics/splines/aboutSplines.html
@@ -193,7 +193,7 @@
         ctx.lineWidth=1;
         ctx.strokeStyle = strokeColor;
         ctx.fillStyle=fillColor;
-        ctx.arc(knot.t, knot.x, r, 0.0, 2*Math.PI, false);
+        ctx.arc(knot.x, knot.y, r, 0.0, 2*Math.PI, false);
         ctx.closePath();
         ctx.stroke();
         ctx.fill();
@@ -204,10 +204,10 @@
             distanceCN = calcDistance(currentKnot, nextKnot),
             fractionPC = tension * distancePC / (distancePC + distanceCN),
             fractionCN = tension - fractionPC,
-            controlPointPrev2 = {t: currentKnot.t + fractionPC * (prevKnot.t - nextKnot.t),
-                x: currentKnot.x + fractionPC * (prevKnot.x - nextKnot.x)},
-            controlPointCurr1 = {t: currentKnot.t - fractionCN * (prevKnot.t - nextKnot.t),
-                x: currentKnot.x - fractionCN * (prevKnot.x - nextKnot.x)};
+            controlPointPrev2 = {x: currentKnot.x + fractionPC * (prevKnot.x - nextKnot.x),
+                y: currentKnot.y + fractionPC * (prevKnot.y - nextKnot.y)},
+            controlPointCurr1 = {x: currentKnot.x - fractionCN * (prevKnot.x - nextKnot.x),
+                y: currentKnot.y - fractionCN * (prevKnot.y - nextKnot.y)};
 
         return {prev2: controlPointPrev2, curr1: controlPointCurr1};
     }
@@ -216,8 +216,8 @@
         ctx.beginPath();
         ctx.lineWidth = 1;
         ctx.strokeStyle = color;
-        ctx.moveTo(knot.t, knot.x);
-        ctx.lineTo(controlPoint.t, controlPoint.x);
+        ctx.moveTo(knot.x, knot.y);
+        ctx.lineTo(controlPoint.x, controlPoint.y);
         ctx.closePath();
         ctx.stroke();
         drawPoint(ctx, controlPoint, 1.5, ctx.strokeStyle, ctx.strokeStyle);
@@ -226,9 +226,9 @@
     function drawInnerSegment(ctx, knot1, knot2, knotPrev, drawControlPoints) {
         ctx.strokeStyle = knot1.color;
         ctx.beginPath();
-        ctx.moveTo(knot1.t, knot1.x);
-        ctx.bezierCurveTo(knot1.cp1.t, knot1.cp1.x, knot1.cp2.t, knot1.cp2.x,
-            knot2.t, knot2.x);
+        ctx.moveTo(knot1.x, knot1.y);
+        ctx.bezierCurveTo(knot1.cp1.x, knot1.cp1.y, knot1.cp2.x, knot1.cp2.y,
+            knot2.x, knot2.y);
         ctx.stroke();
         ctx.closePath();
         if(drawControlPoints){
@@ -239,8 +239,8 @@
     function drawEndSegment(ctx, endKnot, innerKnot, cp, cpKnot, prevKnot, color, drawControlPoints) {
         ctx.strokeStyle=color;
         ctx.beginPath();
-        ctx.moveTo(endKnot.t, endKnot.x);
-        ctx.quadraticCurveTo(cp.t, cp.x, innerKnot.t, innerKnot.x);
+        ctx.moveTo(endKnot.x, endKnot.y);
+        ctx.quadraticCurveTo(cp.x, cp.y, innerKnot.x, innerKnot.y);
         ctx.stroke();
         ctx.closePath();
         if(drawControlPoints){
@@ -290,43 +290,43 @@
 
     function drawArrow(ctx, p1, p2, text, arrowColor, labelColor) {
         var length = calcDistance(p1, p2),
-            angle = Math.atan2(p2.x - p1.x, p2.t - p1.t),
-            end = {t: length, x: 0};
+            angle = Math.atan2(p2.y - p1.y, p2.x - p1.x),
+            end = {x: length, y: 0};
         ctx.save();
         ctx.font = ARROW_LABEL_FONT;
         ctx.strokeStyle = arrowColor;
         ctx.fillStyle = arrowColor;
         ctx.lineWidth = 1;
-        ctx.translate(p1.t, p1.x);
+        ctx.translate(p1.x, p1.y);
         ctx.rotate(angle);
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.lineTo(end.t, end.x);
-        ctx.lineTo(end.t - ARROWHEAD_LENGTH, end.x + ARROWHEAD_WIDTH / 2);
-        ctx.lineTo(end.t - ARROWHEAD_LENGTH, end.x - ARROWHEAD_WIDTH / 2);
-        ctx.lineTo(end.t, end.x);
+        ctx.lineTo(end.x, end.y);
+        ctx.lineTo(end.x - ARROWHEAD_LENGTH, end.y + ARROWHEAD_WIDTH / 2);
+        ctx.lineTo(end.x - ARROWHEAD_LENGTH, end.y - ARROWHEAD_WIDTH / 2);
+        ctx.lineTo(end.x, end.y);
         ctx.stroke();
         ctx.fill();
         ctx.fillStyle = labelColor;
-        ctx.fillText(text, end.t / 2 - ctx.measureText(text).width / 2, end.x - ARROW_LABEL_OFFSET_X);
+        ctx.fillText(text, end.x / 2 - ctx.measureText(text).width / 2, end.y - ARROW_LABEL_OFFSET_Y);
         ctx.restore();
     }
     function drawAxis(ctx, start, end, width, color, axisLabels,
                       minCoordinate, maxCoordinate, step, tickWidth, tickLength, tickColor, coordinateLabels) {
         var length = calcDistance(start, end),
-            angle = Math.atan2(end.x - start.x, end.t - start.t),
+            angle = Math.atan2(end.y - start.y, end.x - start.x),
             numCoordinates = (maxCoordinate - minCoordinate) / step,
-            tickStart = {x: 0},
-            tickEnd = {x: -tickLength},
+            tickStart = {y: 0},
+            tickEnd = {y: -tickLength},
             i;
 
         function drawLabeledLine(ctx, start, end, width, color, labels) {
             var length = calcDistance(start, end),
-                angle = Math.atan2(end.x - start.x, end.t - start.t);
+                angle = Math.atan2(end.y - start.y, end.x - start.x);
             ctx.save();
             ctx.lineWidth = width;
             ctx.strokeStyle = color;
-            ctx.translate(start.t, start.x);
+            ctx.translate(start.x, start.y);
             ctx.save();
             ctx.rotate(angle);
             ctx.beginPath();
@@ -335,23 +335,23 @@
             ctx.stroke();
             ctx.restore();
             labels.forEach(function (label) {
-                var labelT;
+                var labelX;
                 ctx.save();
                 ctx.font = label.font;
                 ctx.fillStyle = label.color;
                 switch (label.relativeTo) {
                     case 'start' :
-                        labelT = label.offset.t;
+                        labelX = label.offset.x;
                         break;
                     case 'middle' :
-                        labelT = length / 2 + label.offset.t;
+                        labelX = length / 2 + label.offset.x;
                         break;
                     case 'end' :
-                        labelT = length + label.offset.t;
+                        labelX = length + label.offset.x;
                         break;
                 }
-                //labelT = label.adjustForWidth ? labelT - ctx.measureText(label.text).width / 2 : labelT;
-                ctx.translate(labelT, label.offset.x);
+                //labelX = label.adjustForWidth ? labelX - ctx.measureText(label.text).width / 2 : labelX;
+                ctx.translate(labelX, label.offset.y);
                 ctx.rotate(label.angle);
                 ctx.fillText(label.text, -ctx.measureText(label.text).width * label.widthMultiplier, 0);
                 ctx.restore();
@@ -359,12 +359,12 @@
             ctx.restore();
         }
         ctx.save();
-        ctx.translate(start.t, start.x);
+        ctx.translate(start.x, start.y);
         ctx.rotate(angle);
-        drawLabeledLine(ctx, {t: 0, x: 0}, {t: length, x: 0}, width, color, axisLabels);
+        drawLabeledLine(ctx, {x: 0, y: 0}, {x: length, y: 0}, width, color, axisLabels);
         for (i = 0; i <= numCoordinates; i++) {
-            tickStart.t = i * length / numCoordinates;
-            tickEnd.t = tickStart.t;
+            tickStart.x = i * length / numCoordinates;
+            tickEnd.x = tickStart.x;
             coordinateLabels[0].text = minCoordinate + step * i;
             if (coordinateLabels[0].text !== 0) {
                 drawLabeledLine(ctx, tickStart, tickEnd, tickWidth, tickColor, coordinateLabels);
@@ -377,27 +377,27 @@
         //ctx.fillStyle = CANVAS_BACKGROUND_COLOR;
         //ctx.fillRect(0, 0, splineCanvasWidth, splineCanvasHeight);
         ctx.drawImage(splineBackgroundCanvasElem, 0, 0);
-//        drawAxis(ctx, splineAxisStartT, splineAxisEndT, LINE_WIDTH, COLOR, SPLINE_AXIS_LABELS_T,
-//            SPLINE_AXIS_MIN_COORDINATE_T, SPLINE_AXIS_MAX_COORDINATE_T, AXIS_COORDINATE_STEP, LINE_WIDTH,
-//            TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_T);
 //        drawAxis(ctx, splineAxisStartX, splineAxisEndX, LINE_WIDTH, COLOR, SPLINE_AXIS_LABELS_X,
 //            SPLINE_AXIS_MIN_COORDINATE_X, SPLINE_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH,
-//            -TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_X);
+//            TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_X);
+//        drawAxis(ctx, splineAxisStartY, splineAxisEndY, LINE_WIDTH, COLOR, SPLINE_AXIS_LABELS_Y,
+//            SPLINE_AXIS_MIN_COORDINATE_Y, SPLINE_AXIS_MAX_COORDINATE_Y, AXIS_COORDINATE_STEP, LINE_WIDTH,
+//            -TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_Y);
         drawSpline(ctx, knots, CLOSED, DRAW_CONTROL_POINTS);
         drawArrow(ctx, knots[0], knots[1], 'Average Velocity =  ' + averageVelocities[0].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[0]);
         drawArrow(ctx, knots[1], knots[2], 'Average Velocity =  ' + averageVelocities[1].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[1]);
         drawArrow(ctx, knots[2], knots[3], 'Average Velocity =  ' + averageVelocities[2].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[2]);
     }
-//    function drawBunny(ctx, x) {
-//        ctx.drawImage(bunnyImg, x + BUNNY_AXIS_OFFSET_LEFT - BUNNY_IMG_WIDTH / 2, BUNNY_IMG_OFFSET_TOP, BUNNY_IMG_WIDTH, BUNNY_IMG_HEIGHT);
+//    function drawBunny(ctx, y) {
+//        ctx.drawImage(bunnyImg, y + BUNNY_AXIS_OFFSET_LEFT - BUNNY_IMG_WIDTH / 2, BUNNY_IMG_OFFSET_TOP, BUNNY_IMG_WIDTH, BUNNY_IMG_HEIGHT);
 //    }
 //    function drawBunnyAll(ctx) {
 //        ctx.clearRect(0, 0, bunnyCanvasWidth, bunnyCanvasHeight);
 //        ctx.fillStyle = CANVAS_BACKGROUND_COLOR;
 //        ctx.fillRect(0, 0, splineCanvasWidth, splineCanvasHeight);
-//        drawBunny(ctx, (AXIS_OFFSET_BOTTOM - knots[0].x) * bunnyXScalar);
-//        drawAxis(ctx, splineAxisStartX, splineAxisEndX, LINE_WIDTH, BLACK_COLOR, SPLINE_AXIS_LABELS_X,
-//            SPLINE_AXIS_MIN_COORDINATE_X, SPLINE_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH, TICK_LENGTH, COORDINATE_LABELS_X);
+//        drawBunny(ctx, (AXIS_OFFSET_BOTTOM - knots[0].y) * bunnyYScalar);
+//        drawAxis(ctx, splineAxisStartY, splineAxisEndY, LINE_WIDTH, BLACK_COLOR, SPLINE_AXIS_LABELS_Y,
+//            SPLINE_AXIS_MIN_COORDINATE_Y, SPLINE_AXIS_MAX_COORDINATE_Y, AXIS_COORDINATE_STEP, LINE_WIDTH, TICK_LENGTH, COORDINATE_LABELS_Y);
 //    }
     function calcMousePos(e) {
         var top = 0,
@@ -414,8 +414,8 @@
         }
 
         // return relative mouse position
-        mousePos.t = e.clientX - left + window.pageXOffset;
-        mousePos.x = e.clientY - top + window.pageYOffset;
+        mousePos.x = e.clientX - left + window.pageXOffset;
+        mousePos.y = e.clientY - top + window.pageYOffset;
     }
     function calcClosestPoint() {
         var i;
@@ -430,67 +430,67 @@
         }
     }
     function updateKnotCoordinateValues() {
-        function calcTCoordinateValue(t) {
-            return (((t - splineAxisStartT.t) * splineAxisCoordinatesScalarT) + SPLINE_AXIS_MIN_COORDINATE_T).toFixed(COORDINATE_DISPLAY_DIGITS);
-        }
         function calcXCoordinateValue(x) {
-            return (((splineAxisStartX.x - x)  * splineAxisCoordinatesScalarX) + SPLINE_AXIS_MIN_COORDINATE_X).toFixed(COORDINATE_DISPLAY_DIGITS);
+            return (((x - splineAxisStartX.x) * splineAxisCoordinatesScalarX) + SPLINE_AXIS_MIN_COORDINATE_X).toFixed(COORDINATE_DISPLAY_DIGITS);
+        }
+        function calcYCoordinateValue(y) {
+            return (((splineAxisStartY.y - y)  * splineAxisCoordinatesScalarY) + SPLINE_AXIS_MIN_COORDINATE_Y).toFixed(COORDINATE_DISPLAY_DIGITS);
         }
         knots.forEach(function (value) {
-            value.coordinates = {t: calcTCoordinateValue(value.t),
-                x: calcXCoordinateValue(value.x)};
+            value.coordinates = {x: calcXCoordinateValue(value.x),
+                y: calcYCoordinateValue(value.y)};
         });
     }
     function updateTextBoxes() {
-        t1Elem.value = knots[0].coordinates.t;
-        x1Elem.value = knots[0].coordinates.x;
-        t2Elem.value = knots[1].coordinates.t;
-        x2Elem.value = knots[1].coordinates.x;
-        t3Elem.value = knots[2].coordinates.t;
-        x3Elem.value = knots[2].coordinates.x;
-        t4Elem.value = knots[3].coordinates.t;
-        x4Elem.value = knots[3].coordinates.x;
+        t1Elem.value = knots[0].coordinates.x;
+        x1Elem.value = knots[0].coordinates.y;
+        t2Elem.value = knots[1].coordinates.x;
+        x2Elem.value = knots[1].coordinates.y;
+        t3Elem.value = knots[2].coordinates.x;
+        x3Elem.value = knots[2].coordinates.y;
+        t4Elem.value = knots[3].coordinates.x;
+        x4Elem.value = knots[3].coordinates.y;
     }
     function updateAverageVelocities() {
         function calculateVelocity(p1, p2) {
-            return (p2.x - p1.x) / (p2.t - p1.t);
+            return (p2.y - p1.y) / (p2.x - p1.x);
         }
-        averageVelocities[0] = calculateVelocity({t: knots[0].coordinates.t, x: knots[0].coordinates.x},
-            {t: knots[1].coordinates.t, x: knots[1].coordinates.x});
-        averageVelocities[1] = calculateVelocity({t: knots[1].coordinates.t, x: knots[1].coordinates.x},
-            {t: knots[2].coordinates.t, x: knots[2].coordinates.x});
-        averageVelocities[2] = calculateVelocity({t: knots[2].coordinates.t, x: knots[2].coordinates.x},
-            {t: knots[3].coordinates.t, x: knots[3].coordinates.x});
+        averageVelocities[0] = calculateVelocity({x: knots[0].coordinates.x, y: knots[0].coordinates.y},
+            {x: knots[1].coordinates.x, y: knots[1].coordinates.y});
+        averageVelocities[1] = calculateVelocity({x: knots[1].coordinates.x, y: knots[1].coordinates.y},
+            {x: knots[2].coordinates.x, y: knots[2].coordinates.y});
+        averageVelocities[2] = calculateVelocity({x: knots[2].coordinates.x, y: knots[2].coordinates.y},
+            {x: knots[3].coordinates.x, y: knots[3].coordinates.y});
     }
     function mouseMove(e) {
 
         var posText,
             posTextWidth,
             posTextHeight = 7,
-            posTextT,
-            posTextX;
+            posTextX,
+            posTextY;
 
         calcMousePos(e);
 
-        if (mousePos.t > splineCanvasWidth) {
-            mousePos.t = splineCanvasWidth;
+        if (mousePos.x > splineCanvasWidth) {
+            mousePos.x = splineCanvasWidth;
         }
-        if (mousePos.x > splineCanvasHeight) {
-            mousePos.x = splineCanvasHeight;
+        if (mousePos.y > splineCanvasHeight) {
+            mousePos.y = splineCanvasHeight;
         }
         if (mouseIsDown) {
             if (mousePoint !== 0 &&
                 ((mousePoint === knots.length - 1 &&
-                  (mousePos.t >= knots[mousePoint - 1].t + CLOSEST_T && mousePos.t <= splineAxisEndT.t)) ||
+                  (mousePos.x >= knots[mousePoint - 1].x + CLOSEST_X && mousePos.x <= splineAxisEndX.x)) ||
                  (mousePoint < knots.length - 1 &&
-                  (mousePos.t >= knots[mousePoint - 1].t + CLOSEST_T && mousePos.t < knots[mousePoint + 1].t - CLOSEST_T) &&
-                  (mousePos.t >= splineAxisStartT.t + AXIS_CLOSEST_T && mousePos.t <= splineAxisEndT.t - AXIS_CLOSEST_T)))) {
-                knots[mousePoint].t = mousePos.t;
+                  (mousePos.x >= knots[mousePoint - 1].x + CLOSEST_X && mousePos.x < knots[mousePoint + 1].x - CLOSEST_X) &&
+                  (mousePos.x >= splineAxisStartX.x + AXIS_CLOSEST_X && mousePos.x <= splineAxisEndX.x - AXIS_CLOSEST_X)))) {
+                knots[mousePoint].x = mousePos.x;
             }
             if (((mousePoint === 0 || mousePoint === knots.length - 1) &&
-                 mousePos.x <= splineAxisStartX.x && mousePos.x >= splineAxisEndX.x) ||
-                (mousePos.x <= splineAxisStartX.x - AXIS_CLOSEST_X && mousePos.x >= splineAxisEndX.x + AXIS_CLOSEST_X)) {
-                knots[mousePoint].x = mousePos.x;
+                 mousePos.y <= splineAxisStartY.y && mousePos.y >= splineAxisEndY.y) ||
+                (mousePos.y <= splineAxisStartY.y - AXIS_CLOSEST_Y && mousePos.y >= splineAxisEndY.y + AXIS_CLOSEST_Y)) {
+                knots[mousePoint].y = mousePos.y;
             }
         }
         updateKnotCoordinateValues();
@@ -500,20 +500,20 @@
         if (mousePoint === 0 && mouseIsDown) {
             //drawBunnyAll(bunnyCtx);
         }
-        posText = '{' + mousePos.t + ',' + mousePos.x + ')';
+        posText = '{' + mousePos.x + ',' + mousePos.y + ')';
         posTextWidth = splineCtx.measureText(posText).width;
-        posTextT = mousePos.t;
         posTextX = mousePos.x;
-        if (mousePos.t + posTextWidth > splineCanvasWidth) {
-            posTextT = mousePos.t - (posTextWidth - (splineCanvasWidth - mousePos.t));
+        posTextY = mousePos.y;
+        if (mousePos.x + posTextWidth > splineCanvasWidth) {
+            posTextX = mousePos.x - (posTextWidth - (splineCanvasWidth - mousePos.x));
         }
 
-        if (mousePos.x - posTextHeight < 0) {
-            posTextX = mousePos.x + (posTextHeight - mousePos.x);
+        if (mousePos.y - posTextHeight < 0) {
+            posTextY = mousePos.y + (posTextHeight - mousePos.y);
         }
         splineCtx.save();
         splineCtx.fillStyle = COLOR;
-        splineCtx.fillText(posText,  posTextT, posTextX);
+        splineCtx.fillText(posText,  posTextX, posTextY);
         splineCtx.restore();
     }
     function mouseDown(e) {
@@ -527,13 +527,13 @@
     }
     function submit(e) {
         knots = [];
-        knots.push({coordinates: {t: Number(t1Elem.value), x: Number(x1Elem.value)}, color: SEGMENT_COLORS[0]});
-        knots.push({coordinates: {t: Number(t2Elem.value), x: Number(x2Elem.value)}, color: SEGMENT_COLORS[1]});
-        knots.push({coordinates: {t: Number(t3Elem.value), x: Number(x3Elem.value)}, color: SEGMENT_COLORS[2]});
-        knots.push({coordinates: {t: Number(t4Elem.value), x: Number(x4Elem.value)}, color: SEGMENT_COLORS[3]});
+        knots.push({coordinates: {x: Number(t1Elem.value), y: Number(x1Elem.value)}, color: SEGMENT_COLORS[0]});
+        knots.push({coordinates: {x: Number(t2Elem.value), y: Number(x2Elem.value)}, color: SEGMENT_COLORS[1]});
+        knots.push({coordinates: {x: Number(t3Elem.value), y: Number(x3Elem.value)}, color: SEGMENT_COLORS[2]});
+        knots.push({coordinates: {x: Number(t4Elem.value), y: Number(x4Elem.value)}, color: SEGMENT_COLORS[3]});
         knots.forEach(function (knot) {
-            knot.t = (knot.coordinates.t - SPLINE_AXIS_MIN_COORDINATE_T) / splineAxisCoordinatesScalarT + splineAxisStartT.t;
-            knot.x = splineAxisStartX.x - (knot.coordinates.x - SPLINE_AXIS_MIN_COORDINATE_X) / splineAxisCoordinatesScalarX;
+            knot.x = (knot.coordinates.x - SPLINE_AXIS_MIN_COORDINATE_X) / splineAxisCoordinatesScalarX + splineAxisStartX.x;
+            knot.y = splineAxisStartY.y - (knot.coordinates.y - SPLINE_AXIS_MIN_COORDINATE_Y) / splineAxisCoordinatesScalarY;
         });
         tension = Number(tensionElem.value) / 100;
         updateKnotCoordinateValues();
@@ -546,22 +546,22 @@
         }
     }
 /*    function bunnyRun() {
-        var bunnyX;
+        var bunnyY;
 
-        bunnyX = avgVelocities[currentVelIndex] * delT * axisCoordinatesRatio + bunnyXTotal;
+        bunnyY = avgVelocities[currentVelIndex] * delX * axisCoordinatesRatio + bunnyYTotal;
         bunnyCtx.clearRect(0, 0, bunnyWidth, bunnyHeight);
         ctx.fillStyle = CANVAS_BACKGROUND_COLOR;
         ctx.fillRect(0, 0, splineCanvasWidth, splineCanvasHeight);
         drawAxis(bunnyCtx, BUNNY_AXIS_OFFSET_LEFT, BUNNY_AXIS_OFFSET_RIGHT, BUNNY_AXIS_OFFSET_BOTTOM, 'x', bunnyStep, true, BUNNY_SCALAR);
-        drawBunny(bunnyCtx, bunnyX * bunnyXScalar);
+        drawBunny(bunnyCtx, bunnyY * bunnyYScalar);
         drawSplineAll(splineCtx);
-        drawPoint(splineCtx, {t: (delT + delTTotal) + AXIS_OFFSET_LEFT, x: AXIS_OFFSET_BOTTOM - bunnyX}, 5.0, "rgb(0, 0, 0)", "rgb(255, 0, 255)");
-        delT++;
-        if (delT + delTTotal > knots[(currentVelIndex + 1)].t - AXIS_OFFSET_LEFT) {
-            bunnyXTotal += avgVelocities[currentVelIndex] * (delT - 1) * axisCoordinatesRatio;
+        drawPoint(splineCtx, {x: (delX + delXTotal) + AXIS_OFFSET_LEFT, y: AXIS_OFFSET_BOTTOM - bunnyY}, 5.0, "rgb(0, 0, 0)", "rgb(255, 0, 255)");
+        delX++;
+        if (delX + delXTotal > knots[(currentVelIndex + 1)].x - AXIS_OFFSET_LEFT) {
+            bunnyYTotal += avgVelocities[currentVelIndex] * (delX - 1) * axisCoordinatesRatio;
             currentVelIndex++;
-            delTTotal += delT - 1;
-            delT = 1;
+            delXTotal += delX - 1;
+            delX = 1;
             if (currentVelIndex + 1 === knots.length) {
                 //window.cancelAnimationFrame(requestID);
                 return;
@@ -570,19 +570,19 @@
         window.requestAnimationFrame(bunnyRun);
     }*/
 /*    function animate() {
-        delT = 0;
-        delTTotal = 0;
-        bunnyXTotal = AXIS_OFFSET_BOTTOM - knots[0].x;
+        delX = 0;
+        delXTotal = 0;
+        bunnyYTotal = AXIS_OFFSET_BOTTOM - knots[0].y;
         currentVelIndex = 0;
         requestID = window.requestAnimationFrame(bunnyRun);
     }*/
     function drawBackground(ctx) {
-        drawAxis(ctx, splineAxisStartT, splineAxisEndT, LINE_WIDTH, COLOR, SPLINE_AXIS_LABELS_T,
-            SPLINE_AXIS_MIN_COORDINATE_T, SPLINE_AXIS_MAX_COORDINATE_T, AXIS_COORDINATE_STEP, LINE_WIDTH,
-            TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_T);
         drawAxis(ctx, splineAxisStartX, splineAxisEndX, LINE_WIDTH, COLOR, SPLINE_AXIS_LABELS_X,
             SPLINE_AXIS_MIN_COORDINATE_X, SPLINE_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH,
-            -TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_X);
+            TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_X);
+        drawAxis(ctx, splineAxisStartY, splineAxisEndY, LINE_WIDTH, COLOR, SPLINE_AXIS_LABELS_Y,
+            SPLINE_AXIS_MIN_COORDINATE_Y, SPLINE_AXIS_MAX_COORDINATE_Y, AXIS_COORDINATE_STEP, LINE_WIDTH,
+            -TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_Y);
     }
     window.addEventListener('load', function() {
         splineCanvasElem = document.getElementById('splineCanvas');
@@ -604,30 +604,30 @@
         animateElem = document.getElementById('animate');
         //bunnyWidth = bunnyCanvasElem.width;
         //bunnyHeight = bunnyCanvasElem.height;
-        //bunnyAxisCoordsScalar = (bunnyWidth / (BUNNY_AXIS_OFFSET_RIGHT - BUNNY_AXIS_OFFSET_LEFT)) / BUNNY_SCALAR;
+        //bunnyAxisCoordinatesScalar = (bunnyWidth / (BUNNY_AXIS_OFFSET_RIGHT - BUNNY_AXIS_OFFSET_LEFT)) / BUNNY_SCALAR;
+//        t1Elem.addEventListener('change', submit, false);
 //        x1Elem.addEventListener('change', submit, false);
-//        y1Elem.addEventListener('change', submit, false);
+//        t2Elem.addEventListener('change', submit, false);
 //        x2Elem.addEventListener('change', submit, false);
-//        y2Elem.addEventListener('change', submit, false);
+//        t3Elem.addEventListener('change', submit, false);
 //        x3Elem.addEventListener('change', submit, false);
-//        y3Elem.addEventListener('change', submit, false);
+//        t4Elem.addEventListener('change', submit, false);
 //        x4Elem.addEventListener('change', submit, false);
-//        y4Elem.addEventListener('change', submit, false);
 //        tElem.addEventListener('change', submit, false);
         //formElem.addEventListener('submit', submit, false);
         //animateElem.addEventListener('click', animate, false);
         //canvasElem.addEventListener('click', canvasMousePos, false);
         splineCanvasWidth = splineCanvasElem.width;
         splineCanvasHeight = splineCanvasElem.height;
-        splineAxisStartT = {t: SPLINE_AXIS_MARGINS, x: splineCanvasHeight / 2};
-        splineAxisEndT = {t: splineCanvasWidth - SPLINE_AXIS_MARGINS, x: splineCanvasHeight / 2};
-        splineAxisStartX = {t: splineCanvasWidth / 2, x: splineCanvasHeight - SPLINE_AXIS_MARGINS};
-        splineAxisEndX = {t: splineCanvasWidth / 2, x: SPLINE_AXIS_MARGINS};
-        splineAxisLengthT = splineCanvasWidth - SPLINE_AXIS_MARGINS * 2;
-        splineAxisLengthX = splineCanvasHeight - SPLINE_AXIS_MARGINS * 2;
-        splineAxisCoordinatesScalarT = SPLINE_AXIS_RANGE_T / splineAxisLengthT;
+        splineAxisStartX = {x: SPLINE_AXIS_MARGINS, y: splineCanvasHeight / 2};
+        splineAxisEndX = {x: splineCanvasWidth - SPLINE_AXIS_MARGINS, y: splineCanvasHeight / 2};
+        splineAxisStartY = {x: splineCanvasWidth / 2, y: splineCanvasHeight - SPLINE_AXIS_MARGINS};
+        splineAxisEndY = {x: splineCanvasWidth / 2, y: SPLINE_AXIS_MARGINS};
+        splineAxisLengthX = splineCanvasWidth - SPLINE_AXIS_MARGINS * 2;
+        splineAxisLengthY = splineCanvasHeight - SPLINE_AXIS_MARGINS * 2;
         splineAxisCoordinatesScalarX = SPLINE_AXIS_RANGE_X / splineAxisLengthX;
-        //splineAxisCoordinatesRatio = splineAxisCoordinatesScalarT / splineAxisCoordinatesScalarX;
+        splineAxisCoordinatesScalarY = SPLINE_AXIS_RANGE_Y / splineAxisLengthY;
+        //splineAxisCoordinatesRatio = splineAxisCoordinatesScalarX / splineAxisCoordinatesScalarY;
         splineCanvasElem.addEventListener('mousemove', mouseMove, false);
         splineCanvasElem.addEventListener('mousedown', mouseDown, false);
         splineCanvasElem.addEventListener('mouseup', mouseUp, false);
