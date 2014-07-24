@@ -13,10 +13,6 @@
         COLOR = 'rgb(100, 100, 100)',
         ARROW_LABEL_COLORS = ['rgb(169, 229, 146)',
             'rgb(245, 157, 171)', 'rgb(123, 192, 176)'], // Light green-blue pastel
-        //ARROW_LABEL_COLOR = 'rgb(115, 90, 255)', // Blue
-        //ARROW_LABEL_COLOR = 'rgb(184, 111, 252)', // Light Purple
-        //ARROW_LABEL_COLOR = 'rgb(117, 60, 171)', // Purple
-        //CANVAS_BACKGROUND_COLOR = 'rgb(100, 100, 100)',
         SEGMENT_COLORS = ['rgb(128, 209, 99)', 'rgb(231, 109, 128)',
             'rgb(74, 158, 139)', 'rgb(245, 165, 115)'],
         KNOT_POINT_FILL_COLOR = 'rgb(199, 67, 88)',
@@ -31,6 +27,30 @@
         COORDINATE_LABEL_OFFSET_Y_X = 20,
         COORDINATE_LABEL_OFFSET_X_Y = 4,
         COORDINATE_LABEL_OFFSET_Y_Y = 10,
+        COORDINATE_LABELS_X =
+            [
+                {
+                    text: '',
+                    font: AXIS_COORDINATES_FONT,
+                    color: COLOR,
+                    relativeTo: "start",
+                    offset: {x: COORDINATE_LABEL_OFFSET_X_X, y: COORDINATE_LABEL_OFFSET_Y_X},
+                    angle: 0,
+                    widthMultiplier: 0.5
+                }
+            ],
+        COORDINATE_LABELS_Y =
+            [
+                {
+                    text: '',
+                    font: AXIS_COORDINATES_FONT,
+                    color: COLOR,
+                    relativeTo: "start",
+                    offset: {x: -COORDINATE_LABEL_OFFSET_X_Y, y: -COORDINATE_LABEL_OFFSET_Y_Y},
+                    angle: Math.PI / 2,
+                    widthMultiplier: 1
+                }
+            ],
         SPLINE_AXIS_MARGINS = 30,
         SPLINE_AXIS_MIN_COORDINATE_X = -20,
         SPLINE_AXIS_MAX_COORDINATE_X = 20,
@@ -80,30 +100,6 @@
                     widthMultiplier: 0.5
                 }
             ],
-        COORDINATE_LABELS_X =
-            [
-                {
-                    text: '',
-                    font: AXIS_COORDINATES_FONT,
-                    color: COLOR,
-                    relativeTo: "start",
-                    offset: {x: COORDINATE_LABEL_OFFSET_X_X, y: COORDINATE_LABEL_OFFSET_Y_X},
-                    angle: 0,
-                    widthMultiplier: 0.5
-                }
-            ],
-        COORDINATE_LABELS_Y =
-            [
-                {
-                    text: '',
-                    font: AXIS_COORDINATES_FONT,
-                    color: COLOR,
-                    relativeTo: "start",
-                    offset: {x: -COORDINATE_LABEL_OFFSET_X_Y, y: -COORDINATE_LABEL_OFFSET_Y_Y},
-                    angle: Math.PI / 2,
-                    widthMultiplier: 1
-                }
-            ],
         splineCanvasWidth,
         splineCanvasHeight,
         splineAxisStartX,
@@ -114,7 +110,37 @@
         splineAxisLengthY,
         splineAxisCoordinatesScalarX,
         splineAxisCoordinatesScalarY,
-        CLOSEST_X = 1,//220,
+        BUNNY_AXIS_MARGINS = 30,
+        BUNNY_AXIS_MIN_COORDINATE_X = SPLINE_AXIS_MIN_COORDINATE_X,
+        BUNNY_AXIS_MAX_COORDINATE_X = SPLINE_AXIS_MAX_COORDINATE_X,
+        BUNNY_AXIS_RANGE_X = BUNNY_AXIS_MAX_COORDINATE_X - BUNNY_AXIS_MIN_COORDINATE_X,
+        BUNNY_AXIS_LABELS_X =             [
+                {
+                    text: '-x',
+                    font: AXIS_LABEL_FONT,
+                    color: COLOR,
+                    relativeTo: "start",
+                    offset: {x: AXIS_LABEL_OFFSET_X_Y, y: -AXIS_LABEL_OFFSET_Y_Y},
+                    angle: Math.PI / 2,
+                    widthMultiplier: 0.5
+                },
+                {
+                    text: '+x',
+                    font: AXIS_LABEL_FONT,
+                    color: COLOR,
+                    relativeTo: "end",
+                    offset: {x: -AXIS_LABEL_OFFSET_X_Y, y: -AXIS_LABEL_OFFSET_Y_Y},
+                    angle: Math.PI / 2,
+                    widthMultiplier: 0.5
+                }
+            ],
+        bunnyCanvasWidth,
+        bunnyCanvasHeight,
+        bunnyAxisStartX,
+        bunnyAxisEndX,
+        bunnyAxisLengthX,
+        bunnyAxisCoordinatesScalarX,
+        CLOSEST_X = 1,
         AXIS_CLOSEST_X = 0,
         AXIS_CLOSEST_Y = 0,
         BUNNY_IMG_WIDTH = 48,
@@ -133,6 +159,7 @@
         splineCanvasElem,
         splineBackgroundCanvasElem,
         bunnyCanvasElem,
+        bunnyBackgroundCanvasElem,
         bunnyImg = new Image(),
         formElem,
         t1Elem,
@@ -589,7 +616,7 @@
         currentVelIndex = 0;
         requestID = window.requestAnimationFrame(bunnyRun);
     }*/
-    function drawBackground(ctx) {
+    function drawSplineBackground(ctx) {
         drawAxis(ctx, splineAxisStartX, splineAxisEndX, LINE_WIDTH, COLOR, SPLINE_AXIS_LABELS_X,
             SPLINE_AXIS_MIN_COORDINATE_X, SPLINE_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH,
             TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_X);
@@ -597,10 +624,16 @@
             SPLINE_AXIS_MIN_COORDINATE_Y, SPLINE_AXIS_MAX_COORDINATE_Y, AXIS_COORDINATE_STEP, LINE_WIDTH,
             -TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_Y);
     }
+    function drawBunnyBackground(ctx) {
+        drawAxis(ctx, bunnyAxisStartX, bunnyAxisEndX, LINE_WIDTH, COLOR, BUNNY_AXIS_LABELS_X,
+            BUNNY_AXIS_MIN_COORDINATE_X, BUNNY_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH,
+            TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_X);
+    }
     window.addEventListener('load', function() {
         splineCanvasElem = document.getElementById('splineCanvas');
         splineBackgroundCanvasElem = document.getElementById('splineBackgroundCanvas');
         bunnyCanvasElem = document.getElementById('bunnyCanvas');
+        bunnyBackgroundCanvasElem = document.getElementById('bunnyBackgroundCanvas');
         formElem = document.getElementById('form');
         splineCtx = splineCanvasElem.getContext('2d');
         splineBackgroundCtx = splineBackgroundCanvasElem.getContext('2d');
@@ -642,7 +675,14 @@
         splineAxisCoordinatesScalarY = SPLINE_AXIS_RANGE_Y / splineAxisLengthY;
         defaultTension = Number(tensionElem.value);
         tension = defaultTension;
-        //splineAxisCoordinatesRatio = splineAxisCoordinatesScalarX / splineAxisCoordinatesScalarY;
+        bunnyCanvasWidth = bunnyCanvasElem.width;
+        bunnyCanvasHeight = bunnyCanvasElem.height;
+        bunnyAxisStartX = {x: BUNNY_AXIS_MARGINS, y: bunnyCanvasHeight / 2};
+        bunnyAxisEndX = {x: bunnyCanvasWidth - BUNNY_AXIS_MARGINS, y: bunnyCanvasHeight / 2};
+        bunnyAxisLengthX = bunnyCanvasWidth - BUNNY_AXIS_MARGINS * 2;
+        bunnyAxisCoordinatesScalarX = BUNNY_AXIS_RANGE_X / bunnyAxisLengthX;
+        drawSplineBackground(splineBackgroundCtx);
+        drawBunnyBackground(bunnyBackgroundCtx);
         splineCanvasElem.addEventListener('mousemove', mouseMove, false);
         splineCanvasElem.addEventListener('mousedown', mouseDown, false);
         splineCanvasElem.addEventListener('mouseup', mouseUp, false);
@@ -651,7 +691,6 @@
             submit();
         });
         bunnyImg.src = 'bunny.jpg';
-        drawBackground(splineBackgroundCtx);
         //t1Elem.focus();
     }, false);
 }());
