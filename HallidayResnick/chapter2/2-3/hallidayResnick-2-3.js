@@ -1,4 +1,4 @@
-// Copyright © 2014 QuarksCode.  MIT License - see http://opensource.org/licenses/MIT and see COPYRIGHT.md
+// Copyright © 2014 QuarksCode.  MIT License - see http://opensource.org/licenses/MIT or LICENSE.md file
 // Original Author:  aeoril
 //
 // hallidayResnick-2-3.js - 1 motion: displacement and time interactive lesson
@@ -6,7 +6,7 @@
 (function () {
     'use strict';
 
-    var COORDINATE_DISPLAY_DIGITS = 2,
+    var DISPLAY_DIGITS = 2,
         AVERAGE_VELOCITY_DISPLAY_DIGITS = 2,
         TICK_DISPLACEMENT = 5,
         LINE_WIDTH = 1,
@@ -35,11 +35,9 @@
         SPLINE_AXIS_MIN_COORDINATE_X = -20,
         SPLINE_AXIS_MAX_COORDINATE_X = 20,
         SPLINE_AXIS_RANGE_X = SPLINE_AXIS_MAX_COORDINATE_X - SPLINE_AXIS_MIN_COORDINATE_X,
-        //SPLINE_AXIS_NUM_COORDINATES_X = (SPLINE_AXIS_RANGE_X) / AXIS_COORDINATE_STEP,
         SPLINE_AXIS_MIN_COORDINATE_Y = -10,
         SPLINE_AXIS_MAX_COORDINATE_Y = 10,
         SPLINE_AXIS_RANGE_Y = SPLINE_AXIS_MAX_COORDINATE_Y - SPLINE_AXIS_MIN_COORDINATE_Y,
-        //SPLINE_AXIS_NUM_COORDINATES_Y = (SPLINE_AXIS_RANGE_Y) / AXIS_COORDINATE_STEP,
         SPLINE_AXIS_LABELS_X =
             [
                 {
@@ -116,19 +114,18 @@
         splineAxisLengthY,
         splineAxisCoordinatesScalarX,
         splineAxisCoordinatesScalarY,
-        //splineAxisCoordinatesRatio,
-        CLOSEST_X = 220,
+        CLOSEST_X = 1,//220,
         AXIS_CLOSEST_X = 0,
         AXIS_CLOSEST_Y = 0,
-        //BUNNY_IMG_WIDTH = 48,
-        //BUNNY_IMG_HEIGHT = 48,
-        //BUNNY_IMG_MARGIN_TOP = 5,
+        BUNNY_IMG_WIDTH = 48,
+        BUNNY_IMG_HEIGHT = 48,
+        BUNNY_IMG_MARGIN_TOP = 5,
         ARROW_LABEL_FONT = 'normal 10pt "Droid Sans", sans-serif',
         ARROW_LABEL_OFFSET_Y = 10,
         ARROWHEAD_LENGTH = 7,
         ARROWHEAD_WIDTH = 5,
         DRAW_CONTROL_POINTS = false,
-        CLOSED = true,
+        CLOSED = false,
         knots = [],
         mouseIsDown = false,
         mousePoint = 0,
@@ -148,13 +145,13 @@
         x4Elem,
         tensionElem,
         animateElem,
+        defaultTension,
         tension,
+        TENSION_LIMIT_DIVISOR = 4,
         splineCtx,
         splineBackgroundCtx,
-        //bunnyCtx,
-        //axisCoordinatesRatio,
-        //x1 = NaN,
-        //x2 = NaN,
+        bunnyCtx,
+        bunnyBackgroundCtx,
         averageVelocities = [];//,
         //delX,
         //delXTotal,
@@ -256,7 +253,7 @@
         knots.forEach(function (knot, index, array) {
             var prevKnot = index === 0 ? array[array.length - 1] : array[index - 1],
                 nextKnot = array[(index + 1) % array.length],
-                controlPoints = calcControlPoints(prevKnot, knot, nextKnot, tension);
+                controlPoints = calcControlPoints(prevKnot, knot, nextKnot, tension / 100);
             prevKnot.cp2 = controlPoints.prev2;
             knot.cp1 = controlPoints.curr1;
         });
@@ -423,7 +420,7 @@
         mousePoint = 0;
 
         for (i = 0; i < knots.length - 1; i++) {
-           if (calcDistance(knots[i], mousePos) >
+           if (calcDistance(knots[mousePoint], mousePos) >
                calcDistance(knots[i + 1], mousePos)) {
                mousePoint = i + 1;
            }
@@ -431,10 +428,10 @@
     }
     function updateKnotCoordinateValues() {
         function calcXCoordinateValue(x) {
-            return (((x - splineAxisStartX.x) * splineAxisCoordinatesScalarX) + SPLINE_AXIS_MIN_COORDINATE_X).toFixed(COORDINATE_DISPLAY_DIGITS);
+            return ((x - splineAxisStartX.x) * splineAxisCoordinatesScalarX) + SPLINE_AXIS_MIN_COORDINATE_X;
         }
         function calcYCoordinateValue(y) {
-            return (((splineAxisStartY.y - y)  * splineAxisCoordinatesScalarY) + SPLINE_AXIS_MIN_COORDINATE_Y).toFixed(COORDINATE_DISPLAY_DIGITS);
+            return ((splineAxisStartY.y - y)  * splineAxisCoordinatesScalarY) + SPLINE_AXIS_MIN_COORDINATE_Y;
         }
         knots.forEach(function (value) {
             value.coordinates = {x: calcXCoordinateValue(value.x),
@@ -442,14 +439,14 @@
         });
     }
     function updateTextBoxes() {
-        t1Elem.value = knots[0].coordinates.x;
-        x1Elem.value = knots[0].coordinates.y;
-        t2Elem.value = knots[1].coordinates.x;
-        x2Elem.value = knots[1].coordinates.y;
-        t3Elem.value = knots[2].coordinates.x;
-        x3Elem.value = knots[2].coordinates.y;
-        t4Elem.value = knots[3].coordinates.x;
-        x4Elem.value = knots[3].coordinates.y;
+        t1Elem.value = knots[0].coordinates.x.toFixed(DISPLAY_DIGITS);
+        x1Elem.value = knots[0].coordinates.y.toFixed(DISPLAY_DIGITS);
+        t2Elem.value = knots[1].coordinates.x.toFixed(DISPLAY_DIGITS);
+        x2Elem.value = knots[1].coordinates.y.toFixed(DISPLAY_DIGITS);
+        t3Elem.value = knots[2].coordinates.x.toFixed(DISPLAY_DIGITS);
+        x3Elem.value = knots[2].coordinates.y.toFixed(DISPLAY_DIGITS);
+        t4Elem.value = knots[3].coordinates.x.toFixed(DISPLAY_DIGITS);
+        x4Elem.value = knots[3].coordinates.y.toFixed(DISPLAY_DIGITS);
     }
     function updateAverageVelocities() {
         function calculateVelocity(p1, p2) {
@@ -461,6 +458,20 @@
             {x: knots[2].coordinates.x, y: knots[2].coordinates.y});
         averageVelocities[2] = calculateVelocity({x: knots[2].coordinates.x, y: knots[2].coordinates.y},
             {x: knots[3].coordinates.x, y: knots[3].coordinates.y});
+    }
+    function updateTension() {
+        var i,
+            limit;
+
+        tension = defaultTension;
+
+        for (i = 0; i < knots.length - 1; i++) {
+            limit = (knots[i + 1].x - knots[i].x) / TENSION_LIMIT_DIVISOR;
+            if (limit < tension) {
+                tension = limit;
+            }
+        }
+        tensionElem.value = tension.toFixed(DISPLAY_DIGITS);
     }
     function mouseMove(e) {
 
@@ -492,10 +503,11 @@
                 (mousePos.y <= splineAxisStartY.y - AXIS_CLOSEST_Y && mousePos.y >= splineAxisEndY.y + AXIS_CLOSEST_Y)) {
                 knots[mousePoint].y = mousePos.y;
             }
+            updateKnotCoordinateValues();
+            updateTextBoxes();
+            updateAverageVelocities();
+            updateTension();
         }
-        updateKnotCoordinateValues();
-        updateTextBoxes();
-        updateAverageVelocities();
         drawSplineAll(splineCtx);
         if (mousePoint === 0 && mouseIsDown) {
             //drawBunnyAll(bunnyCtx);
@@ -535,10 +547,11 @@
             knot.x = (knot.coordinates.x - SPLINE_AXIS_MIN_COORDINATE_X) / splineAxisCoordinatesScalarX + splineAxisStartX.x;
             knot.y = splineAxisStartY.y - (knot.coordinates.y - SPLINE_AXIS_MIN_COORDINATE_Y) / splineAxisCoordinatesScalarY;
         });
-        tension = Number(tensionElem.value) / 100;
+        //tension = Number(tensionElem.value) / 100;
         updateKnotCoordinateValues();
         updateTextBoxes();
         updateAverageVelocities();
+        updateTension();
         drawSplineAll(splineCtx);
         //drawBunnyAll(bunnyCtx);
         if (e) {
@@ -627,6 +640,8 @@
         splineAxisLengthY = splineCanvasHeight - SPLINE_AXIS_MARGINS * 2;
         splineAxisCoordinatesScalarX = SPLINE_AXIS_RANGE_X / splineAxisLengthX;
         splineAxisCoordinatesScalarY = SPLINE_AXIS_RANGE_Y / splineAxisLengthY;
+        defaultTension = Number(tensionElem.value);
+        tension = defaultTension;
         //splineAxisCoordinatesRatio = splineAxisCoordinatesScalarX / splineAxisCoordinatesScalarY;
         splineCanvasElem.addEventListener('mousemove', mouseMove, false);
         splineCanvasElem.addEventListener('mousedown', mouseDown, false);

@@ -11,4 +11,4 @@ Intended for first year college students aiming for a physical sciences or engin
 degree.
 
 physicsLearning provides a number of interactive tutorials and animations to help learn physics
-and coding discussions to learn how to code physics.
+and math and coding discussions to learn how to code them.

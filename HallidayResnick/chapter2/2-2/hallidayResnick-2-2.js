@@ -1,4 +1,4 @@
-// Copyright © 2014 QuarksCode.  MIT License - see http://opensource.org/licenses/MIT and see COPYRIGHT.md
+// Copyright © 2014 QuarksCode.  MIT License - see http://opensource.org/licenses/MIT or LICENSE.md file
 // Original Author:  aeoril
 //
 // hallidayResnick-2-2.js - 1 dimensional position and displacement interactive lesson
