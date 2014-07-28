@@ -28,7 +28,7 @@ canvas {
     /*box-shadow: 0 0 10px #888;*/
     margin-bottom: 15px;
 }
-#splineBackgroundCanvas {
+#splineBackgroundCanvas, #bunnyBackgroundCanvas {
     display: none;
 }
 input[type='text'] {
