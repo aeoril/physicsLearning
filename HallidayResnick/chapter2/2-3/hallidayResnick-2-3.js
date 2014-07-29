@@ -190,7 +190,7 @@
         tTotal,
         bunnyXCoordinateTotal,
         currentVelIndex,
-        requestID;
+        requestID = null;
 
     function cloneObj(from) {
         var to = {},
@@ -502,8 +502,10 @@
             posTextX,
             posTextY;
 
+        if (requestID !== null) {
+            return;
+        }
         calcMousePos(e);
-
         if (mousePos.x > splineCanvasWidth) {
             mousePos.x = splineCanvasWidth;
         }
@@ -606,6 +608,9 @@
         requestID = window.requestAnimationFrame(bunnyRun);
     }
     function animate() {
+        if (requestID !== null) {
+            return;
+        }
          currentSegmentBunnyT = 0;
          tTotal = knots[0].coordinates.x;
          bunnyXCoordinateTotal = knots[0].coordinates.y;
