@@ -192,22 +192,22 @@
         currentVelIndex,
         requestID = null;
 
-    function cloneObj(from) {
-        var to = {},
-            key;
-
-        for (key in from) {
-            if (from.hasOwnProperty(key)) {
-                if (typeof from[key] === 'object') {
-                    to[key] = cloneObj(from[key]);
-                } else {
-                    to[key] = from[key];
-                }
-            }
-        }
-        return to;
-    }
-
+//    function cloneObj(from) {
+//        var to = {},
+//            key;
+//
+//        for (key in from) {
+//            if (from.hasOwnProperty(key)) {
+//                if (typeof from[key] === 'object') {
+//                    to[key] = cloneObj(from[key]);
+//                } else {
+//                    to[key] = from[key];
+//                }
+//            }
+//        }
+//        return to;
+//    }
+//
     function calcDistance(point1, point2) {
         var delta = {x: point2.x - point1.x, y: point2.y - point1.y};
         return Math.sqrt(delta.x * delta.x + delta.y * delta.y);
@@ -381,7 +381,6 @@
                         labelX = length + label.offset.x;
                         break;
                 }
-                //labelX = label.adjustForWidth ? labelX - ctx.measureText(label.text).width / 2 : labelX;
                 ctx.translate(labelX, label.offset.y);
                 ctx.rotate(label.angle);
                 ctx.fillText(label.text, -ctx.measureText(label.text).width * label.widthMultiplier, 0);
@@ -407,12 +406,9 @@
         ctx.clearRect(0, 0, splineCanvasWidth, splineCanvasHeight);
         ctx.drawImage(splineBackgroundCanvasElem, 0, 0);
         drawSpline(ctx, knots, CLOSED, DRAW_CONTROL_POINTS);
-//        drawArrow(ctx, knots[0], knots[1], 'Average Velocity =  ' + averageVelocities[0].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[0]);
-//        drawArrow(ctx, knots[1], knots[2], 'Average Velocity =  ' + averageVelocities[1].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[1]);
-//        drawArrow(ctx, knots[2], knots[3], 'Average Velocity =  ' + averageVelocities[2].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[2]);
-        drawArrow(ctx, knots[0], knots[1], 'Average Velocity =  ' + averageVelocities[0], COLOR, ARROW_LABEL_COLORS[0]);
-        drawArrow(ctx, knots[1], knots[2], 'Average Velocity =  ' + averageVelocities[1], COLOR, ARROW_LABEL_COLORS[1]);
-        drawArrow(ctx, knots[2], knots[3], 'Average Velocity =  ' + averageVelocities[2], COLOR, ARROW_LABEL_COLORS[2]);
+        drawArrow(ctx, knots[0], knots[1], 'Average Velocity =  ' + averageVelocities[0].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[0]);
+        drawArrow(ctx, knots[1], knots[2], 'Average Velocity =  ' + averageVelocities[1].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[1]);
+        drawArrow(ctx, knots[2], knots[3], 'Average Velocity =  ' + averageVelocities[2].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[2]);
     }
     function calcMousePos(e) {
         var top = 0,
@@ -506,12 +502,8 @@
             return;
         }
         calcMousePos(e);
-        if (mousePos.x > splineCanvasWidth) {
-            mousePos.x = splineCanvasWidth;
-        }
-        if (mousePos.y > splineCanvasHeight) {
-            mousePos.y = splineCanvasHeight;
-        }
+        mousePos.x = Math.min(mousePos.x, splineCanvasWidth);
+        mousePos.y = Math.min(mousePos.y, splineCanvasHeight);
         if (mouseIsDown) {
             if (mousePoint !== 0 &&
                 ((mousePoint === knots.length - 1 &&
@@ -535,7 +527,7 @@
         if (mouseIsDown) {
             drawBunnyAll(bunnyCtx, knots[0].coordinates.y, averageVelocities[0]);
         }
-        posText = '{' + mousePos.x + ',' + mousePos.y + ')';
+        posText = '(' + mousePos.x + ',' + mousePos.y + ')';
         posTextWidth = splineCtx.measureText(posText).width;
         posTextX = mousePos.x;
         posTextY = mousePos.y;
