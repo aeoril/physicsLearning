@@ -161,7 +161,6 @@
         splineBackgroundCanvasElem,
         bunnyCanvasElem,
         bunnyBackgroundCanvasElem,
-        bunnyImg = new Image(),
         formElem,
         t1Elem,
         x1Elem,
@@ -178,6 +177,10 @@
         TENSION_LIMIT_DIVISOR = 4,
         splineCtx,
         splineBackgroundCtx,
+        BUNNY_RIGHT_SRC = 'bunnyRight.png',
+        BUNNY_LEFT_SRC = 'bunnyLeft.png',
+        bunnyRightImg = new Image(),
+        bunnyLeftImg = new Image(),
         bunnyCtx,
         bunnyBackgroundCtx,
         averageVelocities = [],
@@ -186,7 +189,8 @@
         currentSegmentBunnyT,
         tTotal,
         bunnyXCoordinateTotal,
-        currentVelIndex;
+        currentVelIndex,
+        requestID;
 
     function cloneObj(from) {
         var to = {},
@@ -526,8 +530,8 @@
             updateTension();
         }
         drawSplineAll(splineCtx);
-        if (mousePoint === 0 && mouseIsDown) {
-            drawBunnyAll(bunnyCtx, knots[0].coordinates.y);
+        if (mouseIsDown) {
+            drawBunnyAll(bunnyCtx, knots[0].coordinates.y, averageVelocities[0]);
         }
         posText = '{' + mousePos.x + ',' + mousePos.y + ')';
         posTextWidth = splineCtx.measureText(posText).width;
@@ -546,6 +550,10 @@
         splineCtx.restore();
     }
     function mouseDown(e) {
+        if (requestID !== null) {
+            window.cancelAnimationFrame(requestID);
+            requestID = null;
+        }
         calcMousePos(e);
         calcClosestPoint();
         mouseIsDown = true;
@@ -557,42 +565,52 @@
     function calcBunnyX(xCoordinate) {
         return bunnyAxisStartX.x + (xCoordinate - BUNNY_AXIS_MIN_COORDINATE_X) / bunnyAxisCoordinatesScalarX;
     }
-    function drawBunny(ctx, bunnyXCoordinate) {
-        ctx.drawImage(bunnyImg, calcBunnyX(bunnyXCoordinate) - BUNNY_IMG_WIDTH / 2,
+    function drawBunny(ctx, bunnyXCoordinate, velocity) {
+        ctx.drawImage(velocity < 0 ? bunnyLeftImg : bunnyRightImg,
+            calcBunnyX(bunnyXCoordinate) - BUNNY_IMG_WIDTH / 2,
             BUNNY_IMG_MARGIN_TOP, BUNNY_IMG_WIDTH, BUNNY_IMG_HEIGHT);
     }
-    function drawBunnyAll(ctx, bunnyXCoordinate) {
+    function drawBunnyAll(ctx, bunnyXCoordinate, velocity) {
         ctx.clearRect(0, 0, bunnyCanvasWidth, bunnyCanvasHeight);
         ctx.drawImage(bunnyBackgroundCanvasElem, 0, 0);
-        drawBunny(ctx, bunnyXCoordinate);
+        drawBunny(ctx, bunnyXCoordinate, velocity);
     }
     function bunnyRun() {
+
+        function draw() {
+            drawSplineAll(splineCtx);
+            drawPoint(splineCtx, {x: calcSplineX(currentSegmentBunnyT + tTotal),
+                    y: calcSplineY(currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal)},
+                5.0, "rgb(0, 0, 0)", "rgb(255, 0, 255)");
+            drawBunnyAll(bunnyCtx, currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal,
+                averageVelocities[currentVelIndex]);
+        }
+
         var currentSegmentBunnyXCoordinateOffset;
 
         currentSegmentBunnyXCoordinateOffset = averageVelocities[currentVelIndex] * currentSegmentBunnyT;
-        drawSplineAll(splineCtx);
-        drawPoint(splineCtx, {x: calcSplineX(currentSegmentBunnyT + tTotal),
-            y: calcSplineY(currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal)},
-            5.0, "rgb(0, 0, 0)", "rgb(255, 0, 255)");
-        drawBunnyAll(bunnyCtx, currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal);
+        draw();
         if (currentSegmentBunnyT + DELTA_T + tTotal > knots[(currentVelIndex + 1)].coordinates.x) {
-            if (currentVelIndex + 2 === knots.length) {
-                return;
-            }
             currentVelIndex++;
             bunnyXCoordinateTotal = knots[currentVelIndex].coordinates.y;
             tTotal = knots[currentVelIndex].coordinates.x;
             currentSegmentBunnyT = 0;
+            if (requestID === null || currentVelIndex + 1 === knots.length) {
+                currentSegmentBunnyXCoordinateOffset = 0;
+                draw();
+                requestID = null;
+                return;
+            }
         }
         currentSegmentBunnyT += DELTA_T;
-        window.requestAnimationFrame(bunnyRun);
+        requestID = window.requestAnimationFrame(bunnyRun);
     }
     function animate() {
          currentSegmentBunnyT = 0;
          tTotal = knots[0].coordinates.x;
          bunnyXCoordinateTotal = knots[0].coordinates.y;
          currentVelIndex = 0;
-         window.requestAnimationFrame(bunnyRun);
+         requestID = window.requestAnimationFrame(bunnyRun);
      }
     function bunnyImgLoaded(e) {
         knots = [];
@@ -610,7 +628,7 @@
         updateAverageVelocities();
         updateTension();
         drawSplineAll(splineCtx);
-        drawBunnyAll(bunnyCtx, knots[0].coordinates.y);
+        drawBunnyAll(bunnyCtx, knots[0].coordinates.y, averageVelocities[0]);
         splineCanvasElem.addEventListener('mousemove', mouseMove, false);
         splineCanvasElem.addEventListener('mousedown', mouseDown, false);
         splineCanvasElem.addEventListener('mouseup', mouseUp, false);
@@ -673,10 +691,13 @@
         bunnyAxisCoordinatesScalarX = BUNNY_AXIS_RANGE_X / bunnyAxisLengthX;
         drawSplineBackground(splineBackgroundCtx);
         drawBunnyBackground(bunnyBackgroundCtx);
-        bunnyImg.addEventListener('load', function () {
+        bunnyLeftImg.addEventListener('load', function () {
             bunnyImgLoaded();
-        });
-        bunnyImg.src = 'bunny.jpg';
+        }, false);
+        bunnyRightImg.addEventListener('load', function () {
+            bunnyLeftImg.src = BUNNY_LEFT_SRC;
+        }, false);
+        bunnyRightImg.src = BUNNY_RIGHT_SRC;
         //t1Elem.focus();
     }, false);
 }());
