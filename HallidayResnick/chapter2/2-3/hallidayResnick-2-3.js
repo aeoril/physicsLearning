@@ -188,8 +188,10 @@
         DELTA_T = (SPLINE_AXIS_RANGE_X / 60) / MAX_ANIMATION_TIME,
         currentSegmentBunnyT,
         tTotal,
+        currentSegmentBunnyXCoordinateOffset,
         bunnyXCoordinateTotal,
         currentVelIndex,
+        showBunnyPoint = false,
         requestID = null;
 
 //    function cloneObj(from) {
@@ -490,6 +492,11 @@
         }
         tensionElem.value = tension.toFixed(DISPLAY_DIGITS);
     }
+    function drawBunnyPoint() {
+        drawPoint(splineCtx, {x: calcSplineX(currentSegmentBunnyT + tTotal),
+                y: calcSplineY(currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal)},
+            5.0, "rgb(0, 0, 0)", "rgb(255, 0, 255)");
+    }
     function mouseMove(e) {
 
         var posText,
@@ -522,10 +529,13 @@
             updateTextBoxes();
             updateAverageVelocities();
             updateTension();
+            drawBunnyAll(bunnyCtx, knots[0].coordinates.y, averageVelocities[0]);
         }
         drawSplineAll(splineCtx);
+        if (showBunnyPoint) {
+            drawBunnyPoint();
+        }
         if (mouseIsDown) {
-            drawBunnyAll(bunnyCtx, knots[0].coordinates.y, averageVelocities[0]);
         }
         posText = '(' + mousePos.x + ',' + mousePos.y + ')';
         posTextWidth = splineCtx.measureText(posText).width;
@@ -551,6 +561,7 @@
         calcMousePos(e);
         calcClosestPoint();
         mouseIsDown = true;
+        showBunnyPoint = false;
         mouseMove(e);
     }
     function mouseUp() {
@@ -573,14 +584,10 @@
 
         function draw() {
             drawSplineAll(splineCtx);
-            drawPoint(splineCtx, {x: calcSplineX(currentSegmentBunnyT + tTotal),
-                    y: calcSplineY(currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal)},
-                5.0, "rgb(0, 0, 0)", "rgb(255, 0, 255)");
+            drawBunnyPoint();
             drawBunnyAll(bunnyCtx, currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal,
                 averageVelocities[currentVelIndex]);
         }
-
-        var currentSegmentBunnyXCoordinateOffset;
 
         currentSegmentBunnyXCoordinateOffset = averageVelocities[currentVelIndex] * currentSegmentBunnyT;
         draw();
@@ -591,6 +598,7 @@
             currentSegmentBunnyT = 0;
             if (requestID === null || currentVelIndex + 1 === knots.length) {
                 currentSegmentBunnyXCoordinateOffset = 0;
+                currentVelIndex--;
                 draw();
                 requestID = null;
                 return;
@@ -603,11 +611,12 @@
         if (requestID !== null) {
             return;
         }
-         currentSegmentBunnyT = 0;
-         tTotal = knots[0].coordinates.x;
-         bunnyXCoordinateTotal = knots[0].coordinates.y;
-         currentVelIndex = 0;
-         requestID = window.requestAnimationFrame(bunnyRun);
+        currentSegmentBunnyT = 0;
+        tTotal = knots[0].coordinates.x;
+        bunnyXCoordinateTotal = knots[0].coordinates.y;
+        currentVelIndex = 0;
+        showBunnyPoint = true;
+        requestID = window.requestAnimationFrame(bunnyRun);
      }
     function bunnyImgLoaded(e) {
         knots = [];
