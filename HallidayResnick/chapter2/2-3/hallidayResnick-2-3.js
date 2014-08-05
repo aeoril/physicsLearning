@@ -6,6 +6,116 @@
 (function () {
     'use strict';
 
+    function calcDistance(point1, point2) {
+        var delta = {x: point2.x - point1.x, y: point2.y - point1.y};
+        return Math.sqrt(delta.x * delta.x + delta.y * delta.y);
+    }
+
+    function drawPoint(ctx, knot, r, strokeColor, fillColor, lineWidth){
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineWidth = lineWidth || 1;
+        ctx.strokeStyle = strokeColor || 'rgb(0, 0, 0)';
+        ctx.fillStyle = fillColor || 'rgb(0, 0, 0)';
+        ctx.arc(knot.x, knot.y, r, 0.0, 2 * Math.PI, false);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fill();
+        ctx.restore();
+    }
+
+    function MultiSegmentSpline(numberOfSegments) {
+
+    }
+    // Set shared properties using prototype object
+    MultiSegmentSpline.prototype = {
+        calcControlPoints: function(prevKnot, currentKnot, nextKnot, tension){
+            var distancePC = calcDistance(prevKnot, currentKnot),
+                distanceCN = calcDistance(currentKnot, nextKnot),
+                fractionPC = tension * distancePC / (distancePC + distanceCN),
+                fractionCN = tension - fractionPC,
+                controlPointPrev2 = {x: currentKnot.x + fractionPC * (prevKnot.x - nextKnot.x),
+                    y: currentKnot.y + fractionPC * (prevKnot.y - nextKnot.y)},
+                controlPointCurr1 = {x: currentKnot.x - fractionCN * (prevKnot.x - nextKnot.x),
+                    y: currentKnot.y - fractionCN * (prevKnot.y - nextKnot.y)};
+
+            return {prev2: controlPointPrev2, curr1: controlPointCurr1};
+        },
+        drawControlLine: function(ctx, knot, controlPoint, color){
+            ctx.save();
+            ctx.beginPath();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = color;
+            ctx.moveTo(knot.x, knot.y);
+            ctx.lineTo(controlPoint.x, controlPoint.y);
+            ctx.closePath();
+            ctx.stroke();
+            drawPoint(ctx, controlPoint, 1.5, ctx.strokeStyle, ctx.strokeStyle);
+            ctx.restore();
+        },
+        drawInnerSegment: function(ctx, knot1, knot2, knotPrev, drawControlPoints) {
+            ctx.strokeStyle = knot1.color;
+            ctx.beginPath();
+            ctx.moveTo(knot1.x, knot1.y);
+            ctx.bezierCurveTo(knot1.cp1.x, knot1.cp1.y, knot1.cp2.x, knot1.cp2.y,
+                knot2.x, knot2.y);
+            ctx.stroke();
+            ctx.closePath();
+            if (drawControlPoints) {
+                drawControlLine(ctx, knot1, knot1.cp1, COLOR);
+                drawControlLine(ctx, knot1, knotPrev.cp2, COLOR);
+            }
+        },
+        drawEndSegment: function(ctx, endKnot, innerKnot, cp, cpKnot, prevKnot, color, drawControlPoints) {
+            ctx.strokeStyle=color;
+            ctx.beginPath();
+            ctx.moveTo(endKnot.x, endKnot.y);
+            ctx.quadraticCurveTo(cp.x, cp.y, innerKnot.x, innerKnot.y);
+            ctx.stroke();
+            ctx.closePath();
+            if (drawControlPoints) {
+                drawControlLine(ctx, cpKnot, cpKnot.cp1, COLOR);
+                drawControlLine(ctx, cpKnot, prevKnot.cp2, COLOR);
+            }
+        },
+        draw: function(ctx, knots, closed, drawControlPoints){
+            var lastIndex = knots.length - 1;
+
+            ctx.save();
+            ctx.lineWidth=4;
+            knots.forEach(function (knot, index, array) {
+                var prevKnot = index === 0 ? array[array.length - 1] : array[index - 1],
+                    nextKnot = array[(index + 1) % array.length],
+                    controlPoints = calcControlPoints(prevKnot, knot, nextKnot, tension / 100);
+                prevKnot.cp2 = controlPoints.prev2;
+                knot.cp1 = controlPoints.curr1;
+            });
+            knots.forEach(function (knot, index, array) {
+                var prevKnot = index === 0 ? array[array.length - 1] : array[index - 1],
+                    nextKnot = array[(index + 1) % array.length];
+                if (!closed && (index === 0 || index >= array.length - 2)) {
+                    return;
+                }
+                drawInnerSegment(ctx, knot, nextKnot, prevKnot, drawControlPoints);
+            });
+            if (!closed) {
+                drawEndSegment(ctx, knots[0], knots[1], knots[0].cp2, knots[0], knots[lastIndex], knots[0].color, drawControlPoints);
+                drawEndSegment(ctx, knots[lastIndex], knots[lastIndex - 1],
+                    knots[lastIndex - 1].cp1, knots[lastIndex - 1],  knots[lastIndex - 2], knots[lastIndex - 1].color, drawControlPoints);
+            }
+            if (drawControlPoints) {
+                drawControlLine(ctx, knots[lastIndex], knots[lastIndex].cp1, COLOR);
+                drawControlLine(ctx, knots[lastIndex], knots[lastIndex - 1].cp2, COLOR);
+            }
+            knots.forEach(function(knot) {
+                drawPoint(ctx, knot, 2.5, COLOR, KNOT_POINT_FILL_COLOR);
+            });
+            ctx.restore();
+        }
+    };
+    // Fix instanceOf after obliterating prototype.constructor with object assignment
+    MultiSegmentSpline.prototype.constructor = MultiSegmentSpline;
+
     var DISPLAY_DIGITS = 2,
         AVERAGE_VELOCITY_DISPLAY_DIGITS = 2,
         TICK_DISPLACEMENT = 5,
@@ -193,132 +303,6 @@
         currentVelIndex,
         showBunnyPoint = false,
         requestID = null;
-
-//    function cloneObj(from) {
-//        var to = {},
-//            key;
-//
-//        for (key in from) {
-//            if (from.hasOwnProperty(key)) {
-//                if (typeof from[key] === 'object') {
-//                    to[key] = cloneObj(from[key]);
-//                } else {
-//                    to[key] = from[key];
-//                }
-//            }
-//        }
-//        return to;
-//    }
-//
-    function calcDistance(point1, point2) {
-        var delta = {x: point2.x - point1.x, y: point2.y - point1.y};
-        return Math.sqrt(delta.x * delta.x + delta.y * delta.y);
-    }
-// *******************************************************************************************
-// Start Rob Spencer Code from http://scaledinnovation.com/analytics/splines/aboutSplines.html
-// This code is copyrighted with all rights reserved - see his site for details.  Thanks, Rob!
-// Heavily refactored by QuarksCode
-// *******************************************************************************************
-    function drawPoint(ctx, knot, r, strokeColor, fillColor){
-        ctx.save();
-        ctx.beginPath();
-        ctx.lineWidth=1;
-        ctx.strokeStyle = strokeColor;
-        ctx.fillStyle=fillColor;
-        ctx.arc(knot.x, knot.y, r, 0.0, 2*Math.PI, false);
-        ctx.closePath();
-        ctx.stroke();
-        ctx.fill();
-        ctx.restore();
-    }
-    function calcControlPoints(prevKnot, currentKnot, nextKnot, tension){
-        var distancePC = calcDistance(prevKnot, currentKnot),
-            distanceCN = calcDistance(currentKnot, nextKnot),
-            fractionPC = tension * distancePC / (distancePC + distanceCN),
-            fractionCN = tension - fractionPC,
-            controlPointPrev2 = {x: currentKnot.x + fractionPC * (prevKnot.x - nextKnot.x),
-                y: currentKnot.y + fractionPC * (prevKnot.y - nextKnot.y)},
-            controlPointCurr1 = {x: currentKnot.x - fractionCN * (prevKnot.x - nextKnot.x),
-                y: currentKnot.y - fractionCN * (prevKnot.y - nextKnot.y)};
-
-        return {prev2: controlPointPrev2, curr1: controlPointCurr1};
-    }
-    function drawControlLine(ctx, knot, controlPoint, color){
-        ctx.save();
-        ctx.beginPath();
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = color;
-        ctx.moveTo(knot.x, knot.y);
-        ctx.lineTo(controlPoint.x, controlPoint.y);
-        ctx.closePath();
-        ctx.stroke();
-        drawPoint(ctx, controlPoint, 1.5, ctx.strokeStyle, ctx.strokeStyle);
-        ctx.restore();
-    }
-    function drawInnerSegment(ctx, knot1, knot2, knotPrev, drawControlPoints) {
-        ctx.strokeStyle = knot1.color;
-        ctx.beginPath();
-        ctx.moveTo(knot1.x, knot1.y);
-        ctx.bezierCurveTo(knot1.cp1.x, knot1.cp1.y, knot1.cp2.x, knot1.cp2.y,
-            knot2.x, knot2.y);
-        ctx.stroke();
-        ctx.closePath();
-        if(drawControlPoints){
-            drawControlLine(ctx, knot1, knot1.cp1, COLOR);
-            drawControlLine(ctx, knot1, knotPrev.cp2, COLOR);
-        }
-    }
-    function drawEndSegment(ctx, endKnot, innerKnot, cp, cpKnot, prevKnot, color, drawControlPoints) {
-        ctx.strokeStyle=color;
-        ctx.beginPath();
-        ctx.moveTo(endKnot.x, endKnot.y);
-        ctx.quadraticCurveTo(cp.x, cp.y, innerKnot.x, innerKnot.y);
-        ctx.stroke();
-        ctx.closePath();
-        if(drawControlPoints){
-            drawControlLine(ctx, cpKnot, cpKnot.cp1, COLOR);
-            drawControlLine(ctx, cpKnot, prevKnot.cp2, COLOR);
-        }
-    }
-    function drawSpline(ctx, knots, closed, drawControlPoints){
-        var lastIndex = knots.length - 1;
-
-        ctx.save();
-        ctx.lineWidth=4;
-        knots.forEach(function (knot, index, array) {
-            var prevKnot = index === 0 ? array[array.length - 1] : array[index - 1],
-                nextKnot = array[(index + 1) % array.length],
-                controlPoints = calcControlPoints(prevKnot, knot, nextKnot, tension / 100);
-            prevKnot.cp2 = controlPoints.prev2;
-            knot.cp1 = controlPoints.curr1;
-        });
-        knots.forEach(function (knot, index, array) {
-            var prevKnot = index === 0 ? array[array.length - 1] : array[index - 1],
-                nextKnot = array[(index + 1) % array.length];
-            if (!closed && (index === 0 || index >= array.length - 2)) {
-                return;
-            }
-            drawInnerSegment(ctx, knot, nextKnot, prevKnot, drawControlPoints);
-        });
-        if (!closed) {
-            drawEndSegment(ctx, knots[0], knots[1], knots[0].cp2, knots[0], knots[lastIndex], knots[0].color, drawControlPoints);
-            drawEndSegment(ctx, knots[lastIndex], knots[lastIndex - 1],
-                knots[lastIndex - 1].cp1, knots[lastIndex - 1],  knots[lastIndex - 2], knots[lastIndex - 1].color, drawControlPoints);
-        }
-        if(drawControlPoints){
-            drawControlLine(ctx, knots[lastIndex], knots[lastIndex].cp1, COLOR);
-            drawControlLine(ctx, knots[lastIndex], knots[lastIndex - 1].cp2, COLOR);
-        }
-        knots.forEach(function(knot) {
-            drawPoint(ctx, knot, 2.5, COLOR, KNOT_POINT_FILL_COLOR);
-        });
-        ctx.restore();
-    }
-
-// *******************************************************************************************
-// End Rob Spencer Code from http://scaledinnovation.com/analytics/splines/aboutSplines.html
-// Heavily refactored by QuarksCode
-// *******************************************************************************************
 
     function drawArrow(ctx, p1, p2, text, arrowColor, labelColor) {
         var length = calcDistance(p1, p2),
