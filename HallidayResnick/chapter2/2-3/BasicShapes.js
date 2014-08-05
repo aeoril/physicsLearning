@@ -5,19 +5,27 @@
 
 var BasicShapes = {
     create: function(context) {
+        'use strict';
+
         return Object.create(basicShapesPrototype).init(context);
     },
     drawPoint: function(context) {
+        'use strict';
+
         return this.drawPoint();
     }
 };
 
 var basicShapesPrototype = {
     init: function(context) {
+        'use strict';
+
         this.context = context;
         return this;
     },
     drawPoint: function(point, r, strokeStyle, fillStyle, lineWidth){
+        'use strict';
+
         ctx.save();
         ctx.beginPath();
         ctx.lineWidth = lineWidth || 1;

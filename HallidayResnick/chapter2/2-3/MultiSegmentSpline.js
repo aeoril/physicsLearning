@@ -6,6 +6,8 @@
 var MultiSegmentSpline = {
     create: function(context, basicShapes, knots, closed, tension, drawControlLines,
                      segmentStrokeStyles, knotParams, controlLineParams) {
+        'use strict';
+
         return Object.create(multiSegmentSplinePrototype).init(context, basicShapes, knots, closed,
             tension, drawControlLines, segmentStrokeStyles, knotParams, controlLineParams);
     }
@@ -14,6 +16,8 @@ var MultiSegmentSpline = {
 var multiSegmentSplinePrototype = {
     init: function(context, basicShapes, knots, closed, tension, drawControlPoints,
                    segmentParams, knotParams, controlLineParams) {
+        'use strict';
+
         this.context = context;
         this.basicShapes = basicShapes || BasicShapes.create(context);
         this.knots = knots;
@@ -23,11 +27,53 @@ var multiSegmentSplinePrototype = {
         this.segmentParams = segmentParams || {lineWidth: 4, segmentStrokeStyles:
             ['rgb(128, 209, 99)', 'rgb(231, 109, 128)', 'rgb(74, 158, 139)', 'rgb(245, 165, 115)']};
         this.knotParams = knotParams
-            || {radius: 2.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
+            || {minKnotDelta: 1, radius: 2.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
         this.controlLineParams = controlLineParams
             || {lineWidth: 1, radius: 1.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
     },
+    calcClosestKnotIndex: function(point) {
+        var i,
+            closestKnotIndex = 0;
+
+        for (i = 0; i < this.knots.length - 1; i++) {
+            if (mathBasics.calcDistance(this.knots[index], point) >
+                mathBasics.calcDistance(this.knots[i + 1], point)) {
+                closestKnotIndex = i + 1;
+            }
+        }
+        return closestKnotIndex;
+    },
+    knotInBounds: function(value, lowerBound, upperBound, minKnotDelta) {
+        if (value - minKnotDelta <= lowerBound) {
+            return false;
+        } else if (value + minKnotDelta >= upperBound) {
+            return false;
+        }
+        return true;
+    },
+    setClosestKnot: function(point, startX, endX, startY, endY) {
+        'use strict';
+
+        var closestKnotIndex,
+            maxKnotIndex = this.knots.length - 1;
+
+        closestKnotIndex = this.calcClosestKnotIndex(point);
+        if (closestKnotIndex !== 0 &&
+            ((closestKnotIndex === 1 && this.knotInBounds(point.x, startX, this.knots[2].x, this.knotParams.minKnotDelta)) ||
+             (closestKnotIndex === maxKnotIndex &&
+              this.knotInBounds(point.x, this.knots[this.knots.length - 2].x, endX, this.knotParams.minKnotDelta)) ||
+             (closestKnotIndex > 1 && closestKnotIndex < maxKnotIndex &&
+              this.knotInBounds(point.x, this.knots[closestKnotIndex - 1], this.knots[closestKnotIndex + 1],
+                  this.knotParams.minKnotDelta)))) {
+            this.knots[closestKnotIndex].x = point.x;
+        }
+        if (point.y >= startY && point.y <= endY) {
+            this.knots[closestKnotIndex].y = point.y;
+        }
+    },
     calcControlPoints: function(prevKnot, currentKnot, nextKnot) {
+        'use strict';
+
         var distancePC = mathBasics.calcDistance(prevKnot, currentKnot),
             distanceCN = mathBasics.calcDistance(currentKnot, nextKnot),
             fractionPC = this.tension * distancePC / (distancePC + distanceCN),
@@ -40,6 +86,8 @@ var multiSegmentSplinePrototype = {
         return {prev2: controlPointPrev2, curr1: controlPointCurr1};
     },
     drawControlLine: function(knot, controlPoint) {
+        'use strict';
+
         this.context.save();
         this.context.beginPath();
         this.context.lineWidth = this.controlLineParams.lineWidth;
@@ -53,6 +101,8 @@ var multiSegmentSplinePrototype = {
         this.context.restore();
     },
     drawInnerSegment: function(knot1, knot2, previousKnot, segmentColor) {
+        'use strict';
+
         this.context.save();
         this.context.lineWidth = this.segmentParams.lineWidth;
         this.context.strokeStyle = segmentColor;
@@ -70,6 +120,8 @@ var multiSegmentSplinePrototype = {
         }
     },
     drawEndSegment: function(endKnot, innerKnot, cp, cpKnot, prevKnot, color) {
+        'use strict';
+
         this.context.save();
         this.context.lineWidth = this.segmentParams.lineWidth;
         this.context.strokeStyle=color;
@@ -85,6 +137,8 @@ var multiSegmentSplinePrototype = {
         }
     },
     draw: function(){
+        'use strict';
+
         var lastIndex = this.knots.length - 1;
 
         this.knots.forEach(function (knot, index, array) {
