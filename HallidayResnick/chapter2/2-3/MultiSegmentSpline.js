@@ -4,110 +4,119 @@
 // MultiSegmentSpline.js - models and draws a multi-segment spline
 
 var MultiSegmentSpline = {
-    create: function(context, basicShapes, knots, closed, drawControlLines,
+    create: function(context, basicShapes, knots, closed, tension, drawControlLines,
                      segmentStrokeStyles, knotParams, controlLineParams) {
-        return Object.create(multiSegmentSplinePrototype).init(context, numberOfSegments);
+        return Object.create(multiSegmentSplinePrototype).init(context, basicShapes, knots, closed,
+            tension, drawControlLines, segmentStrokeStyles, knotParams, controlLineParams);
+    }
+};
+// Set shared properties using prototype object
+var multiSegmentSplinePrototype = {
+    init: function(context, basicShapes, knots, closed, tension, drawControlPoints,
+                   segmentParams, knotParams, controlLineParams) {
+        this.context = context;
+        this.basicShapes = basicShapes || BasicShapes.create(context);
+        this.knots = knots;
+        this.closed = closed;
+        this.tension = tension;
+        this.drawControlPoints = drawControlPoints;
+        this.segmentParams = segmentParams || {lineWidth: 4, segmentStrokeStyles:
+            ['rgb(128, 209, 99)', 'rgb(231, 109, 128)', 'rgb(74, 158, 139)', 'rgb(245, 165, 115)']};
+        this.knotParams = knotParams
+            || {radius: 2.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
+        this.controlLineParams = controlLineParams
+            || {lineWidth: 1, radius: 1.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
     },
-    calcControlPoints: function(prevKnot, currentKnot, nextKnot, tension) {
-        var distancePC = calcDistance(prevKnot, currentKnot),
-            distanceCN = calcDistance(currentKnot, nextKnot),
-            fractionPC = tension * distancePC / (distancePC + distanceCN),
-            fractionCN = tension - fractionPC,
+    calcControlPoints: function(prevKnot, currentKnot, nextKnot) {
+        var distancePC = mathBasics.calcDistance(prevKnot, currentKnot),
+            distanceCN = mathBasics.calcDistance(currentKnot, nextKnot),
+            fractionPC = this.tension * distancePC / (distancePC + distanceCN),
+            fractionCN = this.tension - fractionPC,
             controlPointPrev2 = {x: currentKnot.x + fractionPC * (prevKnot.x - nextKnot.x),
                 y: currentKnot.y + fractionPC * (prevKnot.y - nextKnot.y)},
             controlPointCurr1 = {x: currentKnot.x - fractionCN * (prevKnot.x - nextKnot.x),
                 y: currentKnot.y - fractionCN * (prevKnot.y - nextKnot.y)};
 
         return {prev2: controlPointPrev2, curr1: controlPointCurr1};
-    }
-};
-// Set shared properties using prototype object
-var multiSegmentSplinePrototype = {
-    init: function(context, basicShapes, knots, closed, drawControlLines,
-                   segmentStrokeStyles, knotParams, controlLineParams) {
-        this.context = context;
-        this.basicShapes = basicShapes || BasicShapes.create(context);
-        this.knots = knots;
-        this.closed = closed;
-        this.drawControlLines = drawControlLines;
-        this.segmentStrokeStyles = segmentStrokeStyles
-            || ['rgb(128, 209, 99)', 'rgb(231, 109, 128)', 'rgb(74, 158, 139)', 'rgb(245, 165, 115)']
-        this.knotParams = knotParams
-            || {radius: 2.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
-        this.controlLineParams = controlLineParams
-            || {lineWidth: 1, radius: 1.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
     },
     drawControlLine: function(knot, controlPoint) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.lineWidth = this.controlLineParams.lineWidth;
-        ctx.strokeStyle = this.controlLineParams.strokeStyle;
-        ctx.moveTo(knot.x, knot.y);
-        ctx.lineTo(controlPoint.x, controlPoint.y);
-        ctx.closePath();
-        ctx.stroke();
+        this.context.save();
+        this.context.beginPath();
+        this.context.lineWidth = this.controlLineParams.lineWidth;
+        this.context.strokeStyle = this.controlLineParams.strokeStyle;
+        this.context.moveTo(knot.x, knot.y);
+        this.context.lineTo(controlPoint.x, controlPoint.y);
+        this.context.closePath();
+        this.context.stroke();
         this.basicShapes.drawPoint(controlPoint, this.controlLineParams.radius,
             this.controlLineParams.strokeStyle, this.controlLineParams.fillStyle);
-        ctx.restore();
+        this.context.restore();
     },
-    drawInnerSegment: function(knot1Index, knot2Index, previousKnotIndex, drawControlPoints) {
-        ctx.strokeStyle = this.segmentStrokeStyles[knot1Index];
-        ctx.beginPath();
-        ctx.moveTo(knots[knot1Index].x, knots[knot1Index].y);
-        ctx.bezierCurveTo(knots[knot1Index].cp1.x, knots[knot1Index].cp1.y,
-            knots[knot1Index].cp2.x, knots[knot1Index].cp2.y,
-            knots[knot2Index].x, knots[knot2Index].y);
-        ctx.stroke();
-        ctx.closePath();
-        if (drawControlPoints) {
-            drawControlLine(ctx, this.knots[knot1Index], this.knots[knot1Index].cp1);
-            drawControlLine(ctx, this.knots[knot1Index], this.knots[previousKnotIndex].cp2);
+    drawInnerSegment: function(knot1, knot2, previousKnot, segmentColor) {
+        this.context.save();
+        this.context.lineWidth = this.segmentParams.lineWidth;
+        this.context.strokeStyle = segmentColor;
+        this.context.beginPath();
+        this.context.moveTo(knot1.x, knot1.y);
+        this.context.bezierCurveTo(knot1.cp1.x, knot1.cp1.y,
+            knot1.cp2.x, knot1.cp2.y,
+            knot2.x, knot2.y);
+        this.context.stroke();
+        this.context.closePath();
+        this.context.restore();
+        if (this.drawControlPoints) {
+            this.drawControlLine(knot1, knot1.cp1);
+            this.drawControlLine(knot1, previousKnot.cp2);
         }
     },
-    drawEndSegment: function(ctx, endKnot, innerKnot, cp, cpKnot, prevKnot, color, drawControlPoints) {
-        ctx.strokeStyle=color;
-        ctx.beginPath();
-        ctx.moveTo(endKnot.x, endKnot.y);
-        ctx.quadraticCurveTo(cp.x, cp.y, innerKnot.x, innerKnot.y);
-        ctx.stroke();
-        ctx.closePath();
-        if (drawControlPoints) {
-            drawControlLine(ctx, cpKnot, cpKnot.cp1, COLOR);
-            drawControlLine(ctx, cpKnot, prevKnot.cp2, COLOR);
+    drawEndSegment: function(endKnot, innerKnot, cp, cpKnot, prevKnot, color) {
+        this.context.save();
+        this.context.lineWidth = this.segmentParams.lineWidth;
+        this.context.strokeStyle=color;
+        this.context.beginPath();
+        this.context.moveTo(endKnot.x, endKnot.y);
+        this.context.quadraticCurveTo(cp.x, cp.y, innerKnot.x, innerKnot.y);
+        this.context.stroke();
+        //this.context.closePath();
+        this.context.restore();
+        if (this.drawControlPoints) {
+            this.drawControlLine(cpKnot, cpKnot.cp1);
+            this.drawControlLine(cpKnot, prevKnot.cp2);
         }
     },
-    draw: function(ctx, knots, closed, drawControlPoints){
-        var lastIndex = knots.length - 1;
+    draw: function(){
+        var lastIndex = this.knots.length - 1;
 
-        ctx.save();
-        ctx.lineWidth=4;
-        knots.forEach(function (knot, index, array) {
+        this.knots.forEach(function (knot, index, array) {
             var prevKnot = index === 0 ? array[array.length - 1] : array[index - 1],
                 nextKnot = array[(index + 1) % array.length],
-                controlPoints = calcControlPoints(prevKnot, knot, nextKnot, tension / 100);
+                controlPoints = this.calcControlPoints(prevKnot, knot, nextKnot);
             prevKnot.cp2 = controlPoints.prev2;
             knot.cp1 = controlPoints.curr1;
         });
-        knots.forEach(function (knot, index, array) {
+        this.knots.forEach(function (knot, index, array) {
             var prevKnot = index === 0 ? array[array.length - 1] : array[index - 1],
                 nextKnot = array[(index + 1) % array.length];
-            if (!closed && (index === 0 || index >= array.length - 2)) {
+            if (!this.closed && (index === 0 || index >= array.length - 2)) {
                 return;
             }
-            drawInnerSegment(ctx, knot, nextKnot, prevKnot, drawControlPoints);
-        });
-        if (!closed) {
-            drawEndSegment(ctx, knots[0], knots[1], knots[0].cp2, knots[0], knots[lastIndex], knots[0].color, drawControlPoints);
-            drawEndSegment(ctx, knots[lastIndex], knots[lastIndex - 1],
-                knots[lastIndex - 1].cp1, knots[lastIndex - 1],  knots[lastIndex - 2], knots[lastIndex - 1].color, drawControlPoints);
+            this.drawInnerSegment(knot, nextKnot, prevKnot,
+                this.segmentParams.segmentStrokeStyles[index]);
+        }, this);
+        if (!this.closed) {
+            this.drawEndSegment(this.knots[0], this.knots[1], this.knots[0].cp2, this.knots[0],
+                this.knots[lastIndex], this.segmentParams.segmentStrokeStyles[0]);
+            this.drawEndSegment(this.knots[lastIndex], this.knots[lastIndex - 1],
+                this.knots[lastIndex - 1].cp1, this.knots[lastIndex - 1],
+                this.knots[lastIndex - 2], this.segmentParams.segmentStrokeStyles[lastIndex - 1]);
         }
-        if (drawControlPoints) {
-            drawControlLine(ctx, knots[lastIndex], knots[lastIndex].cp1, COLOR);
-            drawControlLine(ctx, knots[lastIndex], knots[lastIndex - 1].cp2, COLOR);
+        if (this.drawControlPoints) {
+            this.drawControlLine(this.knots[lastIndex], this.knots[lastIndex].cp1);
+            this.drawControlLine(this.knots[lastIndex], this.knots[lastIndex - 1].cp2);
         }
-        knots.forEach(function(knot) {
-            drawPoint(ctx, knot, 2.5, COLOR, KNOT_POINT_FILL_COLOR);
-        });
-        ctx.restore();
+        this.knots.forEach(function(knot) {
+            this.drawPoint(knot, this.knotParams.radius, this.knotParams.strokeStyle,
+                this.knotParams.fillStyle);
+        }, this);
     }
 };
