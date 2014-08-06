@@ -14,7 +14,7 @@ var MultiSegmentSpline = {
 };
 // Set shared properties using prototype object
 var multiSegmentSplinePrototype = {
-    init: function(context, basicShapes, knots, closed, tension, drawControlPoints,
+    init: function(context, basicShapes, knots, closed, boundingParams, tension, drawControlPoints,
                    segmentParams, knotParams, controlLineParams) {
         'use strict';
 
@@ -22,14 +22,16 @@ var multiSegmentSplinePrototype = {
         this.basicShapes = basicShapes || BasicShapes.create(context);
         this.knots = knots;
         this.closed = closed;
-        this.tension = tension;
         this.drawControlPoints = drawControlPoints;
+        this.boundingParams = boundingParams || {startX: 0, endX: 0, startY: 0, endY: 0};
+        this.tension = tension || 50;
         this.segmentParams = segmentParams || {lineWidth: 4, segmentStrokeStyles:
             ['rgb(128, 209, 99)', 'rgb(231, 109, 128)', 'rgb(74, 158, 139)', 'rgb(245, 165, 115)']};
-        this.knotParams = knotParams
-            || {minKnotDelta: 1, radius: 2.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
-        this.controlLineParams = controlLineParams
-            || {lineWidth: 1, radius: 1.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
+        this.knotParams = knotParams ||
+            {minKnotDelta: 1, radius: 2.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
+        this.controlLineParams = controlLineParams ||
+            {lineWidth: 1, radius: 1.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
+            {}
     },
     calcClosestKnotIndex: function(point) {
         var i,
@@ -43,31 +45,43 @@ var multiSegmentSplinePrototype = {
         }
         return closestKnotIndex;
     },
-    knotInBounds: function(value, lowerBound, upperBound, minKnotDelta) {
-        if (value - minKnotDelta <= lowerBound) {
+    knotInBounds: function(value, lowerBound, upperBound) {
+        'use strict';
+        if (value - this.minKnotDelta <= lowerBound) {
             return false;
-        } else if (value + minKnotDelta >= upperBound) {
+        } else if (value + this.minKnotDelta >= upperBound) {
             return false;
         }
         return true;
     },
-    setClosestKnot: function(point, startX, endX, startY, endY) {
+    changeX: function(x, closestKnotIndex) {
         'use strict';
 
-        var closestKnotIndex,
-            maxKnotIndex = this.knots.length - 1;
+        var maxKnotIndex = this.knots.length - 1;
 
-        closestKnotIndex = this.calcClosestKnotIndex(point);
-        if (closestKnotIndex !== 0 &&
-            ((closestKnotIndex === 1 && this.knotInBounds(point.x, startX, this.knots[2].x, this.knotParams.minKnotDelta)) ||
-             (closestKnotIndex === maxKnotIndex &&
-              this.knotInBounds(point.x, this.knots[this.knots.length - 2].x, endX, this.knotParams.minKnotDelta)) ||
-             (closestKnotIndex > 1 && closestKnotIndex < maxKnotIndex &&
-              this.knotInBounds(point.x, this.knots[closestKnotIndex - 1], this.knots[closestKnotIndex + 1],
-                  this.knotParams.minKnotDelta)))) {
+        if (closestKnotIndex === 0) {
+            return false;
+        } else if (closestKnotIndex === 1 &&
+            this.knotInBounds(x, this.boundingParams.startX, this.knots[2].x)) {
+            return true;
+        } else if (closestKnotIndex === maxKnotIndex &&
+            this.knotInBounds(x, this.knots[this.knots.length - 2].x, this.boundingParams.endX)) {
+            return true;
+        } else if (closestKnotIndex > 1 && closestKnotIndex < maxKnotIndex &&
+            this.knotInBounds(x, this.knots[closestKnotIndex - 1], this.knots[closestKnotIndex + 1])) {
+            return true;
+        }
+        return false;
+    },
+    setClosestKnot: function(point) {
+        'use strict';
+
+        var closestKnotIndex = this.calcClosestKnotIndex(point);
+
+        if (this.changeX(point.x, closestKnotIndex)) {
             this.knots[closestKnotIndex].x = point.x;
         }
-        if (point.y >= startY && point.y <= endY) {
+        if (point.y >= this.boundingParams.startY && point.y <= this.boundingParams.endY) {
             this.knots[closestKnotIndex].y = point.y;
         }
     },
