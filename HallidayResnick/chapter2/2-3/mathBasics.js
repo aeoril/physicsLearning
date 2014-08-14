@@ -7,7 +7,9 @@ var mathBasics = {
     calcDistance: function(point1, point2) {
         'use strict';
 
-        var delta = {x: point2.x - point1.x, y: point2.y - point1.y};
-        return Math.sqrt(delta.x * delta.x + delta.y * delta.y);
+        var deltaX = point2.x - point1.x,
+            deltaY = point2.y - point1.y;
+
+        return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     }
 };

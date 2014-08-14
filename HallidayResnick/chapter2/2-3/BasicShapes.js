@@ -9,10 +9,10 @@ var BasicShapes = {
 
         return Object.create(basicShapesPrototype).init(context);
     },
-    drawPoint: function(context) {
+    drawPoint: function(context, point, radius, strokeStyle, fillStyle, lineWidth) {
         'use strict';
 
-        return this.drawPoint();
+        return this.create(context).drawPoint(point, radius, strokeStyle, fillStyle, lineWidth);
     }
 };
 
@@ -23,19 +23,23 @@ var basicShapesPrototype = {
         this.context = context;
         return this;
     },
-    drawPoint: function(point, r, strokeStyle, fillStyle, lineWidth){
+    drawPoint: function(point, radius, strokeStyle, fillStyle, lineWidth){
         'use strict';
 
-        ctx.save();
-        ctx.beginPath();
-        ctx.lineWidth = lineWidth || 1;
-        ctx.strokeStyle = strokeStyle || 'rgb(0, 0, 0)';
-        ctx.fillStyle = fillStyle || 'rgb(0, 0, 0)';
-        ctx.arc(point.x, point.y, r, 0.0, 2 * Math.PI, false);
-        ctx.closePath();
-        ctx.stroke();
-        ctx.fill();
-        ctx.restore();
+        var startAngle = 0.0,
+            endAngle = 2 * Math.PI,
+            clockWise = false;
+
+        this.context.save();
+        this.context.beginPath();
+        this.context.lineWidth = lineWidth || 1;
+        this.context.strokeStyle = strokeStyle || 'rgb(0, 0, 0)';
+        this.context.fillStyle = fillStyle || 'rgb(0, 0, 0)';
+        this.context.arc(point.x, point.y, radius || 2.5, startAngle, endAngle, clockWise);
+        this.context.closePath();
+        this.context.stroke();
+        this.context.fill();
+        this.context.restore();
         return this;
     }
 };

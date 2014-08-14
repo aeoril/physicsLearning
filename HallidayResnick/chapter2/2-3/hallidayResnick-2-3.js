@@ -15,7 +15,6 @@
             'rgb(245, 157, 171)', 'rgb(123, 192, 176)'], // Light green-blue pastel
         SEGMENT_COLORS = ['rgb(128, 209, 99)', 'rgb(231, 109, 128)',
             'rgb(74, 158, 139)', 'rgb(245, 165, 115)'],
-        KNOT_POINT_FILL_COLOR = 'rgb(199, 67, 88)',
         AXIS_COORDINATE_STEP = 2,
         AXIS_COORDINATES_FONT = 'normal 10pt "Droid Sans", sans-serif',
         AXIS_LABEL_FONT = 'normal 13pt "Droid Sans", sans-serif',
@@ -100,6 +99,7 @@
                     widthMultiplier: 0.5
                 }
             ],
+        splineBasicShapes,
         splineCanvasWidth,
         splineCanvasHeight,
         splineAxisStartX,
@@ -141,9 +141,6 @@
         bunnyAxisEndX,
         bunnyAxisLengthX,
         bunnyAxisCoordinatesScalarX,
-        CLOSEST_X = 1,
-        AXIS_CLOSEST_X = 0,
-        AXIS_CLOSEST_Y = 0,
         BUNNY_IMG_WIDTH = 48,
         BUNNY_IMG_HEIGHT = 48,
         BUNNY_IMG_MARGIN_TOP = 5,
@@ -155,7 +152,6 @@
         CLOSED = false,
         knots = [],
         mouseIsDown = false,
-        mousePoint = 0,
         mousePos = {},
         splineCanvasElem,
         splineBackgroundCanvasElem,
@@ -172,11 +168,9 @@
         x4Elem,
         tensionElem,
         animateElem,
-        defaultTension,
-        tension,
-        TENSION_LIMIT_DIVISOR = 4,
         splineCtx,
         splineBackgroundCtx,
+        multiSegmentSpline,
         BUNNY_RIGHT_SRC = 'bunnyRight.png',
         BUNNY_LEFT_SRC = 'bunnyLeft.png',
         bunnyRightImg = new Image(),
@@ -195,7 +189,7 @@
         requestID = null;
 
     function drawArrow(ctx, p1, p2, text, arrowColor, labelColor) {
-        var length = calcDistance(p1, p2),
+        var length = mathBasics.calcDistance(p1, p2),
             angle = Math.atan2(p2.y - p1.y, p2.x - p1.x),
             end = {x: length, y: 0};
         ctx.save();
@@ -220,7 +214,7 @@
     function drawAxis(ctx, start, end, width, color, axisLabels,
                       minCoordinate, maxCoordinate, step,
                       tickWidth, tickLength, tickColor, coordinateLabels, drawOrigin) {
-        var length = calcDistance(start, end),
+        var length = mathBasics.calcDistance(start, end),
             angle = Math.atan2(end.y - start.y, end.x - start.x),
             numCoordinates = (maxCoordinate - minCoordinate) / step,
             tickStart = {y: 0},
@@ -228,7 +222,7 @@
             i;
 
         function drawLabeledLine(ctx, start, end, width, color, labels) {
-            var length = calcDistance(start, end),
+            var length = mathBasics.calcDistance(start, end),
                 angle = Math.atan2(end.y - start.y, end.x - start.x);
             ctx.save();
             ctx.lineWidth = width;
@@ -281,7 +275,7 @@
     function drawSplineAll(ctx) {
         ctx.clearRect(0, 0, splineCanvasWidth, splineCanvasHeight);
         ctx.drawImage(splineBackgroundCanvasElem, 0, 0);
-        drawSpline(ctx, knots, CLOSED, DRAW_CONTROL_POINTS);
+        multiSegmentSpline.draw();
         drawArrow(ctx, knots[0], knots[1], 'Average Velocity =  ' + averageVelocities[0].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[0]);
         drawArrow(ctx, knots[1], knots[2], 'Average Velocity =  ' + averageVelocities[1].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[1]);
         drawArrow(ctx, knots[2], knots[3], 'Average Velocity =  ' + averageVelocities[2].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[2]);
@@ -340,22 +334,8 @@
         averageVelocities[1] = calculateVelocity(knots[1].coordinates, knots[2].coordinates);
         averageVelocities[2] = calculateVelocity(knots[2].coordinates, knots[3].coordinates);
     }
-    function updateTension() {
-        var i,
-            limit;
-
-        tension = defaultTension;
-
-        for (i = 0; i < knots.length - 1; i++) {
-            limit = (knots[i + 1].x - knots[i].x) / TENSION_LIMIT_DIVISOR;
-            if (limit < tension) {
-                tension = limit;
-            }
-        }
-        tensionElem.value = tension.toFixed(DISPLAY_DIGITS);
-    }
     function drawBunnyPoint() {
-        drawPoint(splineCtx, {x: calcSplineX(currentSegmentBunnyT + tTotal),
+        splineBasicShapes.drawPoint({x: calcSplineX(currentSegmentBunnyT + tTotal),
                 y: calcSplineY(currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal)},
             5.0, "rgb(0, 0, 0)", "rgb(255, 0, 255)");
     }
@@ -374,10 +354,12 @@
         mousePos.x = Math.min(mousePos.x, splineCanvasWidth);
         mousePos.y = Math.min(mousePos.y, splineCanvasHeight);
         if (mouseIsDown) {
+            multiSegmentSpline.setKnot(mousePos);
             updateKnotCoordinateValues();
             updateTextBoxes();
             updateAverageVelocities();
-            updateTension();
+            tensionElem.value = multiSegmentSpline.tension.toFixed(DISPLAY_DIGITS);
+            drawSplineAll(splineCtx);
             drawBunnyAll(bunnyCtx, knots[0].coordinates.y, averageVelocities[0]);
         }
         drawSplineAll(splineCtx);
@@ -408,7 +390,9 @@
             requestID = null;
         }
         calcMousePos(e);
-        calcClosestPoint();
+        multiSegmentSpline.setClosestKnotIndex(mousePos);
+        multiSegmentSpline.setKnot(mousePos);
+        tensionElem.value = multiSegmentSpline.tension.toFixed(DISPLAY_DIGITS);
         mouseIsDown = true;
         showBunnyPoint = false;
         mouseMove(e);
@@ -481,7 +465,11 @@
         updateKnotCoordinateValues();
         updateTextBoxes();
         updateAverageVelocities();
-        updateTension();
+        multiSegmentSpline = MultiSegmentSpline.create(splineCtx, splineBasicShapes, knots, CLOSED,
+            {startX: splineAxisStartX.x, endX: splineAxisEndX.x, startY: splineAxisStartY.y, endY: splineAxisEndY.y},
+            Number(tensionElem.value), DRAW_CONTROL_POINTS, null, null, null);
+        multiSegmentSpline.updateTension();
+        tensionElem.value = multiSegmentSpline.tension.toFixed(DISPLAY_DIGITS);
         drawSplineAll(splineCtx);
         drawBunnyAll(bunnyCtx, knots[0].coordinates.y, averageVelocities[0]);
         splineCanvasElem.addEventListener('mousemove', mouseMove, false);
@@ -514,6 +502,7 @@
         formElem = document.getElementById('form');
         splineCtx = splineCanvasElem.getContext('2d');
         splineBackgroundCtx = splineBackgroundCanvasElem.getContext('2d');
+        splineBasicShapes = BasicShapes.create(splineCtx);
         bunnyBackgroundCtx = bunnyBackgroundCanvasElem.getContext('2d');
         bunnyCtx = bunnyCanvasElem.getContext('2d');
         t1Elem = document.getElementById('t1');
@@ -536,8 +525,6 @@
         splineAxisLengthY = splineCanvasHeight - SPLINE_AXIS_MARGINS * 2;
         splineAxisCoordinatesScalarX = SPLINE_AXIS_RANGE_X / splineAxisLengthX;
         splineAxisCoordinatesScalarY = SPLINE_AXIS_RANGE_Y / splineAxisLengthY;
-        defaultTension = Number(tensionElem.value);
-        tension = defaultTension;
         bunnyCanvasWidth = bunnyCanvasElem.width;
         bunnyCanvasHeight = bunnyCanvasElem.height;
         bunnyAxisStartX = {x: BUNNY_AXIS_MARGINS, y: bunnyCanvasHeight / 2};

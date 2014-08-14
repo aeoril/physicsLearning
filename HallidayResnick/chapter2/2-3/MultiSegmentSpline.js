@@ -4,17 +4,17 @@
 // MultiSegmentSpline.js - models and draws a multi-segment spline
 
 var MultiSegmentSpline = {
-    create: function(context, basicShapes, knots, closed, tension, drawControlLines,
-                     segmentStrokeStyles, knotParams, controlLineParams) {
+    create: function(context, basicShapes, knots, closed, boundingParams, defaultTension, drawControlPoints,
+                     segmentParams, knotParams, controlLineParams) {
         'use strict';
 
         return Object.create(multiSegmentSplinePrototype).init(context, basicShapes, knots, closed,
-            tension, drawControlLines, segmentStrokeStyles, knotParams, controlLineParams);
+            boundingParams, defaultTension, drawControlPoints, segmentParams, knotParams, controlLineParams);
     }
 };
 // Set shared properties using prototype object
 var multiSegmentSplinePrototype = {
-    init: function(context, basicShapes, knots, closed, boundingParams, tension, drawControlPoints,
+    init: function(context, basicShapes, knots, closed, boundingParams, defaultTension, drawControlPoints,
                    segmentParams, knotParams, controlLineParams) {
         'use strict';
 
@@ -22,34 +22,49 @@ var multiSegmentSplinePrototype = {
         this.basicShapes = basicShapes || BasicShapes.create(context);
         this.knots = knots;
         this.closed = closed;
-        this.drawControlPoints = drawControlPoints;
         this.boundingParams = boundingParams || {startX: 0, endX: 0, startY: 0, endY: 0};
-        this.tension = tension || 50;
+        this.defaultTension = defaultTension;
+        this.tension = defaultTension;
+        this.TENSION_LIMIT_DIVISOR = 4;
+        this.drawControlPoints = drawControlPoints;
         this.segmentParams = segmentParams || {lineWidth: 4, segmentStrokeStyles:
             ['rgb(128, 209, 99)', 'rgb(231, 109, 128)', 'rgb(74, 158, 139)', 'rgb(245, 165, 115)']};
         this.knotParams = knotParams ||
             {minKnotDelta: 1, radius: 2.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
         this.controlLineParams = controlLineParams ||
             {lineWidth: 1, radius: 1.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
-            {}
+        return this;
     },
-    calcClosestKnotIndex: function(point) {
+    updateTension: function() {
         var i,
-            closestKnotIndex = 0;
+            limit;
+
+        this.tension = this.defaultTension;
 
         for (i = 0; i < this.knots.length - 1; i++) {
-            if (mathBasics.calcDistance(this.knots[index], point) >
-                mathBasics.calcDistance(this.knots[i + 1], point)) {
-                closestKnotIndex = i + 1;
+            limit = (this.knots[i + 1].x - this.knots[i].x) / this.TENSION_LIMIT_DIVISOR;
+            if (limit < this.tension) {
+                this.tension = limit;
             }
         }
-        return closestKnotIndex;
+    },
+    setClosestKnotIndex: function(point) {
+        var i;
+
+        this.closestKnotIndex = 0;
+
+        for (i = 0; i < this.knots.length - 1; i++) {
+            if (mathBasics.calcDistance(this.knots[this.closestKnotIndex], point) >
+                mathBasics.calcDistance(this.knots[i + 1], point)) {
+                this.closestKnotIndex = i + 1;
+            }
+        }
     },
     knotInBounds: function(value, lowerBound, upperBound) {
         'use strict';
-        if (value - this.minKnotDelta <= lowerBound) {
+        if (value - this.knotParams.minKnotDelta <= lowerBound) {
             return false;
-        } else if (value + this.minKnotDelta >= upperBound) {
+        } else if (value + this.knotParams.minKnotDelta >= upperBound) {
             return false;
         }
         return true;
@@ -68,30 +83,31 @@ var multiSegmentSplinePrototype = {
             this.knotInBounds(x, this.knots[this.knots.length - 2].x, this.boundingParams.endX)) {
             return true;
         } else if (closestKnotIndex > 1 && closestKnotIndex < maxKnotIndex &&
-            this.knotInBounds(x, this.knots[closestKnotIndex - 1], this.knots[closestKnotIndex + 1])) {
+            this.knotInBounds(x, this.knots[closestKnotIndex - 1].x, this.knots[closestKnotIndex + 1].x)) {
             return true;
         }
         return false;
     },
-    setClosestKnot: function(point) {
+    setKnot: function(point) {
         'use strict';
 
-        var closestKnotIndex = this.calcClosestKnotIndex(point);
-
-        if (this.changeX(point.x, closestKnotIndex)) {
-            this.knots[closestKnotIndex].x = point.x;
+        if (this.changeX(point.x, this.closestKnotIndex)) {
+            this.knots[this.closestKnotIndex].x = point.x;
+            this.updateTension();
         }
-        if (point.y >= this.boundingParams.startY && point.y <= this.boundingParams.endY) {
-            this.knots[closestKnotIndex].y = point.y;
+        if (point.y <= this.boundingParams.startY && point.y >= this.boundingParams.endY) {
+            this.knots[this.closestKnotIndex].y = point.y;
         }
     },
     calcControlPoints: function(prevKnot, currentKnot, nextKnot) {
         'use strict';
 
+        var workingTension = this.tension / 100;
+
         var distancePC = mathBasics.calcDistance(prevKnot, currentKnot),
             distanceCN = mathBasics.calcDistance(currentKnot, nextKnot),
-            fractionPC = this.tension * distancePC / (distancePC + distanceCN),
-            fractionCN = this.tension - fractionPC,
+            fractionPC = workingTension * distancePC / (distancePC + distanceCN),
+            fractionCN = workingTension - fractionPC,
             controlPointPrev2 = {x: currentKnot.x + fractionPC * (prevKnot.x - nextKnot.x),
                 y: currentKnot.y + fractionPC * (prevKnot.y - nextKnot.y)},
             controlPointCurr1 = {x: currentKnot.x - fractionCN * (prevKnot.x - nextKnot.x),
@@ -161,7 +177,7 @@ var multiSegmentSplinePrototype = {
                 controlPoints = this.calcControlPoints(prevKnot, knot, nextKnot);
             prevKnot.cp2 = controlPoints.prev2;
             knot.cp1 = controlPoints.curr1;
-        });
+        }, this);
         this.knots.forEach(function (knot, index, array) {
             var prevKnot = index === 0 ? array[array.length - 1] : array[index - 1],
                 nextKnot = array[(index + 1) % array.length];
@@ -183,7 +199,7 @@ var multiSegmentSplinePrototype = {
             this.drawControlLine(this.knots[lastIndex], this.knots[lastIndex - 1].cp2);
         }
         this.knots.forEach(function(knot) {
-            this.drawPoint(knot, this.knotParams.radius, this.knotParams.strokeStyle,
+            this.basicShapes.drawPoint(knot, this.knotParams.radius, this.knotParams.strokeStyle,
                 this.knotParams.fillStyle);
         }, this);
     }
