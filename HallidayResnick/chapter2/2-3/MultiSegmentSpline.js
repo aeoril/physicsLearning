@@ -54,8 +54,8 @@ var multiSegmentSplinePrototype = {
         this.closestKnotIndex = 0;
 
         for (i = 0; i < this.knots.length - 1; i++) {
-            if (mathBasics.calcDistance(this.knots[this.closestKnotIndex], point) >
-                mathBasics.calcDistance(this.knots[i + 1], point)) {
+            if (geometry.calcDistance(this.knots[this.closestKnotIndex], point) >
+                geometry.calcDistance(this.knots[i + 1], point)) {
                 this.closestKnotIndex = i + 1;
             }
         }
@@ -104,8 +104,8 @@ var multiSegmentSplinePrototype = {
 
         var workingTension = this.tension / 100;
 
-        var distancePC = mathBasics.calcDistance(prevKnot, currentKnot),
-            distanceCN = mathBasics.calcDistance(currentKnot, nextKnot),
+        var distancePC = geometry.calcDistance(prevKnot, currentKnot),
+            distanceCN = geometry.calcDistance(currentKnot, nextKnot),
             fractionPC = workingTension * distancePC / (distancePC + distanceCN),
             fractionCN = workingTension - fractionPC,
             controlPointPrev2 = {x: currentKnot.x + fractionPC * (prevKnot.x - nextKnot.x),
