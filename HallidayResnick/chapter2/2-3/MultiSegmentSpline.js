@@ -1,5 +1,6 @@
 // Copyright © 2014 QuarksCode.  MIT License - see http://opensource.org/licenses/MIT or LICENSE.md file
 // Original Author:  aeoril
+// Based on code by Rob Spencer - http://scaledinnovation.com/analytics/splines/aboutSplines.html
 //
 // MultiSegmentSpline.js - models and draws a multi-segment spline
 

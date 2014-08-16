@@ -146,7 +146,7 @@
         ARROWHEAD_WIDTH = 5,
         DRAW_CONTROL_POINTS = false,
         CLOSED = false,
-        knots = [],
+        knots,
         mouseIsDown = false,
         mousePos = {},
         splineCanvasElem,
@@ -165,7 +165,7 @@
         bunnyCtx,
         bunnyBackgroundCtx,
         MAX_ANIMATION_TIME = 20, //seconds
-        DELTA_T = (splineAxisParams.SPLINE_AXIS_RANGE_X / 60) / MAX_ANIMATION_TIME,
+        DELTA_T = 0,
         currentSegmentBunnyT,
         tTotal,
         currentSegmentBunnyXCoordinateOffset,
@@ -286,7 +286,7 @@
     }
     function drawBunnyPoint() {
         splineBasicShapes.drawPoint({x: knots.calcSplineX(currentSegmentBunnyT + tTotal),
-                y: splineAxisParams.calcSplineY(currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal)},
+                y: knots.calcSplineY(currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal)},
             5.0, "rgb(0, 0, 0)", "rgb(255, 0, 255)");
     }
     function mouseMove(e) {
@@ -468,6 +468,7 @@
             splineAxisParams.splineAxisLengthX;
         splineAxisParams.splineAxisCoordinatesScalarY = splineAxisParams.SPLINE_AXIS_RANGE_Y /
             splineAxisParams.splineAxisLengthY;
+        DELTA_T = (splineAxisParams.SPLINE_AXIS_RANGE_X / 60) / MAX_ANIMATION_TIME;
         bunnyCanvasWidth = bunnyCanvasElem.width;
         bunnyCanvasHeight = bunnyCanvasElem.height;
         bunnyAxisStartX = {x: BUNNY_AXIS_MARGINS, y: bunnyCanvasHeight / 2};

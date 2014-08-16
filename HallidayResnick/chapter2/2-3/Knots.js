@@ -30,33 +30,33 @@ var knotsPrototype = {
     },
     calcSplineX: function(xCoordinate) {
         return this.splineAxisParams.splineAxisStartX.x +
-            (xCoordinate - this.splineAxisParams.splineAxisMinCoordinateX) /
+            (xCoordinate - this.splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_X) /
                 this.splineAxisParams.splineAxisCoordinatesScalarX;
     },
     calcSplineY: function(yCoordinate) {
         return this.splineAxisParams.splineAxisStartY.y -
-            (yCoordinate - this.splineAxisParams.splineAxisMinCoordinateY) /
+            (yCoordinate - this.splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_Y) /
                 this.splineAxisParams.splineAxisCoordinatesScalarY;
     },
     calcSplineXCoordinate: function(x) {
         return ((x - this.splineAxisParams.splineAxisStartX.x) *
-            this.splineAxisParams.splineAxisCoordinatesScalarX) + this.splineAxisParams.splineAxisMinCoordinateX;
+            this.splineAxisParams.splineAxisCoordinatesScalarX) + this.splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_X;
     },
     calcSplineYCoordinate: function(y) {
         return ((this.splineAxisParams.splineAxisStartY.y - y)  *
-            this.splineAxisParams.splineAxisCoordinatesScalarY) + this.splineAxisParams.splineAxisMinCoordinateY;
+            this.splineAxisParams.splineAxisCoordinatesScalarY) + this.splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_Y;
     },
     updateKnotCoordinateValues: function() {
         this.knots.forEach(function (knot) {
             knot.coordinates = {x: this.calcSplineXCoordinate(knot.x),
                 y: this.calcSplineYCoordinate(knot.y)};
-        });
+        }, this);
     },
     updateTextBoxes: function() {
         this.textBoxElementsArray.forEach(function(textBoxElements, index) {
             textBoxElements.x.value = this.knots[index].coordinates.x.toFixed(this.displayDigits);
             textBoxElements.y.value = this.knots[index].coordinates.y.toFixed(this.displayDigits);
-        });
+        }, this);
     },
     updateAverageVelocities: function () {
         var i;

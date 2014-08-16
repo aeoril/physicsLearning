@@ -3,7 +3,7 @@
 //
 // BasicShapes.js - 1 motion: displacement and time interactive lesson
 
-var mathBasics = {
+var geometry = {
     calcDistance: function(point1, point2) {
         'use strict';
 
