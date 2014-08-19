@@ -7,12 +7,11 @@
     'use strict';
 
     var DISPLAY_DIGITS = 2,
-        AVERAGE_VELOCITY_DISPLAY_DIGITS = 2,
         TICK_DISPLACEMENT = 5,
         LINE_WIDTH = 1,
-        COLOR = 'rgb(100, 100, 100)',
-        ARROW_LABEL_COLORS = ['rgb(169, 229, 146)',
-            'rgb(245, 157, 171)', 'rgb(123, 192, 176)'], // Light green-blue pastel
+        STYLE = 'rgb(100, 100, 100)',
+        ARROWHEAD_LENGTH = 7,
+        ARROWHEAD_WIDTH = 5,
         AXIS_COORDINATE_STEP = 2,
         AXIS_COORDINATES_FONT = 'normal 10pt "Droid Sans", sans-serif',
         AXIS_LABEL_FONT = 'normal 13pt "Droid Sans", sans-serif',
@@ -20,18 +19,23 @@
         AXIS_LABEL_OFFSET_Y_X = 40,
         AXIS_LABEL_OFFSET_X_Y = 20,
         AXIS_LABEL_OFFSET_Y_Y = 50,
-        COORDINATE_LABEL_OFFSET_X_X = 0,
-        COORDINATE_LABEL_OFFSET_Y_X = 20,
-        COORDINATE_LABEL_OFFSET_X_Y = 4,
-        COORDINATE_LABEL_OFFSET_Y_Y = 10,
+        //COORDINATE_LABEL_OFFSET_X_X = 0,
+        //COORDINATE_LABEL_OFFSET_Y_X = 20,
+        //COORDINATE_LABEL_OFFSET_X_Y = 4,
+        //COORDINATE_LABEL_OFFSET_Y_Y = 10,
+        COORDINATE_LABEL_OFFSET_X_X = -20,
+        COORDINATE_LABEL_OFFSET_Y_X = 0,
+        COORDINATE_LABEL_OFFSET_X_Y = 10,
+        COORDINATE_LABEL_OFFSET_Y_Y = -4,
         COORDINATE_LABELS_X = [
             {
                 text: '',
                 font: AXIS_COORDINATES_FONT,
-                color: COLOR,
+                fillStyle: STYLE,
                 relativeTo: "start",
                 offset: {x: COORDINATE_LABEL_OFFSET_X_X, y: COORDINATE_LABEL_OFFSET_Y_X},
-                angle: 0,
+                angle: Math.PI / 2,
+                //angle: 0,
                 widthMultiplier: 0.5
             }
         ],
@@ -39,13 +43,42 @@
             {
                 text: '',
                 font: AXIS_COORDINATES_FONT,
-                color: COLOR,
+                fillStyle: STYLE,
                 relativeTo: "start",
                 offset: {x: -COORDINATE_LABEL_OFFSET_X_Y, y: -COORDINATE_LABEL_OFFSET_Y_Y},
-                angle: Math.PI / 2,
+                angle: 0,
+                //angle: Math.PI / 2,
                 widthMultiplier: 1
             }
         ],
+        VELOCITY_ARROW_PARAMS = {
+            ARROW_WIDTH: 1,
+            AVERAGE_VELOCITY_DISPLAY_DIGITS: 2,
+            ARROW_LABEL_FILL_STYLES: ['rgb(169, 229, 146)', 'rgb(245, 157, 171)', 'rgb(123, 192, 176)'],
+            VELOCITY_ARROWS: [
+                {
+                    arrowHeadLength: ARROWHEAD_LENGTH * 1.5,
+                    arrowHeadWidth: ARROWHEAD_WIDTH * 1.5,
+                    fill: true,
+                    fillStyle: STYLE,
+                    strokeStyle: STYLE,
+                    relativeTo: "end",
+                    offset: {x: 0, y: 0},
+                    angle: 0
+                }
+            ],
+            VELOCITY_LABELS: [
+                {
+                    text: '',
+                    font: 'normal 10pt "Droid Sans", sans-serif',
+                    fillStyle: '',
+                    relativeTo: "middle",
+                    offset: {x: 0, y: -10},
+                    angle: 0,
+                    widthMultiplier: 0.5
+                }
+            ]
+        },
         splineAxisParams = {
             SPLINE_AXIS_MARGINS: 30,
             SPLINE_AXIS_MIN_COORDINATE_X: -20,
@@ -58,7 +91,7 @@
                 {
                     text: '-t',
                     font: AXIS_LABEL_FONT,
-                    color: COLOR,
+                    fillStyle: STYLE,
                     relativeTo: "start",
                     offset: {x: AXIS_LABEL_OFFSET_X_X, y: AXIS_LABEL_OFFSET_Y_X},
                     angle: 0,
@@ -67,7 +100,7 @@
                 {
                     text: '+t',
                     font: AXIS_LABEL_FONT,
-                    color: COLOR,
+                    fillStyle: STYLE,
                     relativeTo: "end",
                     offset: {x: -AXIS_LABEL_OFFSET_X_X, y: AXIS_LABEL_OFFSET_Y_X},
                     angle: 0,
@@ -78,7 +111,7 @@
                 {
                     text: '-x',
                     font: AXIS_LABEL_FONT,
-                    color: COLOR,
+                    fillStyle: STYLE,
                     relativeTo: "start",
                     offset: {x: AXIS_LABEL_OFFSET_X_Y, y: -AXIS_LABEL_OFFSET_Y_Y},
                     angle: Math.PI / 2,
@@ -87,11 +120,55 @@
                 {
                     text: '+x',
                     font: AXIS_LABEL_FONT,
-                    color: COLOR,
+                    fillStyle: STYLE,
                     relativeTo: "end",
                     offset: {x: -AXIS_LABEL_OFFSET_X_Y, y: -AXIS_LABEL_OFFSET_Y_Y},
                     angle: Math.PI / 2,
                     widthMultiplier: 0.5
+                }
+            ],
+            SPLINE_AXIS_ARROWHEADS_X: [
+                {
+                    arrowHeadLength: ARROWHEAD_LENGTH,
+                    arrowHeadWidth: ARROWHEAD_WIDTH,
+                    fill: true,
+                    fillStyle: STYLE,
+                    strokeStyle: STYLE,
+                    relativeTo: "start",
+                    offset: {x: 0, y: 0},
+                    angle: 0
+                },
+                {
+                    arrowHeadLength: ARROWHEAD_LENGTH,
+                    arrowHeadWidth: ARROWHEAD_WIDTH,
+                    fill: true,
+                    fillStyle: STYLE,
+                    strokeStyle: STYLE,
+                    relativeTo: "end",
+                    offset: {x: 0, y: 0},
+                    angle: 0
+                }
+            ],
+            SPLINE_AXIS_ARROWHEADS_Y: [
+                {
+                    arrowHeadLength: ARROWHEAD_LENGTH,
+                    arrowHeadWidth: ARROWHEAD_WIDTH,
+                    fill: true,
+                    fillStyle: STYLE,
+                    strokeStyle: STYLE,
+                    relativeTo: "start",
+                    offset: {x: 0, y: 0},
+                    angle: 0
+                },
+                {
+                    arrowHeadLength: ARROWHEAD_LENGTH,
+                    arrowHeadWidth: ARROWHEAD_WIDTH,
+                    fill: true,
+                    fillStyle: STYLE,
+                    strokeStyle: STYLE,
+                    relativeTo: "end",
+                    offset: {x: 0, y: 0},
+                    angle: 0
                 }
             ],
             splineAxisStartX: 0,
@@ -115,7 +192,7 @@
             {
                 text: '-x',
                 font: AXIS_LABEL_FONT,
-                color: COLOR,
+                color: STYLE,
                 relativeTo: "start",
                 offset: {x: AXIS_LABEL_OFFSET_X_X, y: AXIS_LABEL_OFFSET_Y_X},
                 angle: 0,
@@ -124,7 +201,7 @@
             {
                 text: '+x',
                 font: AXIS_LABEL_FONT,
-                color: COLOR,
+                color: STYLE,
                 relativeTo: "end",
                 offset: {x: -AXIS_LABEL_OFFSET_X_X, y: AXIS_LABEL_OFFSET_Y_X},
                 angle: 0,
@@ -140,10 +217,6 @@
         BUNNY_IMG_WIDTH = 48,
         BUNNY_IMG_HEIGHT = 48,
         BUNNY_IMG_MARGIN_TOP = 5,
-        ARROW_LABEL_FONT = 'normal 10pt "Droid Sans", sans-serif',
-        ARROW_LABEL_OFFSET_Y = 10,
-        ARROWHEAD_LENGTH = 7,
-        ARROWHEAD_WIDTH = 5,
         DRAW_CONTROL_POINTS = false,
         CLOSED = false,
         knots,
@@ -174,30 +247,70 @@
         showBunnyPoint = false,
         requestID = null;
 
-    function drawArrow(ctx, p1, p2, text, arrowColor, labelColor) {
-        var length = geometry.calcDistance(p1, p2),
-            angle = Math.atan2(p2.y - p1.y, p2.x - p1.x),
-            end = {x: length, y: 0};
+    function drawLabeledLine(ctx, start, end, width, color, arrowHeads, labels) {
+        var length = geometry.calcDistance(start, end),
+            angle = Math.atan2(end.y - start.y, end.x - start.x);
         ctx.save();
-        ctx.font = ARROW_LABEL_FONT;
-        ctx.strokeStyle = arrowColor;
-        ctx.fillStyle = arrowColor;
-        ctx.lineWidth = 1;
-        ctx.translate(p1.x, p1.y);
+        ctx.lineWidth = width;
+        ctx.strokeStyle = color;
+        ctx.translate(start.x, start.y);
         ctx.rotate(angle);
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.lineTo(end.x, end.y);
-        ctx.lineTo(end.x - ARROWHEAD_LENGTH, end.y + ARROWHEAD_WIDTH / 2);
-        ctx.lineTo(end.x - ARROWHEAD_LENGTH, end.y - ARROWHEAD_WIDTH / 2);
-        ctx.lineTo(end.x, end.y);
+        ctx.lineTo(length, 0);
         ctx.stroke();
-        ctx.fill();
-        ctx.fillStyle = labelColor;
-        ctx.fillText(text, end.x / 2 - ctx.measureText(text).width / 2, end.y - ARROW_LABEL_OFFSET_Y);
+        arrowHeads.forEach(function(arrowHead) {
+            var arrowHeadX,
+                arrowHeadAngle = arrowHead.angle;
+            switch (arrowHead.relativeTo) {
+                case 'start' :
+                    arrowHeadX = arrowHead.offset.x;
+                    arrowHeadAngle += Math.PI;
+                    break;
+                case 'end' :
+                    arrowHeadX = length + arrowHead.offset.x;
+                    break;
+            }
+            ctx.save();
+            ctx.strokeStyle = arrowHead.strokeStyle;
+            ctx.translate(arrowHeadX, arrowHead.offset.y);
+            ctx.rotate(arrowHeadAngle);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-arrowHead.arrowHeadLength, arrowHead.arrowHeadWidth / 2);
+            ctx.lineTo(-arrowHead.arrowHeadLength, -arrowHead.arrowHeadWidth / 2);
+            ctx.lineTo(0, 0);
+            ctx.stroke();
+            if (arrowHead.fill) {
+                ctx.fillStyle = arrowHead.fillStyle;
+                ctx.fill();
+            }
+            ctx.restore();
+        });
+        labels.forEach(function (label) {
+            var labelX;
+            switch (label.relativeTo) {
+                case 'start' :
+                    labelX = label.offset.x;
+                    break;
+                case 'middle' :
+                    labelX = length / 2 + label.offset.x;
+                    break;
+                case 'end' :
+                    labelX = length + label.offset.x;
+                    break;
+            }
+            ctx.save();
+            ctx.font = label.font;
+            ctx.fillStyle = label.fillStyle;
+            ctx.translate(labelX, label.offset.y);
+            ctx.rotate(label.angle);
+            ctx.fillText(label.text, -ctx.measureText(label.text).width * label.widthMultiplier, 0);
+            ctx.restore();
+        });
         ctx.restore();
     }
-    function drawAxis(ctx, start, end, width, color, axisLabels,
+    function drawAxis(ctx, start, end, width, color, axisArrowHeads, axisLabels,
                       minCoordinate, maxCoordinate, step,
                       tickWidth, tickLength, tickColor, coordinateLabels, drawOrigin) {
         var length = geometry.calcDistance(start, end),
@@ -207,53 +320,16 @@
             tickEnd = {y: -tickLength},
             i;
 
-        function drawLabeledLine(ctx, start, end, width, color, labels) {
-            var length = geometry.calcDistance(start, end),
-                angle = Math.atan2(end.y - start.y, end.x - start.x);
-            ctx.save();
-            ctx.lineWidth = width;
-            ctx.strokeStyle = color;
-            ctx.translate(start.x, start.y);
-            ctx.save();
-            ctx.rotate(angle);
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(length, 0);
-            ctx.stroke();
-            ctx.restore();
-            labels.forEach(function (label) {
-                var labelX;
-                ctx.save();
-                ctx.font = label.font;
-                ctx.fillStyle = label.color;
-                switch (label.relativeTo) {
-                    case 'start' :
-                        labelX = label.offset.x;
-                        break;
-                    case 'middle' :
-                        labelX = length / 2 + label.offset.x;
-                        break;
-                    case 'end' :
-                        labelX = length + label.offset.x;
-                        break;
-                }
-                ctx.translate(labelX, label.offset.y);
-                ctx.rotate(label.angle);
-                ctx.fillText(label.text, -ctx.measureText(label.text).width * label.widthMultiplier, 0);
-                ctx.restore();
-            });
-            ctx.restore();
-        }
         ctx.save();
         ctx.translate(start.x, start.y);
         ctx.rotate(angle);
-        drawLabeledLine(ctx, {x: 0, y: 0}, {x: length, y: 0}, width, color, axisLabels);
+        drawLabeledLine(ctx, {x: 0, y: 0}, {x: length, y: 0}, width, color, axisArrowHeads, axisLabels);
         for (i = 0; i <= numCoordinates; i++) {
             tickStart.x = i * length / numCoordinates;
             tickEnd.x = tickStart.x;
             coordinateLabels[0].text = minCoordinate + step * i;
             if (coordinateLabels[0].text !== 0 || drawOrigin) {
-                drawLabeledLine(ctx, tickStart, tickEnd, tickWidth, tickColor, coordinateLabels);
+                drawLabeledLine(ctx, tickStart, tickEnd, tickWidth, tickColor, [], coordinateLabels);
             }
         }
         ctx.restore();
@@ -262,9 +338,13 @@
         ctx.clearRect(0, 0, splineCanvasWidth, splineCanvasHeight);
         ctx.drawImage(splineBackgroundCanvasElem, 0, 0);
         multiSegmentSpline.draw();
-        drawArrow(ctx, knots.knots[0], knots.knots[1], 'Average Velocity =  ' + knots.averageVelocities[0].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[0]);
-        drawArrow(ctx, knots.knots[1], knots.knots[2], 'Average Velocity =  ' + knots.averageVelocities[1].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[1]);
-        drawArrow(ctx, knots.knots[2], knots.knots[3], 'Average Velocity =  ' + knots.averageVelocities[2].toFixed(AVERAGE_VELOCITY_DISPLAY_DIGITS), COLOR, ARROW_LABEL_COLORS[2]);
+        knots.averageVelocities.forEach(function(averageVelocity, index) {
+            VELOCITY_ARROW_PARAMS.VELOCITY_LABELS[0].text = 'Average Velocity =  ' +
+                knots.averageVelocities[index].toFixed(VELOCITY_ARROW_PARAMS.AVERAGE_VELOCITY_DISPLAY_DIGITS);
+            VELOCITY_ARROW_PARAMS.VELOCITY_LABELS[0].fillStyle = VELOCITY_ARROW_PARAMS.ARROW_LABEL_FILL_STYLES[index];
+            drawLabeledLine(ctx, knots.knots[index], knots.knots[index + 1], VELOCITY_ARROW_PARAMS.ARROW_WIDTH, STYLE,
+                VELOCITY_ARROW_PARAMS.VELOCITY_ARROWS, VELOCITY_ARROW_PARAMS.VELOCITY_LABELS);
+        });
     }
     function calcMousePos(e) {
         var top = 0,
@@ -328,7 +408,7 @@
             posTextY = mousePos.y + (posTextHeight - mousePos.y);
         }
         splineCtx.save();
-        splineCtx.fillStyle = COLOR;
+        splineCtx.fillStyle = STYLE;
         splineCtx.fillText(posText,  posTextX, posTextY);
         splineCtx.restore();
     }
@@ -369,9 +449,7 @@
             drawBunnyAll(bunnyCtx, currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal,
                 knots.averageVelocities[currentVelIndex]);
         }
-
         currentSegmentBunnyXCoordinateOffset = knots.averageVelocities[currentVelIndex] * currentSegmentBunnyT;
-        draw();
         if (currentSegmentBunnyT + DELTA_T + tTotal > knots.knots[(currentVelIndex + 1)].coordinates.x) {
             currentVelIndex++;
             bunnyXCoordinateTotal = knots.knots[currentVelIndex].coordinates.y;
@@ -385,6 +463,7 @@
                 return;
             }
         }
+        draw();
         currentSegmentBunnyT += DELTA_T;
         requestID = window.requestAnimationFrame(bunnyRun);
     }
@@ -398,7 +477,7 @@
         currentVelIndex = 0;
         showBunnyPoint = true;
         requestID = window.requestAnimationFrame(bunnyRun);
-     }
+    }
     function bunnyImgLoaded(e) {
         knots = Knots.create(knotTextBoxElements, splineAxisParams, DISPLAY_DIGITS);
         multiSegmentSpline = MultiSegmentSpline.create(splineCtx, splineBasicShapes, knots.knots, CLOSED,
@@ -419,19 +498,19 @@
         }
     }
     function drawSplineBackground(ctx) {
-        drawAxis(ctx, splineAxisParams.splineAxisStartX, splineAxisParams.splineAxisEndX, LINE_WIDTH, COLOR,
-            splineAxisParams.SPLINE_AXIS_LABELS_X, splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_X,
-            splineAxisParams.SPLINE_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH,
-            TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_X, false);
-        drawAxis(ctx, splineAxisParams.splineAxisStartY, splineAxisParams.splineAxisEndY, LINE_WIDTH, COLOR,
-            splineAxisParams.SPLINE_AXIS_LABELS_Y, splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_Y,
-            splineAxisParams.SPLINE_AXIS_MAX_COORDINATE_Y, AXIS_COORDINATE_STEP, LINE_WIDTH,
-            -TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_Y, false);
+        drawAxis(ctx, splineAxisParams.splineAxisStartX, splineAxisParams.splineAxisEndX, LINE_WIDTH, STYLE,
+            splineAxisParams.SPLINE_AXIS_ARROWHEADS_X, splineAxisParams.SPLINE_AXIS_LABELS_X,
+            splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_X, splineAxisParams.SPLINE_AXIS_MAX_COORDINATE_X,
+            AXIS_COORDINATE_STEP, LINE_WIDTH, TICK_DISPLACEMENT, STYLE, COORDINATE_LABELS_X, false);
+        drawAxis(ctx, splineAxisParams.splineAxisStartY, splineAxisParams.splineAxisEndY, LINE_WIDTH, STYLE,
+            splineAxisParams.SPLINE_AXIS_ARROWHEADS_Y, splineAxisParams.SPLINE_AXIS_LABELS_Y,
+            splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_Y, splineAxisParams.SPLINE_AXIS_MAX_COORDINATE_Y,
+            AXIS_COORDINATE_STEP, LINE_WIDTH, -TICK_DISPLACEMENT, STYLE, COORDINATE_LABELS_Y, false);
     }
     function drawBunnyBackground(ctx) {
-        drawAxis(ctx, bunnyAxisStartX, bunnyAxisEndX, LINE_WIDTH, COLOR, BUNNY_AXIS_LABELS_X,
+        drawAxis(ctx, bunnyAxisStartX, bunnyAxisEndX, LINE_WIDTH, STYLE, [], BUNNY_AXIS_LABELS_X,
             BUNNY_AXIS_MIN_COORDINATE_X, BUNNY_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH,
-            TICK_DISPLACEMENT, COLOR, COORDINATE_LABELS_X, true);
+            TICK_DISPLACEMENT, STYLE, COORDINATE_LABELS_X, true);
     }
     window.addEventListener('load', function() {
         splineCanvasElem = document.getElementById('splineCanvas');
@@ -484,6 +563,5 @@
             bunnyLeftImg.src = BUNNY_LEFT_SRC;
         }, false);
         bunnyRightImg.src = BUNNY_RIGHT_SRC;
-        //t1Elem.focus();
     }, false);
 }());
