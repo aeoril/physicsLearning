@@ -182,6 +182,8 @@
         },
         knotTextBoxElements = [],
         splineBasicShapes,
+        splineAdvancedShapes,
+        splineBackgroundAdvancedShapes,
         splineCanvasWidth,
         splineCanvasHeight,
         BUNNY_AXIS_MARGINS = 30,
@@ -237,6 +239,7 @@
         bunnyLeftImg = new Image(),
         bunnyCtx,
         bunnyBackgroundCtx,
+        bunnyBackgroundAdvancedShapes,
         MAX_ANIMATION_TIME = 20, //seconds
         DELTA_T = 0,
         currentSegmentBunnyT,
@@ -247,93 +250,6 @@
         showBunnyPoint = false,
         requestID = null;
 
-    function drawLabeledLine(ctx, start, end, width, color, arrowHeads, labels) {
-        var length = geometry.calcDistance(start, end),
-            angle = Math.atan2(end.y - start.y, end.x - start.x);
-        ctx.save();
-        ctx.lineWidth = width;
-        ctx.strokeStyle = color;
-        ctx.translate(start.x, start.y);
-        ctx.rotate(angle);
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(length, 0);
-        ctx.stroke();
-        arrowHeads.forEach(function(arrowHead) {
-            var arrowHeadX,
-                arrowHeadAngle = arrowHead.angle;
-            switch (arrowHead.relativeTo) {
-                case 'start' :
-                    arrowHeadX = arrowHead.offset.x;
-                    arrowHeadAngle += Math.PI;
-                    break;
-                case 'end' :
-                    arrowHeadX = length + arrowHead.offset.x;
-                    break;
-            }
-            ctx.save();
-            ctx.strokeStyle = arrowHead.strokeStyle;
-            ctx.translate(arrowHeadX, arrowHead.offset.y);
-            ctx.rotate(arrowHeadAngle);
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(-arrowHead.arrowHeadLength, arrowHead.arrowHeadWidth / 2);
-            ctx.lineTo(-arrowHead.arrowHeadLength, -arrowHead.arrowHeadWidth / 2);
-            ctx.lineTo(0, 0);
-            ctx.stroke();
-            if (arrowHead.fill) {
-                ctx.fillStyle = arrowHead.fillStyle;
-                ctx.fill();
-            }
-            ctx.restore();
-        });
-        labels.forEach(function (label) {
-            var labelX;
-            switch (label.relativeTo) {
-                case 'start' :
-                    labelX = label.offset.x;
-                    break;
-                case 'middle' :
-                    labelX = length / 2 + label.offset.x;
-                    break;
-                case 'end' :
-                    labelX = length + label.offset.x;
-                    break;
-            }
-            ctx.save();
-            ctx.font = label.font;
-            ctx.fillStyle = label.fillStyle;
-            ctx.translate(labelX, label.offset.y);
-            ctx.rotate(label.angle);
-            ctx.fillText(label.text, -ctx.measureText(label.text).width * label.widthMultiplier, 0);
-            ctx.restore();
-        });
-        ctx.restore();
-    }
-    function drawAxis(ctx, start, end, width, color, axisArrowHeads, axisLabels,
-                      minCoordinate, maxCoordinate, step,
-                      tickWidth, tickLength, tickColor, coordinateLabels, drawOrigin) {
-        var length = geometry.calcDistance(start, end),
-            angle = Math.atan2(end.y - start.y, end.x - start.x),
-            numCoordinates = (maxCoordinate - minCoordinate) / step,
-            tickStart = {y: 0},
-            tickEnd = {y: -tickLength},
-            i;
-
-        ctx.save();
-        ctx.translate(start.x, start.y);
-        ctx.rotate(angle);
-        drawLabeledLine(ctx, {x: 0, y: 0}, {x: length, y: 0}, width, color, axisArrowHeads, axisLabels);
-        for (i = 0; i <= numCoordinates; i++) {
-            tickStart.x = i * length / numCoordinates;
-            tickEnd.x = tickStart.x;
-            coordinateLabels[0].text = minCoordinate + step * i;
-            if (coordinateLabels[0].text !== 0 || drawOrigin) {
-                drawLabeledLine(ctx, tickStart, tickEnd, tickWidth, tickColor, [], coordinateLabels);
-            }
-        }
-        ctx.restore();
-    }
     function drawSplineAll(ctx) {
         ctx.clearRect(0, 0, splineCanvasWidth, splineCanvasHeight);
         ctx.drawImage(splineBackgroundCanvasElem, 0, 0);
@@ -342,7 +258,7 @@
             VELOCITY_ARROW_PARAMS.VELOCITY_LABELS[0].text = 'Average Velocity =  ' +
                 knots.averageVelocities[index].toFixed(VELOCITY_ARROW_PARAMS.AVERAGE_VELOCITY_DISPLAY_DIGITS);
             VELOCITY_ARROW_PARAMS.VELOCITY_LABELS[0].fillStyle = VELOCITY_ARROW_PARAMS.ARROW_LABEL_FILL_STYLES[index];
-            drawLabeledLine(ctx, knots.knots[index], knots.knots[index + 1], VELOCITY_ARROW_PARAMS.ARROW_WIDTH, STYLE,
+            splineAdvancedShapes.drawLabeledLine(knots.knots[index], knots.knots[index + 1], VELOCITY_ARROW_PARAMS.ARROW_WIDTH, STYLE,
                 VELOCITY_ARROW_PARAMS.VELOCITY_ARROWS, VELOCITY_ARROW_PARAMS.VELOCITY_LABELS);
         });
     }
@@ -497,18 +413,18 @@
             e.preventDefault();
         }
     }
-    function drawSplineBackground(ctx) {
-        drawAxis(ctx, splineAxisParams.splineAxisStartX, splineAxisParams.splineAxisEndX, LINE_WIDTH, STYLE,
+    function drawSplineBackground() {
+        splineBackgroundAdvancedShapes.drawAxis(splineBackgroundAdvancedShapes, splineAxisParams.splineAxisStartX, splineAxisParams.splineAxisEndX, LINE_WIDTH, STYLE,
             splineAxisParams.SPLINE_AXIS_ARROWHEADS_X, splineAxisParams.SPLINE_AXIS_LABELS_X,
             splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_X, splineAxisParams.SPLINE_AXIS_MAX_COORDINATE_X,
             AXIS_COORDINATE_STEP, LINE_WIDTH, TICK_DISPLACEMENT, STYLE, COORDINATE_LABELS_X, false);
-        drawAxis(ctx, splineAxisParams.splineAxisStartY, splineAxisParams.splineAxisEndY, LINE_WIDTH, STYLE,
+        splineBackgroundAdvancedShapes.drawAxis(splineBackgroundAdvancedShapes, splineAxisParams.splineAxisStartY, splineAxisParams.splineAxisEndY, LINE_WIDTH, STYLE,
             splineAxisParams.SPLINE_AXIS_ARROWHEADS_Y, splineAxisParams.SPLINE_AXIS_LABELS_Y,
             splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_Y, splineAxisParams.SPLINE_AXIS_MAX_COORDINATE_Y,
             AXIS_COORDINATE_STEP, LINE_WIDTH, -TICK_DISPLACEMENT, STYLE, COORDINATE_LABELS_Y, false);
     }
-    function drawBunnyBackground(ctx) {
-        drawAxis(ctx, bunnyAxisStartX, bunnyAxisEndX, LINE_WIDTH, STYLE, [], BUNNY_AXIS_LABELS_X,
+    function drawBunnyBackground() {
+        bunnyBackgroundAdvancedShapes.drawAxis(bunnyBackgroundAdvancedShapes, bunnyAxisStartX, bunnyAxisEndX, LINE_WIDTH, STYLE, [], BUNNY_AXIS_LABELS_X,
             BUNNY_AXIS_MIN_COORDINATE_X, BUNNY_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH,
             TICK_DISPLACEMENT, STYLE, COORDINATE_LABELS_X, true);
     }
@@ -520,8 +436,11 @@
         splineCtx = splineCanvasElem.getContext('2d');
         splineBackgroundCtx = splineBackgroundCanvasElem.getContext('2d');
         splineBasicShapes = BasicShapes.create(splineCtx);
+        splineAdvancedShapes = AdvancedShapes.create(splineCtx);
         bunnyBackgroundCtx = bunnyBackgroundCanvasElem.getContext('2d');
+        splineBackgroundAdvancedShapes = AdvancedShapes.create(splineBackgroundCtx);
         bunnyCtx = bunnyCanvasElem.getContext('2d');
+        bunnyBackgroundAdvancedShapes = AdvancedShapes.create(bunnyBackgroundCtx);
         knotTextBoxElements.push({x: document.getElementById('t1'), y: document.getElementById('x1')});
         knotTextBoxElements.push({x: document.getElementById('t2'), y: document.getElementById('x2')});
         knotTextBoxElements.push({x: document.getElementById('t3'), y: document.getElementById('x3')});
@@ -554,8 +473,8 @@
         bunnyAxisEndX = {x: bunnyCanvasWidth - BUNNY_AXIS_MARGINS, y: bunnyCanvasHeight / 2};
         bunnyAxisLengthX = bunnyCanvasWidth - BUNNY_AXIS_MARGINS * 2;
         bunnyAxisCoordinatesScalarX = BUNNY_AXIS_RANGE_X / bunnyAxisLengthX;
-        drawSplineBackground(splineBackgroundCtx);
-        drawBunnyBackground(bunnyBackgroundCtx);
+        drawSplineBackground();
+        drawBunnyBackground();
         bunnyLeftImg.addEventListener('load', function () {
             bunnyImgLoaded();
         }, false);
