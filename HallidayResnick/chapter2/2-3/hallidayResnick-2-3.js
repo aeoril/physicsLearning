@@ -7,7 +7,7 @@
     'use strict';
 
     var DISPLAY_DIGITS = 2,
-        TICK_DISPLACEMENT = 5,
+        AXIS_TICK_LENGTH = 5,
         LINE_WIDTH = 1,
         STYLE = 'rgb(100, 100, 100)',
         ARROWHEAD_LENGTH = 7,
@@ -19,10 +19,6 @@
         AXIS_LABEL_OFFSET_Y_X = 40,
         AXIS_LABEL_OFFSET_X_Y = 20,
         AXIS_LABEL_OFFSET_Y_Y = 50,
-        //COORDINATE_LABEL_OFFSET_X_X = 0,
-        //COORDINATE_LABEL_OFFSET_Y_X = 20,
-        //COORDINATE_LABEL_OFFSET_X_Y = 4,
-        //COORDINATE_LABEL_OFFSET_Y_Y = 10,
         COORDINATE_LABEL_OFFSET_X_X = -20,
         COORDINATE_LABEL_OFFSET_Y_X = 0,
         COORDINATE_LABEL_OFFSET_X_Y = 10,
@@ -417,16 +413,16 @@
         splineBackgroundAdvancedShapes.drawAxis(splineBackgroundAdvancedShapes, splineAxisParams.splineAxisStartX, splineAxisParams.splineAxisEndX, LINE_WIDTH, STYLE,
             splineAxisParams.SPLINE_AXIS_ARROWHEADS_X, splineAxisParams.SPLINE_AXIS_LABELS_X,
             splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_X, splineAxisParams.SPLINE_AXIS_MAX_COORDINATE_X,
-            AXIS_COORDINATE_STEP, LINE_WIDTH, TICK_DISPLACEMENT, STYLE, COORDINATE_LABELS_X, false);
+            AXIS_COORDINATE_STEP, LINE_WIDTH, AXIS_TICK_LENGTH, STYLE, COORDINATE_LABELS_X, false);
         splineBackgroundAdvancedShapes.drawAxis(splineBackgroundAdvancedShapes, splineAxisParams.splineAxisStartY, splineAxisParams.splineAxisEndY, LINE_WIDTH, STYLE,
             splineAxisParams.SPLINE_AXIS_ARROWHEADS_Y, splineAxisParams.SPLINE_AXIS_LABELS_Y,
             splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_Y, splineAxisParams.SPLINE_AXIS_MAX_COORDINATE_Y,
-            AXIS_COORDINATE_STEP, LINE_WIDTH, -TICK_DISPLACEMENT, STYLE, COORDINATE_LABELS_Y, false);
+            AXIS_COORDINATE_STEP, LINE_WIDTH, -AXIS_TICK_LENGTH, STYLE, COORDINATE_LABELS_Y, false);
     }
     function drawBunnyBackground() {
         bunnyBackgroundAdvancedShapes.drawAxis(bunnyBackgroundAdvancedShapes, bunnyAxisStartX, bunnyAxisEndX, LINE_WIDTH, STYLE, [], BUNNY_AXIS_LABELS_X,
             BUNNY_AXIS_MIN_COORDINATE_X, BUNNY_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH,
-            TICK_DISPLACEMENT, STYLE, COORDINATE_LABELS_X, true);
+            AXIS_TICK_LENGTH, STYLE, COORDINATE_LABELS_X, true);
     }
     window.addEventListener('load', function() {
         splineCanvasElem = document.getElementById('splineCanvas');
