@@ -14,11 +14,11 @@ var AdvancedShapes = {
 
         return this.create(context).drawLabeledLine(start, end, width, color, arrowHeads, labels);
     },
-    drawAxis: function(context, advancedShapes, start, end, width, color, axisArrowHeads, axisLabels, minCoordinate,
+    drawAxis: function(context, start, end, width, color, axisArrowHeads, axisLabels, minCoordinate,
                        maxCoordinate, step, tickWidth, tickLength, tickColor, coordinateLabels, drawOrigin) {
         'use strict';
 
-        return this.create(context).drawAxis(advancedShapes, start, end, width, color, axisArrowHeads, axisLabels,
+        return this.create(context).drawAxis(start, end, width, color, axisArrowHeads, axisLabels,
             minCoordinate, maxCoordinate, step, tickWidth, tickLength, tickColor, coordinateLabels, drawOrigin);
     }
 };
@@ -93,7 +93,7 @@ var advancedShapesPrototype = {
         }, this);
         this.context.restore();
     },
-    drawAxis: function(advancedShapes, start, end, width, color, axisArrowHeads, axisLabels,
+    drawAxis: function(start, end, width, color, axisArrowHeads, axisLabels,
                        minCoordinate, maxCoordinate, step,
                        tickWidth, tickLength, tickColor, coordinateLabels, drawOrigin) {
         var length = geometry.calcDistance(start, end),

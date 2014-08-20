@@ -28,7 +28,7 @@ var bunnyBackgroundPrototype = {
             AXIS_MIN_COORDINATE_X: -10,
             AXIS_MAX_COORDINATE_X: 10,
             TICK_LENGTH: 5,
-            LINE_WIDTH: 5,
+            LINE_WIDTH: 1,
             COORDINATE_STEP: 2,
             AXIS_LABELS_X: [
                 {
@@ -89,8 +89,8 @@ var bunnyBackgroundPrototype = {
         this.context = this.canvasElement.getContext('2d');
 
         this.advancedShapes = AdvancedShapes.create(this.context);
-        this.canvasWidth = this.canvasElem.width;
-        this.canvasHeight = this.canvasElem.height;
+        this.canvasWidth = this.canvasElement.width;
+        this.canvasHeight = this.canvasElement.height;
         this.axisStartX = {x: this.axisParams.AXIS_MARGINS, y: this.canvasHeight / 2};
         this.axisEndX = {x: this.canvasWidth - this.axisParams.AXIS_MARGINS, y: this.canvasHeight / 2};
         this.axisLengthX = this.canvasWidth - this.axisParams.AXIS_MARGINS * 2;

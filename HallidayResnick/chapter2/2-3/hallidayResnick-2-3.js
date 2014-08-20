@@ -31,7 +31,6 @@
                 relativeTo: "start",
                 offset: {x: COORDINATE_LABEL_OFFSET_X_X, y: COORDINATE_LABEL_OFFSET_Y_X},
                 angle: Math.PI / 2,
-                //angle: 0,
                 widthMultiplier: 0.5
             }
         ],
@@ -43,7 +42,6 @@
                 relativeTo: "start",
                 offset: {x: -COORDINATE_LABEL_OFFSET_X_Y, y: -COORDINATE_LABEL_OFFSET_Y_Y},
                 angle: 0,
-                //angle: Math.PI / 2,
                 widthMultiplier: 1
             }
         ],
@@ -182,36 +180,7 @@
         splineBackgroundAdvancedShapes,
         splineCanvasWidth,
         splineCanvasHeight,
-        BUNNY_AXIS_MARGINS = 30,
-        BUNNY_AXIS_MIN_COORDINATE_X = splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_Y,
-        BUNNY_AXIS_MAX_COORDINATE_X = splineAxisParams.SPLINE_AXIS_MAX_COORDINATE_Y,
-        BUNNY_AXIS_RANGE_X = BUNNY_AXIS_MAX_COORDINATE_X - BUNNY_AXIS_MIN_COORDINATE_X,
-        BUNNY_AXIS_LABELS_X = [
-            {
-                text: '-x',
-                font: AXIS_LABEL_FONT,
-                color: STYLE,
-                relativeTo: "start",
-                offset: {x: AXIS_LABEL_OFFSET_X_X, y: AXIS_LABEL_OFFSET_Y_X},
-                angle: 0,
-                widthMultiplier: 0.5
-            },
-            {
-                text: '+x',
-                font: AXIS_LABEL_FONT,
-                color: STYLE,
-                relativeTo: "end",
-                offset: {x: -AXIS_LABEL_OFFSET_X_X, y: AXIS_LABEL_OFFSET_Y_X},
-                angle: 0,
-                widthMultiplier: 0.5
-            }
-        ],
-        bunnyCanvasWidth,
-        bunnyCanvasHeight,
-        bunnyAxisStartX,
-        bunnyAxisEndX,
-        bunnyAxisLengthX,
-        bunnyAxisCoordinatesScalarX,
+        bunnyBackground,
         BUNNY_IMG_WIDTH = 48,
         BUNNY_IMG_HEIGHT = 48,
         BUNNY_IMG_MARGIN_TOP = 5,
@@ -223,7 +192,6 @@
         splineCanvasElem,
         splineBackgroundCanvasElem,
         bunnyCanvasElem,
-        bunnyBackgroundCanvasElem,
         tensionElem,
         animateElem,
         splineCtx,
@@ -234,8 +202,6 @@
         bunnyRightImg = new Image(),
         bunnyLeftImg = new Image(),
         bunnyCtx,
-        bunnyBackgroundCtx,
-        bunnyBackgroundAdvancedShapes,
         MAX_ANIMATION_TIME = 20, //seconds
         DELTA_T = 0,
         currentSegmentBunnyT,
@@ -341,7 +307,8 @@
         mouseIsDown = false;
     }
     function calcBunnyX(xCoordinate) {
-        return bunnyAxisStartX.x + (xCoordinate - BUNNY_AXIS_MIN_COORDINATE_X) / bunnyAxisCoordinatesScalarX;
+        return bunnyBackground.axisStartX.x + (xCoordinate - bunnyBackground.axisParams.AXIS_MIN_COORDINATE_X) /
+            bunnyBackground.axisCoordinatesScalarX;
     }
     function drawBunny(ctx, bunnyXCoordinate, velocity) {
         ctx.drawImage(velocity < 0 ? bunnyLeftImg : bunnyRightImg,
@@ -349,8 +316,8 @@
             BUNNY_IMG_MARGIN_TOP, BUNNY_IMG_WIDTH, BUNNY_IMG_HEIGHT);
     }
     function drawBunnyAll(ctx, bunnyXCoordinate, velocity) {
-        ctx.clearRect(0, 0, bunnyCanvasWidth, bunnyCanvasHeight);
-        ctx.drawImage(bunnyBackgroundCanvasElem, 0, 0);
+        ctx.clearRect(0, 0, bunnyBackground.canvasWidth, bunnyBackground.canvasHeight);
+        ctx.drawImage(bunnyBackground.canvasElement, 0, 0);
         drawBunny(ctx, bunnyXCoordinate, velocity);
     }
     function bunnyRun() {
@@ -410,33 +377,25 @@
         }
     }
     function drawSplineBackground() {
-        splineBackgroundAdvancedShapes.drawAxis(splineBackgroundAdvancedShapes, splineAxisParams.splineAxisStartX, splineAxisParams.splineAxisEndX, LINE_WIDTH, STYLE,
+        splineBackgroundAdvancedShapes.drawAxis(splineAxisParams.splineAxisStartX, splineAxisParams.splineAxisEndX, LINE_WIDTH, STYLE,
             splineAxisParams.SPLINE_AXIS_ARROWHEADS_X, splineAxisParams.SPLINE_AXIS_LABELS_X,
             splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_X, splineAxisParams.SPLINE_AXIS_MAX_COORDINATE_X,
             AXIS_COORDINATE_STEP, LINE_WIDTH, AXIS_TICK_LENGTH, STYLE, COORDINATE_LABELS_X, false);
-        splineBackgroundAdvancedShapes.drawAxis(splineBackgroundAdvancedShapes, splineAxisParams.splineAxisStartY, splineAxisParams.splineAxisEndY, LINE_WIDTH, STYLE,
+        splineBackgroundAdvancedShapes.drawAxis(splineAxisParams.splineAxisStartY, splineAxisParams.splineAxisEndY, LINE_WIDTH, STYLE,
             splineAxisParams.SPLINE_AXIS_ARROWHEADS_Y, splineAxisParams.SPLINE_AXIS_LABELS_Y,
             splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_Y, splineAxisParams.SPLINE_AXIS_MAX_COORDINATE_Y,
             AXIS_COORDINATE_STEP, LINE_WIDTH, -AXIS_TICK_LENGTH, STYLE, COORDINATE_LABELS_Y, false);
-    }
-    function drawBunnyBackground() {
-        bunnyBackgroundAdvancedShapes.drawAxis(bunnyBackgroundAdvancedShapes, bunnyAxisStartX, bunnyAxisEndX, LINE_WIDTH, STYLE, [], BUNNY_AXIS_LABELS_X,
-            BUNNY_AXIS_MIN_COORDINATE_X, BUNNY_AXIS_MAX_COORDINATE_X, AXIS_COORDINATE_STEP, LINE_WIDTH,
-            AXIS_TICK_LENGTH, STYLE, COORDINATE_LABELS_X, true);
     }
     window.addEventListener('load', function() {
         splineCanvasElem = document.getElementById('splineCanvas');
         splineBackgroundCanvasElem = document.getElementById('splineBackgroundCanvas');
         bunnyCanvasElem = document.getElementById('bunnyCanvas');
-        bunnyBackgroundCanvasElem = document.getElementById('bunnyBackgroundCanvas');
         splineCtx = splineCanvasElem.getContext('2d');
         splineBackgroundCtx = splineBackgroundCanvasElem.getContext('2d');
         splineBasicShapes = BasicShapes.create(splineCtx);
         splineAdvancedShapes = AdvancedShapes.create(splineCtx);
-        bunnyBackgroundCtx = bunnyBackgroundCanvasElem.getContext('2d');
         splineBackgroundAdvancedShapes = AdvancedShapes.create(splineBackgroundCtx);
         bunnyCtx = bunnyCanvasElem.getContext('2d');
-        bunnyBackgroundAdvancedShapes = AdvancedShapes.create(bunnyBackgroundCtx);
         knotTextBoxElements.push({x: document.getElementById('t1'), y: document.getElementById('x1')});
         knotTextBoxElements.push({x: document.getElementById('t2'), y: document.getElementById('x2')});
         knotTextBoxElements.push({x: document.getElementById('t3'), y: document.getElementById('x3')});
@@ -463,14 +422,8 @@
         splineAxisParams.splineAxisCoordinatesScalarY = splineAxisParams.SPLINE_AXIS_RANGE_Y /
             splineAxisParams.splineAxisLengthY;
         DELTA_T = (splineAxisParams.SPLINE_AXIS_RANGE_X / 60) / MAX_ANIMATION_TIME;
-        bunnyCanvasWidth = bunnyCanvasElem.width;
-        bunnyCanvasHeight = bunnyCanvasElem.height;
-        bunnyAxisStartX = {x: BUNNY_AXIS_MARGINS, y: bunnyCanvasHeight / 2};
-        bunnyAxisEndX = {x: bunnyCanvasWidth - BUNNY_AXIS_MARGINS, y: bunnyCanvasHeight / 2};
-        bunnyAxisLengthX = bunnyCanvasWidth - BUNNY_AXIS_MARGINS * 2;
-        bunnyAxisCoordinatesScalarX = BUNNY_AXIS_RANGE_X / bunnyAxisLengthX;
         drawSplineBackground();
-        drawBunnyBackground();
+        bunnyBackground = BunnyBackground.create(document.getElementById('bunnyBackgroundCanvas'));
         bunnyLeftImg.addEventListener('load', function () {
             bunnyImgLoaded();
         }, false);
