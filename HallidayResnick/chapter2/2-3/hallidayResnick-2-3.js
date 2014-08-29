@@ -381,7 +381,7 @@
         splineCanvasElem.addEventListener('mouseup', function(e) { mouseUp(e, false); }, false);
         splineCanvasElem.addEventListener('mouseleave', function(e) { mouseUp(e, false); }, false);
         splineCanvasElem.addEventListener('touchstart', function(e) { mouseDown(e, true); }, false);
-        splineCanvasElem.addEventListener('touchmove', function(e) {mouseDown(e, true); }, false);
+        splineCanvasElem.addEventListener('touchmove', function(e) {mouseMove(e, true); }, false);
         splineCanvasElem.addEventListener('touchend', function (e) { mouseUp(e, true) }, false);
         animateElem.addEventListener('click', animate, false);
         if (e) {
