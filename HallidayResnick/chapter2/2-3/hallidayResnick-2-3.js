@@ -224,20 +224,23 @@
                 VELOCITY_ARROW_PARAMS.VELOCITY_ARROWS, VELOCITY_ARROW_PARAMS.VELOCITY_LABELS);
         });
     }
-    function calcMousePos(e) {
+    function calcMousePos(e, element, isTouch) {
         var top = 0,
-            left = 0,
-            obj = splineCanvasElem;
+            left = 0;
 
-        // get canvas position
-        while (obj.tagName != 'BODY') {
-
-            top += obj.offsetTop;
-            left += obj.offsetLeft;
-
-            obj = obj.offsetParent;
+        if (isTouch) {
+            mousePos.x = e.targetTouches[0].pageX - element.offsetLeft;
+            mousePos.y = e.targetTouches[0].pageY - element.offsetTop;
+            return;
         }
+        // get canvas position
+        while (element.tagName != 'BODY') {
 
+            top += element.offsetTop;
+            left += element.offsetLeft;
+
+            element = element.offsetParent;
+        }
         // return relative mouse position
         mousePos.x = e.clientX - left + window.pageXOffset;
         mousePos.y = e.clientY - top + window.pageYOffset;
@@ -247,7 +250,7 @@
                 y: knots.calcSplineY(currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal)},
             5.0, "rgb(0, 0, 0)", "rgb(255, 0, 255)");
     }
-    function mouseMove(e) {
+    function mouseMove(e, isTouch) {
 
         var posText,
             posTextWidth,
@@ -258,7 +261,7 @@
         if (requestID !== null) {
             return;
         }
-        calcMousePos(e);
+        calcMousePos(e, splineCanvasElem, isTouch);
         mousePos.x = Math.min(mousePos.x, splineCanvasWidth);
         mousePos.y = Math.min(mousePos.y, splineCanvasHeight);
         if (mouseIsDown) {
@@ -289,22 +292,28 @@
         splineCtx.fillStyle = STYLE;
         splineCtx.fillText(posText,  posTextX, posTextY);
         splineCtx.restore();
+        if (isTouch) {
+            e.preventDefault();
+        }
     }
-    function mouseDown(e) {
+    function mouseDown(e, isTouch) {
         if (requestID !== null) {
             window.cancelAnimationFrame(requestID);
             requestID = null;
         }
-        calcMousePos(e);
+        calcMousePos(e, splineCanvasElem, isTouch);
         multiSegmentSpline.setClosestKnotIndex(mousePos);
         multiSegmentSpline.setKnot(mousePos);
         tensionElem.value = multiSegmentSpline.tension.toFixed(DISPLAY_DIGITS);
         mouseIsDown = true;
         showBunnyPoint = false;
-        mouseMove(e);
+        mouseMove(e, isTouch);
     }
-    function mouseUp() {
+    function mouseUp(e, isTouch) {
         mouseIsDown = false;
+        if (isTouch) {
+            e.preventDefault();
+        }
     }
     function calcBunnyX(xCoordinate) {
         return bunnyBackground.axisStartX.x + (xCoordinate - bunnyBackground.axisParams.AXIS_MIN_COORDINATE_X) /
@@ -367,10 +376,13 @@
         tensionElem.value = multiSegmentSpline.tension.toFixed(DISPLAY_DIGITS);
         drawSplineAll(splineCtx);
         drawBunnyAll(bunnyCtx, knots.knots[0].coordinates.y, knots.averageVelocities[0]);
-        splineCanvasElem.addEventListener('mousemove', mouseMove, false);
-        splineCanvasElem.addEventListener('mousedown', mouseDown, false);
-        splineCanvasElem.addEventListener('mouseup', mouseUp, false);
-        splineCanvasElem.addEventListener('mouseleave', mouseUp, false);
+        splineCanvasElem.addEventListener('mousedown', function(e) { mouseDown(e, false); }, false);
+        splineCanvasElem.addEventListener('mousemove', function(e) { mouseMove(e, false); }, false);
+        splineCanvasElem.addEventListener('mouseup', function(e) { mouseUp(e, false); }, false);
+        splineCanvasElem.addEventListener('mouseleave', function(e) { mouseUp(e, false); }, false);
+        splineCanvasElem.addEventListener('touchstart', function(e) { mouseDown(e, true); }, false);
+        splineCanvasElem.addEventListener('touchmove', function(e) {mouseDown(e, true); }, false);
+        splineCanvasElem.addEventListener('touchend', function (e) { mouseUp(e, true) }, false);
         animateElem.addEventListener('click', animate, false);
         if (e) {
             e.preventDefault();
