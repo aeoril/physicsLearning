@@ -12,16 +12,20 @@ body {
     font-family: 'Droid Sans', sans-serif;
     /*font-size: 17px;*/
     /*text-align: center;*/
+    width: 1060px;
+    color: #777;
+    padding: 10px;
+    margin: auto;
+    text-align: center;
 }
-div {
-    /*color: #CCCCCC;*/
+/*div {
     color: #777;
     padding: 10px;
     margin: auto;
     width: 1060px;
     text-align: center;
-    /*background-color: #888888;*/
-}
+    background-color: #888888;
+}*/
 canvas {
     /*border: 1px solid #CCCCCC;*/
     border: 1px solid #777;

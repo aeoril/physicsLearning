@@ -2,45 +2,44 @@
 <html>
 <head>
     <title>Position, Motion and Time</title>
-    <meta name="viewport" content="width=1060,initial-scale=1">
+    <!-- meta name="viewport" content="initial-scale=1.0" -->
+    <!--meta name="viewport" content="width=device-width,initial-scale=1"-->
     <link href="hallidayResnick-2-3.css" rel="stylesheet" type="text/css">
     <link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="shortcut icon" href="/favicon.ico?v=0"/>
 </head>
 <body>
-    <div>
-        <h3>Motion: Displacement and Time Interactive Lesson - First Year Physics for Physical Science and Engineering Majors</h3>
+    <h3>Motion: Displacement and Time Interactive Lesson - First Year Physics for Physical Science and Engineering Majors</h3>
 
-        <canvas id="splineCanvas" height="400" width="960"></canvas><br>
-        <canvas id="splineBackgroundCanvas" height="400" width="960"></canvas>
-        <form id="form" action="#" method="get">
-            <label id="t1Label" for="t1">t1</label>
-            <input id="t1" name="t1" type="text" readonly value="-20"/>
-            <label id="x1Label" for="x1">x1</label>
-            <input id="x1" name="x1" type="text" readonly value="-10"/>
-            <label id="t2Label" for="t2">t2</label>
-            <input id="t2" name="t2" type="text" readonly value="-8"/>
-            <label id="x2Label" for="x2">x2</label>
-            <input id="x2" name="x2" type="text" readonly value="10"/>
-            <label id="t3Label" for="t3">t3</label>
-            <input id="t3" name="t3" type="text" readonly value="8"/>
-            <label id="x3Label" for="x3">x3</label>
-            <input id="x3" name="x3" type="text" readonly value="-10"/>
-            <label id="t4Label" for="t4">t4</label>
-            <input id="t4" name="t4" type="text" readonly value="20"/>
-            <label id="x4Label" for="x4">x4</label>
-            <input id="x4" name="x4" type="text" readonly value="10"/>
-            <label id="tensionLabel" for="tension">tension</label>
-            <input id="tension" name="tension" type="text" readonly value="50"/>
-            <input type="button" id="animate" value="Animate!">
-        </form>
-        <br>
-        <canvas id="bunnyCanvas" height="130" width="960"></canvas><br>
-        <canvas id="bunnyBackgroundCanvas" height="130" width="960"></canvas>
-        Underlying math code for splines by Rob Spencer:<br>
-            <a href="http://scaledinnovation.com/analytics/splines/aboutSplines.html">http://scaledinnovation.com/analytics/splines/aboutSplines.html</a><br>
-            His code is copyrighted with all rights reserved - see his site for details.  Thanks, Rob!
-    </div>
+    <canvas id="splineCanvas" height="400" width="960"></canvas><br>
+    <canvas id="splineBackgroundCanvas" height="400" width="960"></canvas>
+    <form id="form" action="#" method="get">
+        <label id="t1Label" for="t1">t1</label>
+        <input id="t1" name="t1" type="text" readonly value="-20"/>
+        <label id="x1Label" for="x1">x1</label>
+        <input id="x1" name="x1" type="text" readonly value="-10"/>
+        <label id="t2Label" for="t2">t2</label>
+        <input id="t2" name="t2" type="text" readonly value="-8"/>
+        <label id="x2Label" for="x2">x2</label>
+        <input id="x2" name="x2" type="text" readonly value="10"/>
+        <label id="t3Label" for="t3">t3</label>
+        <input id="t3" name="t3" type="text" readonly value="8"/>
+        <label id="x3Label" for="x3">x3</label>
+        <input id="x3" name="x3" type="text" readonly value="-10"/>
+        <label id="t4Label" for="t4">t4</label>
+        <input id="t4" name="t4" type="text" readonly value="20"/>
+        <label id="x4Label" for="x4">x4</label>
+        <input id="x4" name="x4" type="text" readonly value="10"/>
+        <label id="tensionLabel" for="tension">tension</label>
+        <input id="tension" name="tension" type="text" readonly value="50"/>
+        <input type="button" id="animate" value="Animate!">
+    </form>
+    <br>
+    <canvas id="bunnyCanvas" height="130" width="960"></canvas><br>
+    <canvas id="bunnyBackgroundCanvas" height="130" width="960"></canvas>
+    Underlying math code for splines by Rob Spencer:<br>
+        <a href="http://scaledinnovation.com/analytics/splines/aboutSplines.html">http://scaledinnovation.com/analytics/splines/aboutSplines.html</a><br>
+        His code is copyrighted with all rights reserved - see his site for details.  Thanks, Rob!
     <script src="geometry.js"></script>
     <script src="BasicShapes.js"></script>
     <script src="AdvancedShapes.js"></script>
