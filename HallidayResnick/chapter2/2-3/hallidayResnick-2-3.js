@@ -226,11 +226,12 @@
     }
     function calcMousePos(e, element, isTouch) {
         var top = 0,
-            left = 0;
+            left = 0,
+            canvasScale = element.width / element.clientWidth;
 
         if (isTouch) {
-            mousePos.x = e.targetTouches[0].pageX - element.offsetLeft;
-            mousePos.y = e.targetTouches[0].pageY - element.offsetTop;
+            mousePos.x = (e.targetTouches[0].pageX - element.offsetLeft) * canvasScale;
+            mousePos.y = (e.targetTouches[0].pageY - element.offsetTop) * canvasScale;
             return;
         }
         // get canvas position
@@ -242,8 +243,8 @@
             element = element.offsetParent;
         }
         // return relative mouse position
-        mousePos.x = e.clientX - left + window.pageXOffset;
-        mousePos.y = e.clientY - top + window.pageYOffset;
+        mousePos.x = (e.clientX - left + window.pageXOffset) * canvasScale;
+        mousePos.y = (e.clientY - top + window.pageYOffset) * canvasScale;
     }
     function drawBunnyPoint() {
         splineBasicShapes.drawPoint({x: knots.calcSplineX(currentSegmentBunnyT + tTotal),
@@ -277,7 +278,7 @@
         if (showBunnyPoint) {
             drawBunnyPoint();
         }
-        posText = '(' + mousePos.x + ',' + mousePos.y + ')';
+        posText = '(' + mousePos.x.toFixed(0) + ',' + mousePos.y.toFixed(0) + ')';
         posTextWidth = splineCtx.measureText(posText).width;
         posTextX = mousePos.x;
         posTextY = mousePos.y;

@@ -27,9 +27,7 @@ body {
     background-color: #888888;
 }*/
 canvas {
-    /*border: 1px solid #CCCCCC;*/
-    border: 1px solid #777;
-    /*box-shadow: 0 0 10px #888;*/
+    border: 2px solid #777;
     margin-bottom: 15px;
 }
 #splineBackgroundCanvas, #bunnyBackgroundCanvas {
@@ -73,4 +71,12 @@ label {
 }
 .right {
     background-color: #80FF80;
+}
+@media (max-width: 1059px) {
+    body {
+        width: 100%;
+    }
+    canvas {
+        width: 95%;
+    }
 }
