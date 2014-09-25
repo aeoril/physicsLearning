@@ -6,23 +6,28 @@
 (function () {
     'use strict';
 
-    var DISPLAY_DIGITS = 2,
-        AXIS_TICK_LENGTH = 5,
-        LINE_WIDTH = 1,
+    var SCALE_FACTOR = 960 / 960,
+        DISPLAY_DIGITS = 2,
+        AXIS_TICK_LENGTH = 5 * SCALE_FACTOR,
+        LINE_WIDTH = 1 * SCALE_FACTOR,
         STYLE = 'rgb(100, 100, 100)',
-        ARROWHEAD_LENGTH = 7,
-        ARROWHEAD_WIDTH = 5,
+        ARROWHEAD_LENGTH = 7 * SCALE_FACTOR,
+        ARROWHEAD_WIDTH = 5 * SCALE_FACTOR,
         AXIS_COORDINATE_STEP = 2,
-        AXIS_COORDINATES_FONT = 'normal 10pt "Droid Sans", sans-serif',
-        AXIS_LABEL_FONT = 'normal 13pt "Droid Sans", sans-serif',
-        AXIS_LABEL_OFFSET_X_X = 20,
-        AXIS_LABEL_OFFSET_Y_X = 40,
-        AXIS_LABEL_OFFSET_X_Y = 20,
-        AXIS_LABEL_OFFSET_Y_Y = 50,
-        COORDINATE_LABEL_OFFSET_X_X = -20,
-        COORDINATE_LABEL_OFFSET_Y_X = 0,
-        COORDINATE_LABEL_OFFSET_X_Y = 10,
-        COORDINATE_LABEL_OFFSET_Y_Y = -4,
+        //AXIS_COORDINATES_FONT = 'normal 10pt "Droid Sans", sans-serif',
+        //AXIS_LABEL_FONT = 'normal 13pt "Droid Sans", sans-serif',
+        MOUSE_COORDINATES_FONT = 'normal ' + 8 * SCALE_FACTOR + 'pt "Droid Sans", sans-serif',
+        MOUSE_COORDINATES_TEXT_HEIGHT = 9 * SCALE_FACTOR,
+        AXIS_COORDINATES_FONT = 'normal ' + 10 * SCALE_FACTOR + 'pt "Droid Sans", sans-serif',
+        AXIS_LABEL_FONT = 'normal ' + 13 * SCALE_FACTOR + 'pt "Droid Sans", sans-serif',
+        AXIS_LABEL_OFFSET_X_X = 20 * SCALE_FACTOR,
+        AXIS_LABEL_OFFSET_Y_X = 40 * SCALE_FACTOR,
+        AXIS_LABEL_OFFSET_X_Y = 20 * SCALE_FACTOR,
+        AXIS_LABEL_OFFSET_Y_Y = 50 * SCALE_FACTOR,
+        COORDINATE_LABEL_OFFSET_X_X = -20 * SCALE_FACTOR,
+        COORDINATE_LABEL_OFFSET_Y_X = 0 * SCALE_FACTOR,
+        COORDINATE_LABEL_OFFSET_X_Y = 10 * SCALE_FACTOR,
+        COORDINATE_LABEL_OFFSET_Y_Y = -4 * SCALE_FACTOR,
         COORDINATE_LABELS_X = [
             {
                 text: '',
@@ -46,7 +51,7 @@
             }
         ],
         VELOCITY_ARROW_PARAMS = {
-            ARROW_WIDTH: 1,
+            ARROW_WIDTH: 1 * SCALE_FACTOR,
             AVERAGE_VELOCITY_DISPLAY_DIGITS: 2,
             ARROW_LABEL_FILL_STYLES: ['rgb(169, 229, 146)', 'rgb(245, 157, 171)', 'rgb(123, 192, 176)'],
             VELOCITY_ARROWS: [
@@ -64,7 +69,7 @@
             VELOCITY_LABELS: [
                 {
                     text: '',
-                    font: 'normal 10pt "Droid Sans", sans-serif',
+                    font: 'normal ' + 10 * SCALE_FACTOR + 'pt "Droid Sans", sans-serif',
                     fillStyle: '',
                     relativeTo: "middle",
                     offset: {x: 0, y: -10},
@@ -74,7 +79,7 @@
             ]
         },
         splineAxisParams = {
-            SPLINE_AXIS_MARGINS: 30,
+            SPLINE_AXIS_MARGINS: 30 * SCALE_FACTOR,
             SPLINE_AXIS_MIN_COORDINATE_X: -20,
             SPLINE_AXIS_MAX_COORDINATE_X: 20,
             SPLINE_AXIS_RANGE_X: 0,
@@ -181,8 +186,8 @@
         splineCanvasWidth,
         splineCanvasHeight,
         bunnyBackground,
-        BUNNY_IMG_WIDTH = 48,
-        BUNNY_IMG_HEIGHT = 48,
+        BUNNY_IMG_WIDTH = 48 * SCALE_FACTOR,
+        BUNNY_IMG_HEIGHT = 48 * SCALE_FACTOR,
         BUNNY_IMG_MARGIN_TOP = 5,
         DRAW_CONTROL_POINTS = false,
         CLOSED = false,
@@ -203,7 +208,8 @@
         bunnyLeftImg = new Image(),
         bunnyCtx,
         MAX_ANIMATION_TIME = 20, //seconds
-        DELTA_T = 0,
+        xUnitsPerSecond = 0,
+        prevTimeStamp,
         currentSegmentBunnyT,
         tTotal,
         currentSegmentBunnyXCoordinateOffset,
@@ -249,13 +255,12 @@
     function drawBunnyPoint() {
         splineBasicShapes.drawPoint({x: knots.calcSplineX(currentSegmentBunnyT + tTotal),
                 y: knots.calcSplineY(currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal)},
-            5.0, "rgb(0, 0, 0)", "rgb(255, 0, 255)");
+            5.0 * SCALE_FACTOR, "rgb(0, 0, 0)", "rgb(255, 0, 255)");
     }
     function mouseMove(e, isTouch) {
 
         var posText,
             posTextWidth,
-            posTextHeight = 7,
             posTextX,
             posTextY;
 
@@ -279,6 +284,8 @@
             drawBunnyPoint();
         }
         posText = '(' + mousePos.x.toFixed(0) + ',' + mousePos.y.toFixed(0) + ')';
+        splineCtx.save();
+        splineCtx.font = MOUSE_COORDINATES_FONT;
         posTextWidth = splineCtx.measureText(posText).width;
         posTextX = mousePos.x;
         posTextY = mousePos.y;
@@ -286,10 +293,9 @@
             posTextX = mousePos.x - (posTextWidth - (splineCanvasWidth - mousePos.x));
         }
 
-        if (mousePos.y - posTextHeight < 0) {
-            posTextY = mousePos.y + (posTextHeight - mousePos.y);
+        if (mousePos.y - MOUSE_COORDINATES_TEXT_HEIGHT < 0) {
+            posTextY = mousePos.y + (MOUSE_COORDINATES_TEXT_HEIGHT - mousePos.y);
         }
-        splineCtx.save();
         splineCtx.fillStyle = STYLE;
         splineCtx.fillText(posText,  posTextX, posTextY);
         splineCtx.restore();
@@ -330,7 +336,9 @@
         ctx.drawImage(bunnyBackground.canvasElement, 0, 0);
         drawBunny(ctx, bunnyXCoordinate, velocity);
     }
-    function bunnyRun() {
+    function bunnyRun(timeStamp) {
+
+        var deltaT;
 
         function draw() {
             drawSplineAll(splineCtx);
@@ -338,8 +346,14 @@
             drawBunnyAll(bunnyCtx, currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal,
                 knots.averageVelocities[currentVelIndex]);
         }
+        if (prevTimeStamp == null) {
+            prevTimeStamp = timeStamp;
+            requestID = window.requestAnimationFrame(bunnyRun);
+        }
+        deltaT = xUnitsPerSecond * (timeStamp - prevTimeStamp) / 1000;
+        prevTimeStamp = timeStamp;
         currentSegmentBunnyXCoordinateOffset = knots.averageVelocities[currentVelIndex] * currentSegmentBunnyT;
-        if (currentSegmentBunnyT + DELTA_T + tTotal > knots.knots[(currentVelIndex + 1)].coordinates.x) {
+        if (currentSegmentBunnyT + deltaT + tTotal > knots.knots[(currentVelIndex + 1)].coordinates.x) {
             currentVelIndex++;
             bunnyXCoordinateTotal = knots.knots[currentVelIndex].coordinates.y;
             tTotal = knots.knots[currentVelIndex].coordinates.x;
@@ -353,13 +367,14 @@
             }
         }
         draw();
-        currentSegmentBunnyT += DELTA_T;
+        currentSegmentBunnyT += deltaT;
         requestID = window.requestAnimationFrame(bunnyRun);
     }
     function animate() {
         if (requestID !== null) {
             return;
         }
+        prevTimeStamp = null;
         currentSegmentBunnyT = 0;
         tTotal = knots.knots[0].coordinates.x;
         bunnyXCoordinateTotal = knots.knots[0].coordinates.y;
@@ -369,7 +384,7 @@
     }
     function bunnyImgLoaded(e) {
         knots = Knots.create(knotTextBoxElements, splineAxisParams, DISPLAY_DIGITS);
-        multiSegmentSpline = MultiSegmentSpline.create(splineCtx, splineBasicShapes, knots.knots, CLOSED,
+        multiSegmentSpline = MultiSegmentSpline.create(splineCtx, SCALE_FACTOR, splineBasicShapes, knots.knots, CLOSED,
             {startX: splineAxisParams.splineAxisStartX.x, endX: splineAxisParams.splineAxisEndX.x,
                 startY: splineAxisParams.splineAxisStartY.y, endY: splineAxisParams.splineAxisEndY.y},
             Number(tensionElem.value), DRAW_CONTROL_POINTS, null, null, null);
@@ -385,6 +400,9 @@
         splineCanvasElem.addEventListener('touchmove', function(e) {mouseMove(e, true); }, false);
         splineCanvasElem.addEventListener('touchend', function (e) { mouseUp(e, true) }, false);
         animateElem.addEventListener('click', animate, false);
+        //window.addEventListener('resize', function () {
+        //    console.log('splineCanvasElem.clientWidth: ' + splineCanvasElem.clientWidth);
+        //}, false);
         if (e) {
             e.preventDefault();
         }
@@ -434,9 +452,9 @@
             splineAxisParams.splineAxisLengthX;
         splineAxisParams.splineAxisCoordinatesScalarY = splineAxisParams.SPLINE_AXIS_RANGE_Y /
             splineAxisParams.splineAxisLengthY;
-        DELTA_T = (splineAxisParams.SPLINE_AXIS_RANGE_X / 60) / MAX_ANIMATION_TIME;
+        xUnitsPerSecond = (splineAxisParams.SPLINE_AXIS_RANGE_X / MAX_ANIMATION_TIME);
         drawSplineBackground();
-        bunnyBackground = BunnyBackground.create(document.getElementById('bunnyBackgroundCanvas'));
+        bunnyBackground = BunnyBackground.create(document.getElementById('bunnyBackgroundCanvas'), SCALE_FACTOR);
         bunnyLeftImg.addEventListener('load', function () {
             bunnyImgLoaded();
         }, false);

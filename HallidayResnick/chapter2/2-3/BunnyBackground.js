@@ -12,40 +12,40 @@ var BunnyBackground = {
 };
 // Set shared properties using prototype object
 var bunnyBackgroundPrototype = {
-    init: function(canvasElement, axisParams) {
+    init: function(canvasElement, SCALE_FACTOR, axisParams) {
         'use strict';
 
         this.canvasElement = canvasElement;
 
         this.STYLE = 'rgb(100, 100, 100)';
-        this.COORDINATE_FONT = 'normal 10pt "Droid Sans", sans-serif';
-        this.AXIS_LABEL_FONT = 'normal 13pt "Droid Sans", sans-serif';
-        this.ARROWHEAD_LENGTH = 7;
-        this.ARROWHEAD_WIDTH = 5;
+        this.COORDINATE_FONT = 'normal ' + 10 * SCALE_FACTOR + 'pt "Droid Sans", sans-serif';
+        this.AXIS_LABEL_FONT = 'normal ' + 13 * SCALE_FACTOR + 'pt "Droid Sans", sans-serif';
+        this.ARROWHEAD_LENGTH = 7 * SCALE_FACTOR;
+        this.ARROWHEAD_WIDTH = 5 * SCALE_FACTOR;
 
         this.axisParams = axisParams || {
-            AXIS_MARGINS: 30,
+            AXIS_MARGINS: 30 * SCALE_FACTOR,
             AXIS_MIN_COORDINATE_X: -10,
             AXIS_MAX_COORDINATE_X: 10,
-            TICK_LENGTH: 5,
-            LINE_WIDTH: 1,
+            TICK_LENGTH: 5 * SCALE_FACTOR,
+            LINE_WIDTH: 1 * SCALE_FACTOR,
             COORDINATE_STEP: 2,
             AXIS_LABELS_X: [
                 {
                     text: '-x',
                     font: this.AXIS_LABEL_FONT,
-                    color: this.STYLE,
+                    fillStyle: this.STYLE,
                     relativeTo: "start",
-                    offset: {x: 20, y: 40},
+                    offset: {x: 20 * SCALE_FACTOR, y: 40 * SCALE_FACTOR},
                     angle: 0,
                     widthMultiplier: 0.5
                 },
                 {
                     text: '+x',
                     font: this.AXIS_LABEL_FONT,
-                    color: this.STYLE,
+                    fillStyle: this.STYLE,
                     relativeTo: "end",
-                    offset: {x: -20, y: 40},
+                    offset: {x: -20 * SCALE_FACTOR, y: 40 * SCALE_FACTOR},
                     angle: 0,
                     widthMultiplier: 0.5
                 }
@@ -56,7 +56,7 @@ var bunnyBackgroundPrototype = {
                     font: this.COORDINATE_FONT,
                     fillStyle: this.STYLE,
                     relativeTo: "start",
-                    offset: {x: -20, y: 0},
+                    offset: {x: -20 * SCALE_FACTOR, y: 0},
                     angle: Math.PI / 2,
                     widthMultiplier: 0.5
                 }

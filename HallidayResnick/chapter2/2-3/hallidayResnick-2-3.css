@@ -66,13 +66,16 @@ label {
     font-size: 12pt;
     vertical-align: middle;
 }
+.nowrap {
+    white-space: nowrap;
+}
 .wrong {
     background-color: #FF8080;
 }
 .right {
     background-color: #80FF80;
 }
-@media (max-width: 1059px) {
+@media (max-width: 1060px) {
     body {
         width: 100%;
     }

@@ -15,7 +15,7 @@ var MultiSegmentSpline = {
 };
 // Set shared properties using prototype object
 var multiSegmentSplinePrototype = {
-    init: function(context, basicShapes, knots, closed, boundingParams, defaultTension, drawControlPoints,
+    init: function(context, SCALE_FACTOR, basicShapes, knots, closed, boundingParams, defaultTension, drawControlPoints,
                    segmentParams, knotParams, controlLineParams) {
         'use strict';
 
@@ -28,12 +28,12 @@ var multiSegmentSplinePrototype = {
         this.tension = defaultTension;
         this.TENSION_LIMIT_DIVISOR = 4;
         this.drawControlPoints = drawControlPoints;
-        this.segmentParams = segmentParams || {lineWidth: 4, segmentStrokeStyles:
+        this.segmentParams = segmentParams || {lineWidth: 4 * SCALE_FACTOR, segmentStrokeStyles:
             ['rgb(128, 209, 99)', 'rgb(231, 109, 128)', 'rgb(74, 158, 139)', 'rgb(245, 165, 115)']};
         this.knotParams = knotParams ||
-            {minKnotDelta: 1, radius: 2.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
+            {minKnotDelta: 1, radius: 2.5 * SCALE_FACTOR, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
         this.controlLineParams = controlLineParams ||
-            {lineWidth: 1, radius: 1.5, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
+            {lineWidth: 1 * SCALE_FACTOR, radius: 1.5 * SCALE_FACTOR, fillStyle: 'rgb(0, 0, 0', strokeStyle: 'rbg(0, 0, 0)'};
         return this;
     },
     updateTension: function() {
