@@ -361,12 +361,13 @@
             if (requestID === null || currentVelIndex + 1 === knots.knots.length) {
                 currentSegmentBunnyXCoordinateOffset = 0;
                 currentVelIndex--;
-                draw();
                 requestID = null;
-                return;
             }
         }
         draw();
+        if (requestID == null) {
+            return;
+        }
         currentSegmentBunnyT += deltaT;
         requestID = window.requestAnimationFrame(bunnyRun);
     }
@@ -383,14 +384,6 @@
         requestID = window.requestAnimationFrame(bunnyRun);
     }
     function bunnyImgLoaded(e) {
-        knots = Knots.create(knotTextBoxElements, splineAxisParams, DISPLAY_DIGITS);
-        multiSegmentSpline = MultiSegmentSpline.create(splineCtx, SCALE_FACTOR, splineBasicShapes, knots.knots, CLOSED,
-            {startX: splineAxisParams.splineAxisStartX.x, endX: splineAxisParams.splineAxisEndX.x,
-                startY: splineAxisParams.splineAxisStartY.y, endY: splineAxisParams.splineAxisEndY.y},
-            Number(tensionElem.value), DRAW_CONTROL_POINTS, null, null, null);
-        multiSegmentSpline.updateTension();
-        tensionElem.value = multiSegmentSpline.tension.toFixed(DISPLAY_DIGITS);
-        drawSplineAll(splineCtx);
         drawBunnyAll(bunnyCtx, knots.knots[0].coordinates.y, knots.averageVelocities[0]);
         splineCanvasElem.addEventListener('mousedown', function(e) { mouseDown(e, false); }, false);
         splineCanvasElem.addEventListener('mousemove', function(e) { mouseMove(e, false); }, false);
@@ -454,6 +447,14 @@
             splineAxisParams.splineAxisLengthY;
         xUnitsPerSecond = (splineAxisParams.SPLINE_AXIS_RANGE_X / MAX_ANIMATION_TIME);
         drawSplineBackground();
+        knots = Knots.create(knotTextBoxElements, splineAxisParams, DISPLAY_DIGITS);
+        multiSegmentSpline = MultiSegmentSpline.create(splineCtx, SCALE_FACTOR, splineBasicShapes, knots.knots, CLOSED,
+            {startX: splineAxisParams.splineAxisStartX.x, endX: splineAxisParams.splineAxisEndX.x,
+                startY: splineAxisParams.splineAxisStartY.y, endY: splineAxisParams.splineAxisEndY.y},
+            Number(tensionElem.value), DRAW_CONTROL_POINTS, null, null, null);
+        multiSegmentSpline.updateTension();
+        tensionElem.value = multiSegmentSpline.tension.toFixed(DISPLAY_DIGITS);
+        drawSplineAll(splineCtx);
         bunnyBackground = BunnyBackground.create(document.getElementById('bunnyBackgroundCanvas'), SCALE_FACTOR);
         bunnyLeftImg.addEventListener('load', function () {
             bunnyImgLoaded();
