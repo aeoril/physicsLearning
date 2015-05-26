@@ -4,45 +4,43 @@
 // Circle.js - Manages a circle
 
 var Circle = {
-    create: function (params) {
+    create: function (context, params) {
         'use strict';
-        return Object.create(circlePrototype).init(params);
+        return Object.create(circlePrototype).init(context, params);
     },
-    drawPoint: function(params) {
+    draw: function (context, params) {
         'use strict';
-        return this.create(params).drawPoint();
+        return this.create(context, params).draw();
     }
 };
 
-var basicShapesPrototype = {
-    init: function (params) {
+var circlePrototype = {
+    init: function (context, params) {
         'use strict';
-        params = params || {
-            context: null,
+        this.context = context;
+        this.params = params || {
             point: {
-                x: 0,
-                y: 0
+                x: 20,
+                y: 20
             },
-            radius: 1,
+            radius: 2.5,
             strokeStyle: 'rgb(0, 0, 0)',
             fillStyle: 'rgb(0, 0, 0)',
             lineWidth: 0
         };
         return this;
     },
-    drawPoint: function(point, radius, strokeStyle, fillStyle, lineWidth){
+    draw: function () {
         'use strict';
-
         var startAngle = 0.0,
             endAngle = 2 * Math.PI,
             clockWise = false;
-
         this.context.save();
         this.context.beginPath();
-        this.context.lineWidth = lineWidth || 1;
-        this.context.strokeStyle = strokeStyle || 'rgb(0, 0, 0)';
-        this.context.fillStyle = fillStyle || 'rgb(0, 0, 0)';
-        this.context.arc(point.x, point.y, radius || 2.5, startAngle, endAngle, clockWise);
+        this.context.lineWidth = this.params.lineWidth;
+        this.context.strokeStyle = this.params.strokeStyle;
+        this.context.fillStyle = this.params.fillStyle;
+        this.context.arc(this.params.point.x, this.params.point.y, this.params.radius, startAngle, endAngle, clockWise);
         this.context.closePath();
         this.context.stroke();
         this.context.fill();
