@@ -7,16 +7,20 @@
     'use strict';
     window.addEventListener('load', function () {
         var context = document.getElementById('canvas').getContext('2d'),
-            circle = Circle.create(context);
-        circle.draw();
-        circle.params.radius = 5;
-        circle.params.point = {x: 40, y: 40};
-        circle.params.fillStyle = 'rgb(255, 0, 0)';
-        circle.params.strokeStyle = 'rgb(0, 255, 0)';
-        circle.params.lineWidth = 2;
-        circle.draw();
-        circle.params.point = {x: 60, y: 60};
-        circle.params.radius = 10;
-        Circle.draw(context, circle.params);
+            drawDefaultCircle = drawCircleBindParams(null),
+            mutatingParams = drawDefaultCircle(context),
+            drawCircle2,
+            drawCircle3;
+        mutatingParams.radius = 5;
+        mutatingParams.point = {x: 40, y: 40};
+        mutatingParams.fillStyle = 'rgb(255, 0, 0)';
+        mutatingParams.strokeStyle = 'rgb(0, 255, 0)';
+        mutatingParams.lineWidth = 2;
+        drawCircle2 = drawCircleBindParams(mutatingParams);
+        drawCircle2(context);
+        mutatingParams.point = {x: 60, y: 60};
+        mutatingParams.radius = 10;
+        drawCircle3 = drawCircleBindAll(mutatingParams, context);
+        drawCircle3();
     }, false);
 }());
