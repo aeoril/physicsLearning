@@ -222,9 +222,9 @@
         ctx.clearRect(0, 0, splineCanvasWidth, splineCanvasHeight);
         ctx.drawImage(splineBackgroundCanvasElem, 0, 0);
         multiSegmentSpline.draw();
-        knots.averageVelocities.forEach(function(averageVelocity, index) {
+        knots.averageVelocities.forEach(function (averageVelocity, index) {
             VELOCITY_ARROW_PARAMS.VELOCITY_LABELS[0].text = 'Average Velocity =  ' +
-                knots.averageVelocities[index].toFixed(VELOCITY_ARROW_PARAMS.AVERAGE_VELOCITY_DISPLAY_DIGITS);
+                averageVelocity.toFixed(VELOCITY_ARROW_PARAMS.AVERAGE_VELOCITY_DISPLAY_DIGITS);
             VELOCITY_ARROW_PARAMS.VELOCITY_LABELS[0].fillStyle = VELOCITY_ARROW_PARAMS.ARROW_LABEL_FILL_STYLES[index];
             splineAdvancedShapes.drawLabeledLine(knots.knots[index], knots.knots[index + 1], VELOCITY_ARROW_PARAMS.ARROW_WIDTH, STYLE,
                 VELOCITY_ARROW_PARAMS.VELOCITY_ARROWS, VELOCITY_ARROW_PARAMS.VELOCITY_LABELS);
@@ -241,7 +241,7 @@
             return;
         }
         // get canvas position
-        while (element.tagName != 'BODY') {
+        while (element.tagName !== 'BODY') {
 
             top += element.offsetTop;
             left += element.offsetLeft;
@@ -256,6 +256,67 @@
         splineBasicShapes.drawPoint({x: knots.calcSplineX(currentSegmentBunnyT + tTotal),
                 y: knots.calcSplineY(currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal)},
             5.0 * SCALE_FACTOR, "rgb(0, 0, 0)", "rgb(255, 0, 255)");
+    }
+    function calcBunnyX(xCoordinate) {
+        return bunnyBackground.axisStartX.x + (xCoordinate - bunnyBackground.axisParams.AXIS_MIN_COORDINATE_X) /
+            bunnyBackground.axisCoordinatesScalarX;
+    }
+    function drawBunny(ctx, bunnyXCoordinate, velocity) {
+        ctx.drawImage(velocity < 0 ? bunnyLeftImg : bunnyRightImg,
+            calcBunnyX(bunnyXCoordinate) - BUNNY_IMG_WIDTH / 2,
+            BUNNY_IMG_MARGIN_TOP, BUNNY_IMG_WIDTH, BUNNY_IMG_HEIGHT);
+    }
+    function drawBunnyAll(ctx, bunnyXCoordinate, velocity) {
+        ctx.clearRect(0, 0, bunnyBackground.canvasWidth, bunnyBackground.canvasHeight);
+        ctx.drawImage(bunnyBackground.canvasElement, 0, 0);
+        drawBunny(ctx, bunnyXCoordinate, velocity);
+    }
+    function bunnyRun(timeStamp) {
+
+        var deltaT;
+
+        function draw() {
+            drawSplineAll(splineCtx);
+            drawBunnyPoint();
+            drawBunnyAll(bunnyCtx, currentSegmentBunnyXCoordinateOffset + bunnyXCoordinateTotal,
+                knots.averageVelocities[currentVelIndex]);
+        }
+        if (prevTimeStamp === null) {
+            prevTimeStamp = timeStamp;
+            requestID = window.requestAnimationFrame(bunnyRun);
+        }
+        deltaT = xUnitsPerSecond * (timeStamp - prevTimeStamp) / 1000;
+        prevTimeStamp = timeStamp;
+        currentSegmentBunnyXCoordinateOffset = knots.averageVelocities[currentVelIndex] * currentSegmentBunnyT;
+        if (currentSegmentBunnyT + deltaT + tTotal > knots.knots[(currentVelIndex + 1)].coordinates.x) {
+            currentVelIndex += 1;
+            bunnyXCoordinateTotal = knots.knots[currentVelIndex].coordinates.y;
+            tTotal = knots.knots[currentVelIndex].coordinates.x;
+            currentSegmentBunnyT = 0;
+            if (requestID === null || currentVelIndex + 1 === knots.knots.length) {
+                currentSegmentBunnyXCoordinateOffset = 0;
+                currentVelIndex += 1;
+                requestID = null;
+            }
+        }
+        draw();
+        if (requestID === null) {
+            return;
+        }
+        currentSegmentBunnyT += deltaT;
+        requestID = window.requestAnimationFrame(bunnyRun);
+    }
+    function animate() {
+        if (requestID !== null) {
+            return;
+        }
+        prevTimeStamp = null;
+        currentSegmentBunnyT = 0;
+        tTotal = knots.knots[0].coordinates.x;
+        bunnyXCoordinateTotal = knots.knots[0].coordinates.y;
+        currentVelIndex = 0;
+        showBunnyPoint = true;
+        requestID = window.requestAnimationFrame(bunnyRun);
     }
     function mouseMove(e, isTouch) {
 
@@ -322,6 +383,7 @@
             e.preventDefault();
         }
     }
+<<<<<<< Updated upstream
     function calcBunnyX(xCoordinate) {
         return bunnyBackground.axisStartX.x + (xCoordinate - bunnyBackground.axisParams.AXIS_MIN_COORDINATE_X) /
             bunnyBackground.axisCoordinatesScalarX;
@@ -382,6 +444,8 @@
         showBunnyPoint = true;
         requestID = window.requestAnimationFrame(bunnyRun);
     }
+=======
+>>>>>>> Stashed changes
     function bunnyImgLoaded(e) {
         knots = Knots.create(knotTextBoxElements, splineAxisParams, DISPLAY_DIGITS);
         multiSegmentSpline = MultiSegmentSpline.create(splineCtx, SCALE_FACTOR, splineBasicShapes, knots.knots, CLOSED,
@@ -392,13 +456,13 @@
         tensionElem.value = multiSegmentSpline.tension.toFixed(DISPLAY_DIGITS);
         drawSplineAll(splineCtx);
         drawBunnyAll(bunnyCtx, knots.knots[0].coordinates.y, knots.averageVelocities[0]);
-        splineCanvasElem.addEventListener('mousedown', function(e) { mouseDown(e, false); }, false);
-        splineCanvasElem.addEventListener('mousemove', function(e) { mouseMove(e, false); }, false);
-        splineCanvasElem.addEventListener('mouseup', function(e) { mouseUp(e, false); }, false);
-        splineCanvasElem.addEventListener('mouseleave', function(e) { mouseUp(e, false); }, false);
-        splineCanvasElem.addEventListener('touchstart', function(e) { mouseDown(e, true); }, false);
-        splineCanvasElem.addEventListener('touchmove', function(e) {mouseMove(e, true); }, false);
-        splineCanvasElem.addEventListener('touchend', function (e) { mouseUp(e, true) }, false);
+        splineCanvasElem.addEventListener('mousedown', function (e) { mouseDown(e, false); }, false);
+        splineCanvasElem.addEventListener('mousemove', function (e) { mouseMove(e, false); }, false);
+        splineCanvasElem.addEventListener('mouseup', function (e) { mouseUp(e, false); }, false);
+        splineCanvasElem.addEventListener('mouseleave', function (e) { mouseUp(e, false); }, false);
+        splineCanvasElem.addEventListener('touchstart', function (e) { mouseDown(e, true); }, false);
+        splineCanvasElem.addEventListener('touchmove', function (e) {mouseMove(e, true); }, false);
+        splineCanvasElem.addEventListener('touchend', function (e) { mouseUp(e, true); }, false);
         animateElem.addEventListener('click', animate, false);
         //window.addEventListener('resize', function () {
         //    console.log('splineCanvasElem.clientWidth: ' + splineCanvasElem.clientWidth);
@@ -417,7 +481,7 @@
             splineAxisParams.SPLINE_AXIS_MIN_COORDINATE_Y, splineAxisParams.SPLINE_AXIS_MAX_COORDINATE_Y,
             AXIS_COORDINATE_STEP, LINE_WIDTH, -AXIS_TICK_LENGTH, STYLE, COORDINATE_LABELS_Y, false);
     }
-    window.addEventListener('load', function() {
+    window.addEventListener('load', function () {
         splineCanvasElem = document.getElementById('splineCanvas');
         splineBackgroundCanvasElem = document.getElementById('splineBackgroundCanvas');
         bunnyCanvasElem = document.getElementById('bunnyCanvas');
