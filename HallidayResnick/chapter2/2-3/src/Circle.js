@@ -8,20 +8,20 @@ var defaultCircleParams = {
     radius: 2.5,
     strokeStyle: 'rgb(0, 0, 0)',
     fillStyle: 'rgb(0, 0, 0)',
-    lineWidth: 0
+    lineWidth: 0,
+    canvasWidth: 300,
+    canvasHeight: 150
 };
-function renderCircle(params, canvas) {
+function renderCircle(params) {
     'use strict';
     var context,
         startAngle = 0.0,
         endAngle = 2 * Math.PI,
         clockWise = false,
-        width = canvas.width,
-        height = canvas.height;
+        canvas = document.createElement('canvas');
     params = simpleMixin(params, defaultCircleParams);
-    canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = params.canvasWidth;
+    canvas.height = params.canvasHeight;
     context = canvas.getContext('2d');
     context.save();
     context.beginPath();
@@ -35,10 +35,7 @@ function renderCircle(params, canvas) {
     context.restore();
     return canvas;
 }
-function renderCircleBind(params, canvas) {
+function renderCircleBind(params) {
     'use strict';
-    if (!canvas) {
-        return Function.prototype.bind.call(renderCircle, null, simpleClone(params));
-    }
-    return Function.prototype.bind.call(renderCircle, null, simpleClone(params), canvas);
+    return Function.prototype.bind.call(renderCircle, null, simpleClone(params));
 }
