@@ -6,22 +6,21 @@
 (function () {
     'use strict';
     window.addEventListener('load', function () {
-        var context = document.getElementById('canvas').getContext('2d'),
-            drawDefaultCircle = drawCircleBindParams(null),
-            drawCircle2 = drawCircleBindParams({
+        var canvas = document.getElementById('canvas'),
+            context = canvas.getContext('2d'),
+            circle2Params = {
                 radius: 5,
-                x: 40,
-                y: 40,
+                point: {x: 40, y: 40},
                 fillStyle: 'rgb(255, 0, 0',
                 strokeStyle: 'rgb(0, 255, 0)',
                 lineWidth: 2
-            }),
-            params3 = drawCircle2(context, 'returnParams'),
-            drawCircle3 =  drawCircleBindAll({
-                x: 60,
-                y: 60,
-                radius: 10
-            }, context);
-        drawCircle3();
+            },
+            renderDefaultCircle = renderCircleBind(null),
+            circle3Params = simpleMixin({ point: {x: 60, y: 60}, radius: 10 }, circle2Params),
+            renderCircle2 = renderCircleBind(circle2Params),
+            renderCircle3 =  renderCircleBind(circle3Params, canvas);
+        context.drawImage(renderDefaultCircle(canvas), 0, 0);
+        context.drawImage(renderCircle2(canvas), 0, 0);
+        context.drawImage(renderCircle3(), 0, 0);
     }, false);
 }());

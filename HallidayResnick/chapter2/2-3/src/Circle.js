@@ -3,39 +3,42 @@
 //
 // Circle.js - Manages a circle
 
-function drawCircle(overrides, context, flag) {
+var defaultCircleParams = {
+    point: {x: 20, y: 20},
+    radius: 2.5,
+    strokeStyle: 'rgb(0, 0, 0)',
+    fillStyle: 'rgb(0, 0, 0)',
+    lineWidth: 0
+};
+function renderCircle(params, canvas) {
     'use strict';
-    var startAngle = 0.0,
+    var context,
+        startAngle = 0.0,
         endAngle = 2 * Math.PI,
         clockWise = false,
-        params = {
-            x: 20,
-            y: 20,
-            radius: 2.5,
-            strokeStyle: 'rgb(0, 0, 0)',
-            fillStyle: 'rgb(0, 0, 0)',
-            lineWidth: 0
-    };
-    Object.keys(overrides).forEach(function (key) {
-        params[key] = overrides[key];
-    });
-    if (flag !== 'doNotDraw') {
-        context.save();
-        context.beginPath();
-        context.lineWidth = params.lineWidth;
-        context.strokeStyle = params.strokeStyle;
-        context.fillStyle = params.fillStyle;
-        context.arc(params.x, params.y, params.radius, startAngle, endAngle, clockWise);
-        context.closePath();
-        context.stroke();
-        context.fill();
-        context.restore();
-    }
+        width = canvas.width,
+        height = canvas.height;
+    params = simpleMixin(params, defaultCircleParams);
+    canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    context = canvas.getContext('2d');
+    context.save();
+    context.beginPath();
+    context.lineWidth = params.lineWidth;
+    context.strokeStyle = params.strokeStyle;
+    context.fillStyle = params.fillStyle;
+    context.arc(params.point.x, params.point.y, params.radius, startAngle, endAngle, clockWise);
+    context.closePath();
+    context.stroke();
+    context.fill();
+    context.restore();
+    return canvas;
 }
-function drawCircleBindParams(params) {
+function renderCircleBind(params, canvas) {
     'use strict';
-    return drawCircle.bind(null, params);
-}
-function drawCircleBindAll(params, context) {
-    return drawCircle.bind(null, params, context);
+    if (!canvas) {
+        return Function.prototype.bind.call(renderCircle, null, simpleClone(params));
+    }
+    return Function.prototype.bind.call(renderCircle, null, simpleClone(params), canvas);
 }
