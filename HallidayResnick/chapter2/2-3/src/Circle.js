@@ -4,31 +4,28 @@
 // Circle.js - Manages a circle
 
 var defaultCircleParams = {
-    point: {x: 20, y: 20},
-    radius: 2.5,
+    radius: 3,
     strokeStyle: 'rgb(0, 0, 0)',
     fillStyle: 'rgb(0, 0, 0)',
-    lineWidth: 0,
-    canvasWidth: 300,
-    canvasHeight: 150
+    lineWidth: 1
 };
 function renderCircle(params) {
     'use strict';
     var context,
         startAngle = 0.0,
-        endAngle = 2 * Math.PI,
+        endAngle = 2.0 * Math.PI,
         clockWise = false,
         canvas = document.createElement('canvas');
     params = simpleMixin(params, defaultCircleParams);
-    canvas.width = params.canvasWidth;
-    canvas.height = params.canvasHeight;
+    canvas.width = (params.radius + params.lineWidth) * 2;
+    canvas.height = canvas.width;
     context = canvas.getContext('2d');
     context.save();
     context.beginPath();
     context.lineWidth = params.lineWidth;
     context.strokeStyle = params.strokeStyle;
     context.fillStyle = params.fillStyle;
-    context.arc(params.point.x, params.point.y, params.radius, startAngle, endAngle, clockWise);
+    context.arc(canvas.width / 2, canvas.height / 2, params.radius, startAngle, endAngle, clockWise);
     context.closePath();
     context.stroke();
     context.fill();
