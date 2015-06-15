@@ -6,9 +6,9 @@
 (function () {
     'use strict';
     window.addEventListener('load', function () {
-        var canvas = document.getElementById('canvas'),
+        var smallCanvas = document.getElementById('smallCanvas'),
             bigCanvas = document.getElementById('bigCanvas'),
-            context = canvas.getContext('2d'),
+            context = smallCanvas.getContext('2d'),
             bigContext = bigCanvas.getContext('2d'),
             circle2Params = {
                 radius: 5,
@@ -24,7 +24,7 @@
             circle2Canvas = renderCircle2(),
             circle3Canvas = renderCircle3();
         context.drawImage(defaultCircleCanvas, 20, 20);
-        context.drawImage(circle2Canvas, canvas.width - circle2Canvas.width, canvas.height - circle2Canvas.height);
+        context.drawImage(circle2Canvas, smallCanvas.width - circle2Canvas.width, smallCanvas.height - circle2Canvas.height);
         bigContext.drawImage(defaultCircleCanvas, 20, 20);
         bigContext.drawImage(circle2Canvas, 40, 40);
         bigContext.drawImage(circle3Canvas,
