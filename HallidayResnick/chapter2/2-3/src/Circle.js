@@ -32,7 +32,3 @@ function renderCircle(params) {
     context.restore();
     return canvas;
 }
-function renderCircleBind(params) {
-    'use strict';
-    return Function.prototype.bind.call(renderCircle, null, simpleClone(params));
-}
