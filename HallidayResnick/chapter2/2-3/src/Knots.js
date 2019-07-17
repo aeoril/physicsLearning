@@ -1,7 +1,4 @@
-// Copyright © 2014 QuarksCode.  MIT License - see http://opensource.org/licenses/MIT or LICENSE.md file
-// Original Author:  aeoril
-//
-// hallidayResnick-2-3.js - 1 motion: displacement and time interactive lesson
+// Copyright © 2019 by Xitalogy.  MIT License.  http://opensource.org/licenses/MIT
 
 var Knots = {
     create: function(textBoxElements, splineAxisParams, displayDigits) {

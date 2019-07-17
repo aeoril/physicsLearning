@@ -1,8 +1,5 @@
-// Copyright © 2014 QuarksCode.  MIT License - see http://opensource.org/licenses/MIT or LICENSE.md file
-// Original Author:  aeoril
+// Copyright © 2019 by Xitalogy.  MIT License.  http://opensource.org/licenses/MIT
 // Based on code by Rob Spencer - http://scaledinnovation.com/analytics/splines/aboutSplines.html
-//
-// MultiSegmentSpline.js - models and draws a multi-segment spline
 
 var MultiSegmentSpline = {
     create: function(context, basicShapes, knots, closed, boundingParams, defaultTension, drawControlPoints,

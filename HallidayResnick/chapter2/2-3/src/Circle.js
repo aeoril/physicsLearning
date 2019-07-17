@@ -1,7 +1,4 @@
-// Copyright © 2015 QuarksCode.  MIT License - see http://opensource.org/licenses/MIT or LICENSE.md file
-// Original Author:  aeoril
-//
-// Circle.js - Manages a circle
+// Copyright © 2019 by Xitalogy.  MIT License.  http://opensource.org/licenses/MIT
 
 var defaultCircleParams = {
     radius: 3,
