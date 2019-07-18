@@ -19,5 +19,9 @@ degree.
 physicsLearning provides a number of interactive tutorials and animations to help learn physics
 and math and coding discussions to learn how to code them.
 
+![Screenshot1](./screenshot1.png)
+
+![Screenshot2](./screenshot2.png)
+
 [hr22]: https://xitalogy.github.io/physicsLearning/HallidayResnick/chapter2/2-2/hallidayResnick-2-2.html
 [hr23]: https://xitalogy.github.io/physicsLearning/HallidayResnick/chapter2/2-3/hallidayResnick-2-3.html
